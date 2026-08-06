@@ -1,0 +1,30 @@
+sg13g2_stdcell_hv — thick-oxide (3.3 V) standard cell library for IHP SG13G2
+
+Copyright 2026 ChipDesign B.V.
+
+This library is a derived work of the IHP SG13G2 open PDK's thin-oxide
+standard cell library `sg13g2_stdcell`:
+
+    Copyright 2024 IHP PDK Authors
+    https://github.com/IHP-GmbH/IHP-Open-PDK
+    Licensed under the Apache License, Version 2.0
+
+Cell topologies, pin names, symbol drawings and the source layouts originate
+there; the device transform to the 3.3 V thick-oxide FETs, the retargeted
+layouts, the netlists, the Liberty characterisation and all generator and
+verification tooling in work/ are by ChipDesign B.V.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use these files except in compliance with the License. You may obtain a copy
+of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+
+The cells are not silicon-proven. DRC/LVS-clean means the PDK's checks pass,
+not that the cells are known good in fabrication.
