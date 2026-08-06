@@ -1,0 +1,135 @@
+/* ChipDesign B.V. technical-report style for pandoc HTML/PDF output.
+   Mirrors the colors, title block, section rules and table styling of
+   ChipDesign_report.sty (the LaTeX presentation/report theme). */
+
+:root {
+  --cd-blue:     #295285;
+  --cd-orange:   #f47216;
+  --cd-gray:     #737373;
+  --cd-thead:    #e5e5e5;
+  --cd-tr-even:  #f6f7fa;
+  --cd-text:     #1a1a1a;
+}
+
+html {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.45;
+  color: var(--cd-text);
+}
+
+body {
+  max-width: 21cm;
+  margin: 2.5cm auto;
+  padding: 0 2.5cm;
+}
+
+a { color: var(--cd-blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Title block (logo right, title/subtitle/author/date left) ───────────── */
+.cd-titleblock {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5em;
+  border-bottom: 1.2pt solid var(--cd-blue);
+  padding-bottom: 0.6em;
+  margin-bottom: 1.6em;
+}
+.cd-titleinfo { flex: 1 1 auto; }
+.cd-logo { flex: 0 0 25%; text-align: right; }
+.cd-logo img { width: 100%; height: auto; }
+
+.cd-title {
+  color: var(--cd-blue);
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin: 0;
+}
+.cd-subtitle {
+  color: var(--cd-gray);
+  font-size: 1.15rem;
+  margin: 0.25em 0 0;
+}
+.cd-author { font-size: 0.9rem; margin: 0.6em 0 0; }
+.cd-date   { color: var(--cd-gray); font-size: 0.9rem; margin: 0.1em 0 0; }
+
+/* ── Section headings ─────────────────────────────────────────────────────── */
+h1 {
+  color: var(--cd-blue);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 1.4em 0 0.5em;
+  padding-bottom: 0.15em;
+  border-bottom: 0.8pt solid var(--cd-blue);
+}
+h2 {
+  color: var(--cd-blue);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.1em 0 0.35em;
+}
+h3 {
+  color: var(--cd-gray);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 1em 0 0.3em;
+}
+
+/* Section-number prefix (pandoc --number-sections) */
+.header-section-number { margin-right: 0.4em; }
+
+/* ── Math rendered to SVG by the texmath_svg.py filter ───────────────────── */
+img.math-inline { vertical-align: -0.25em; }
+img.math-display { display: block; margin: 0.9em auto; }
+
+/* ── Branded horizontal rule (Markdown `---` / `* * *`) ──────────────────── */
+hr {
+  border: none;
+  border-top: 0.4pt solid var(--cd-blue);
+  margin: 1.2em 0;
+}
+
+/* ── Tables (mirror the cdrTable environment) ────────────────────────────── */
+table {
+  border-collapse: collapse;
+  margin: 1em auto;
+  font-size: 0.9rem;
+  border-top: 1pt solid var(--cd-blue);
+  border-bottom: 1pt solid var(--cd-blue);
+}
+thead th {
+  background: var(--cd-thead);
+  border-bottom: 0.6pt solid var(--cd-blue);
+  font-weight: 700;
+  text-align: left;
+}
+th, td { padding: 0.3em 0.7em; }
+tbody tr:nth-child(even) { background: var(--cd-tr-even); }
+
+/* ── Code / listings ─────────────────────────────────────────────────────── */
+code, pre {
+  font-family: "DejaVu Sans Mono", Consolas, monospace;
+  font-size: 0.85rem;
+}
+pre {
+  background: var(--cd-tr-even);
+  border: 0.6pt solid var(--cd-blue);
+  padding: 0.6em 0.8em;
+}
+@media screen {
+  pre { overflow-x: auto; }
+}
+
+/* ── Print / PDF (weasyprint) ────────────────────────────────────────────── */
+@page {
+  size: A4;
+  margin: 2.5cm 2.5cm 2.0cm;
+  @bottom-left   { content: "ChipDesign B.V."; color: #737373; font-size: 9pt; }
+  @bottom-center { content: "Public";          color: #737373; font-size: 9pt; }
+  @bottom-right  { content: counter(page);     color: #737373; font-size: 9pt; }
+}
+@media print {
+  body { max-width: none; margin: 0; padding: 0; }
+}

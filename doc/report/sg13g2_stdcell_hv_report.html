@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Koen Van Caekenberghe, Ph.D. — ChipDesign B.V. — info@chipdesign.be">
+  <meta name="dcterms.date" content="2026-08-04">
+  <title>sg13g2_stdcell_hv — Generation of a Thick-Oxide (3.3 V) Standard Cell Library</title>
+  <link rel="stylesheet" href="chipdesign.css">
+</head>
+<body>
+  <header class="cd-titleblock">
+    <div class="cd-titleinfo">
+      <h1 class="cd-title">sg13g2_stdcell_hv — Generation of a
+Thick-Oxide (3.3 V) Standard Cell Library</h1>
+      <p class="cd-subtitle">IHP SG13G2 open PDK · derivation, all
+views, verification and physical sign-off</p>
+      <p class="cd-author">Koen Van Caekenberghe, Ph.D. — ChipDesign
+B.V. — <a href="mailto:info@chipdesign.be">info@chipdesign.be</a></p>
+      <p class="cd-date">2026-08-04</p>
+    </div>
+    <div class="cd-logo">
+      <img src="ChipDesign_logo.png" alt="ChipDesign B.V.">
+    </div>
+  </header>
+<h1 data-number="1" id="scope-and-result"><span
+class="header-section-number">1</span> Scope and result</h1>
+<p>The IHP SG13G2 open PDK ships one digital standard cell library,
+<code>sg13g2_stdcell</code>, built entirely from the 1.2 V thin-oxide
+devices (<code>sg13_lv_nmos</code> / <code>sg13_lv_pmos</code>). Its 3.3
+V thick-oxide devices appear only inside the <code>sg13g2_io</code> pad
+ring — 22 macros, all pads, fillers and a corner — so nothing at 3.3 V
+can be synthesised and placed.</p>
+<p><code>sg13g2_stdcell_hv</code> fills that gap: <strong>all 84
+cells</strong> of <code>sg13g2_stdcell</code>, rebuilt on
+<code>sg13_hv_nmos</code> / <code>sg13_hv_pmos</code>, with the same
+topology, the same pin names and the same pin order. Cells are named
+<code>sg13g2_hv_*</code> so the 1.2 V and 3.3 V libraries coexist in one
+netlist. This report documents how every view was generated, how each
+was verified, and the final sign-off state.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Deliverable</th>
+<th>Coverage</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>SPICE netlist (<code>spice/</code>)</td>
+<td>84 cells, 924 devices</td>
+<td>verified against 3 independent views</td>
+</tr>
+<tr class="even">
+<td>CDL netlist (<code>cdl/</code>)</td>
+<td>84 cells</td>
+<td>LVS reference, all 66 drawn cells match</td>
+</tr>
+<tr class="odd">
+<td>Verilog (<code>verilog/</code>)</td>
+<td>84 modules</td>
+<td>shared <code>ihp_*</code> UDPs, deliberately not duplicated</td>
+</tr>
+<tr class="even">
+<td>xschem symbols (<code>sym/xschem</code>)</td>
+<td>84</td>
+<td>copies of the thin-oxide symbols</td>
+</tr>
+<tr class="odd">
+<td>xschem schematics (<code>sch/xschem</code>)</td>
+<td>84 + gallery sheet</td>
+<td>netlist-equivalence proven</td>
+</tr>
+<tr class="even">
+<td>GDS layout (<code>gds/</code>)</td>
+<td>66 of 84 cells</td>
+<td><strong>DRC clean, LVS clean</strong></td>
+</tr>
+<tr class="odd">
+<td>LEF abstracts (<code>lef/</code>)</td>
+<td>66 macros + <code>CoreSiteHV</code> site</td>
+<td>generated from the GDS, pin sets verified against CDL</td>
+</tr>
+<tr class="even">
+<td>Liberty NLDM (<code>lib/</code>)</td>
+<td>66 cells, 600 timing tables</td>
+<td>combinational + sequential (clk→Q, setup/hold); areas from
+layout</td>
+</tr>
+<tr class="odd">
+<td>Registration (<code>xschem_lib_*.tcl</code>)</td>
+<td>library path + gallery hook</td>
+<td>idempotent</td>
+</tr>
+</tbody>
+</table>
+<p>Physical sign-off, from a single fixed invocation of the PDK’s own
+klayout decks on an abutted two-row array of all 66 drawn cells:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check</th>
+<th>This library</th>
+<th>IHP thin-oxide control (same harness)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DRC, cell rules (<code>Act.*</code>, <code>Gat.*</code>,
+<code>M1.*</code> spacing/width, <code>TGO.*</code>, <code>NW.*</code>,
+<code>Cnt.*</code>, …)</td>
+<td><strong>0</strong></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>DRC, chip-level metal density (<code>M1.j</code> …
+<code>TM2.c</code>)</td>
+<td>7</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>LVS</td>
+<td><strong>66 / 66 match</strong></td>
+<td>fill cells fail identically without the documented relaxation</td>
+</tr>
+</tbody>
+</table>
+<p>The density items are properties of the test harness, not of either
+library: a standard cell library contains no Metal2 and above, and metal
+density is a check on a <em>filled</em> die. The one count that differs,
+<code>M1.j</code> (min 35 % Metal1), is quantified rather than waved
+away: the deck measures over the marker bounding box including the empty
+ThickGateOx margin, where the padded 17-track array reads 35.0 % — over
+the actual cell area it is 37.1 % — while the denser, unpadded
+thin-oxide control reads 45.2 % and so never trips it. A placed block
+carries metal fill and does not see this.</p>
+<hr />
+<h1 data-number="2" id="the-device-transform"><span
+class="header-section-number">2</span> The device transform</h1>
+<p>Applied to every logic device in all 84 cells:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>thin oxide</th>
+<th>thick oxide</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>device model</td>
+<td><code>sg13_lv_nmos</code> / <code>sg13_lv_pmos</code></td>
+<td><code>sg13_hv_nmos</code> / <code>sg13_hv_pmos</code></td>
+</tr>
+<tr class="even">
+<td>gate length</td>
+<td>130 nm</td>
+<td><strong>450 nm</strong> (<code>Gat.a3</code> minimum for the 3.3 V
+FET)</td>
+</tr>
+<tr class="odd">
+<td>NMOS width</td>
+<td>—</td>
+<td>unchanged</td>
+</tr>
+<tr class="even">
+<td>PMOS width</td>
+<td>—</td>
+<td><strong>× 2.40</strong>, snapped per finger to the 5 nm grid</td>
+</tr>
+<tr class="odd">
+<td><code>as</code> / <code>ad</code> / <code>ps</code> /
+<code>pd</code></td>
+<td>—</td>
+<td>recomputed from device geometry</td>
+</tr>
+<tr class="even">
+<td>supply</td>
+<td>1.2 V</td>
+<td>3.3 V</td>
+</tr>
+</tbody>
+</table>
+<p>Gate lengths already at or above 450 nm were left alone, because they
+were chosen deliberately rather than set by the minimum: the
+<code>decap_4</code> / <code>decap_8</code> MOS capacitors (1.0 µm), the
+<code>sighold</code> keeper devices (700 nm) and
+<code>dlygate4sd3_1</code> (500 nm). 914 devices had their length
+raised. The delay cells <code>dlygate4sd2_1</code> (180/250 nm) and
+<code>o21ai_1</code> (150 nm) sat below the thick-oxide minimum and had
+to move to 450 nm, which shifts their delay ratios relative to the
+thin-oxide originals. <code>sg13g2_hv_antennanp</code> is unchanged
+apart from its name — it contains <code>dantenna</code> /
+<code>dpantenna</code> junction diodes, to which gate oxide thickness
+does not apply.</p>
+<h2 data-number="2.1" id="why-pmos-2.40"><span
+class="header-section-number">2.1</span> Why PMOS × 2.40</h2>
+<p>The thin-oxide <code>inv_1</code> uses <img
+src="_mathcache/c9238c067c480703.svg"
+title="W_p/W_n = 1.12/0.74 = 1.5135" class="math-inline" />. Simulation
+shows this is <em>not</em> a drive-matched ratio: at 1.2 V the pair
+gives <img src="_mathcache/03b46e3a41a8bcd6.svg"
+title="I_{dsat,p}/I_{dsat,n} = 0.82" class="math-inline" />, and equal
+drive would need <img src="_mathcache/16c1aeb014095caf.svg"
+title="W_p/W_n = 1.894" class="math-inline" />. What 1.5135 does give is
+a switching threshold at</p>
+<p><img src="_mathcache/60267c0dceb5681a.svg"
+title="V_m / V_{DD} = 0.5046" class="math-display" /></p>
+<p>essentially mid-rail. The thin-oxide library is sized for a centred
+switching threshold, and that is the property carried over.</p>
+<p>At 3.3 V with <img src="_mathcache/54b4c91b127ab70a.svg"
+title="L = 450\,\mathrm{nm}" class="math-inline" /> the thick-oxide PMOS
+is much weaker relative to its NMOS (219 µA/µm against 533 µA/µm), and
+reaching the same <img src="_mathcache/7ce805bec4949824.svg"
+title="V_m/V_{DD} = 0.5046" class="math-inline" /> needs <img
+src="_mathcache/d2ff6d02e7ff2616.svg" title="W_p/W_n = 3.63"
+class="math-inline" /> — a factor</p>
+<p><img src="_mathcache/86b35904ee9af67a.svg"
+title="K_p = \frac{3.63}{1.5135} = 2.40" class="math-display" /></p>
+<p>on the thin-oxide ratio. Applying <img
+src="_mathcache/b7388e8b7a0d46f7.svg" title="K_p" class="math-inline" />
+to every PMOS and leaving every NMOS alone preserves each cell’s
+internal stack ratios — where the thin-oxide library encodes its
+series-device compensation — while re-centring the switching threshold.
+Checked across the library’s full 0.3–17.9 µm width range, the required
+ratio varies between 3.63 and 3.97, so one global factor holds to about
+±5 %.</p>
+<p>Method: a self-biased inverter (input tied to output) settles at
+exactly <img src="_mathcache/0aec526e53584bbc.svg" title="V_m"
+class="math-inline" />, so one operating point per candidate ratio gives
+the answer with no sweep interpolation (<code>work/vm_sweep.py</code>,
+<code>work/ratio_check.py</code>).</p>
+<h2 data-number="2.2" id="parasitic-recomputation"><span
+class="header-section-number">2.2</span> Parasitic recomputation</h2>
+<p>Source/drain areas and perimeters follow the vendor deck’s own
+geometry formulas. With finger width <img
+src="_mathcache/486d902a357f937c.svg"
+title="w_f = \max(W/n_g, 0.15\,\mu\mathrm{m})" class="math-inline" />,
+<img src="_mathcache/2875f6f32620cf72.svg"
+title="z_1 = 0.34\,\mu\mathrm{m}" class="math-inline" /> and <img
+src="_mathcache/5e33a7ed84b43110.svg" title="z_2 = 0.38\,\mu\mathrm{m}"
+class="math-inline" />, an odd finger count gives</p>
+<p><img src="_mathcache/5568313e5214e6eb.svg"
+title="A_S = A_D = w_f\left(z_1 + \frac{n_g-1}{2}\,z_2\right)"
+class="math-display" /></p>
+<p>and for even <img src="_mathcache/8c65b049e1635b14.svg" title="n_g"
+class="math-inline" /> the source and drain differ:</p>
+<p><img src="_mathcache/52e6b1fcccdfdc7e.svg"
+title="A_S = w_f\left(2 z_1 + \frac{n_g-2}{2}\,z_2\right)"
+class="math-display" /></p>
+<p><img src="_mathcache/41381be1e03357f6.svg"
+title="A_D = \frac{w_f\, z_2\, n_g}{2}" class="math-display" /></p>
+<p>with the matching perimeter expressions. Before any generation the
+formulas were validated by recomputing all 924 thin-oxide devices and
+comparing against the shipped values: worst relative error <img
+src="_mathcache/39eb6f1131bd4d47.svg" title="3.75\times10^{-4}"
+class="math-inline" />, entirely explained by the vendor netlist
+printing four significant figures. The generator refuses to run if this
+validation fails.</p>
+<h2 data-number="2.3" id="what-the-transform-costs"><span
+class="header-section-number">2.3</span> What the transform costs</h2>
+<p>Measured on <code>inv_1</code> versus <code>sg13g2_hv_inv_1</code>
+(<code>work/fo4.py</code>):</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>thin oxide @ 1.2 V</th>
+<th>thick oxide @ 3.3 V</th>
+<th>ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>input capacitance</td>
+<td>2.67 fF</td>
+<td>5.87 fF</td>
+<td>2.20×</td>
+</tr>
+<tr class="even">
+<td>FO4 delay</td>
+<td>53.6 ps</td>
+<td>142.4 ps</td>
+<td>2.66×</td>
+</tr>
+</tbody>
+</table>
+<p>The thick-oxide NMOS delivers <em>more</em> current per micron at 3.3
+V than the thin-oxide one at 1.2 V (533 vs 391 µA/µm) — the higher
+supply more than compensates for the 3.5× longer channel. The speed loss
+is capacitance, not drive.</p>
+<hr />
+<h1 data-number="3" id="netlist-generation"><span
+class="header-section-number">3</span> Netlist generation</h1>
+<p><code>work/gen_hv_lib.py</code> parses the PDK’s thin-oxide netlists
+and re-emits every view from one internal model, so a device cannot
+silently diverge between views. Regex matching uses named groups
+throughout — an early version with positional groups shifted trailing
+indices and duplicated schematic attributes, a class of bug the named
+form makes impossible.</p>
+<p>Order of operations per device: substitute the model name, raise <img
+src="_mathcache/7ab0ffdcb09eff9b.svg" title="L" class="math-inline" />,
+scale the PMOS <img src="_mathcache/3510b087d3290f93.svg" title="W"
+class="math-inline" />, recompute
+<code>as</code>/<code>ad</code>/<code>ps</code>/<code>pd</code> from the
+new geometry, round consistently. The generator validates the parasitic
+formulas against all 924 source devices before writing a single output
+file.</p>
+<hr />
+<h1 data-number="4" id="deliverables-view-by-view"><span
+class="header-section-number">4</span> Deliverables, view by view</h1>
+<h2 data-number="4.1"
+id="spicesg13g2_stdcell_hv.spice-simulation-netlist"><span
+class="header-section-number">4.1</span>
+<code>spice/sg13g2_stdcell_hv.spice</code> — simulation netlist</h2>
+<p>1 536 lines, 84 <code>.subckt</code> blocks, 924 devices as
+<code>X</code>-cards calling the PSP103 Verilog-A models (loaded via
+OSDI in ngspice). This is the view every functional verification in
+section 5 runs on. Device widths and lengths are synchronised to the
+drawn layout for the 66 cells that have one (section 6.6); the antenna
+cell’s diode <code>w</code>/<code>l</code>/<code>a</code>/<code>p</code>
+follow the drawn diode.</p>
+<h2 data-number="4.2" id="cdlsg13g2_stdcell_hv.cdl-lvs-netlist"><span
+class="header-section-number">4.2</span>
+<code>cdl/sg13g2_stdcell_hv.cdl</code> — LVS netlist</h2>
+<p>1 783 lines, the same 84 subcircuits as <code>M</code>-cards with
+<code>*.PININFO</code> directives, consumed by the PDK’s klayout LVS
+deck. Kept separate from the SPICE view because the two serve different
+tools, but generated from the same internal model and compared
+field-by-field by <code>verify_sch.py</code>.</p>
+<h2 data-number="4.3"
+id="verilogsg13g2_stdcell_hv.v-functional-view"><span
+class="header-section-number">4.3</span>
+<code>verilog/sg13g2_stdcell_hv.v</code> — functional view</h2>
+<p>3 273 lines, 84 modules renamed to <code>sg13g2_hv_*</code>. The file
+deliberately does <strong>not</strong> ship a copy of
+<code>sg13g2_udp.v</code>: the user-defined primitives are named
+<code>ihp_*</code> and shared with the thin-oxide library, and a second
+copy in one elaboration would collide.</p>
+<h2 data-number="4.4" id="symxschem.sym-84-symbols"><span
+class="header-section-number">4.4</span> <code>sym/xschem/*.sym</code> —
+84 symbols</h2>
+<p>Copies of the thin-oxide symbols: same drawn geometry, same pin
+names, same pin order, so schematics port between the libraries by
+netlist prefix alone. Two things differ: the template prefix is
+<code>sg13g2_hv_</code>, so an instance netlists to
+<code>sg13g2_hv_&lt;cell&gt;</code>, and the symbols carry
+<code>type=subcircuit</code>, resolving their schematic through
+<code>$::SG13G2_HV_SCH</code> — the thin-oxide symbols instead resolve
+through the PDK’s <code>hierarchy_config</code> proc, which is
+hard-wired to the thin-oxide schematic directory and has no thick-oxide
+view.</p>
+<h2 data-number="4.5"
+id="schxschem.sch-84-schematics-and-the-gallery"><span
+class="header-section-number">4.5</span> <code>sch/xschem/*.sch</code> —
+84 schematics and the gallery</h2>
+<p>One schematic per cell, netlisted through the symbols by
+<code>verify_sch.py</code> so that symbol→schematic resolution is
+exercised, and compared against SPICE and CDL on pin lists and every
+device’s model, width, length, finger count and multiplier:
+<strong>84/84 cells, 924 devices, three views agree</strong>. The single
+intentional divergence — <code>dlygate4sd2_1</code>’s PMOS drawn at <img
+src="_mathcache/45d7c4fdf021b73c.svg" title="L = 0.625\,\mu"
+class="math-inline" />m (section 6.1) — is carried consistently in all
+three views.</p>
+<p><code>sg13g2_hv_stdcells.sch</code>, in the same directory, is the
+gallery: all 84 cells on one sheet in 13 functional groups, the
+thick-oxide counterpart of the PDK’s <code>IHP130_stdcells.sch</code>.
+It is generated by <code>work/gen_gallery.py</code>, which computes each
+symbol’s drawn extent from its primitive records and packs the groups
+without overlap whatever the pin count. It lives in
+<code>sch/xschem/</code> so it resolves by name like any cell, and
+project <code>xschemrc</code> files open it at startup via
+<code>$::SG13G2_HV_GALLERY</code>.</p>
+<h2 data-number="4.6"
+id="xschem_lib_sg13g2_stdcell_hv.tcl-registration"><span
+class="header-section-number">4.6</span>
+<code>xschem_lib_sg13g2_stdcell_hv.tcl</code> — registration</h2>
+<p>Sourced after the PDK <code>xschemrc</code>, it appends
+<code>sym/xschem</code> and <code>sch/xschem</code> to
+<code>XSCHEM_LIBRARY_PATH</code> (deduplicated — double-sourcing is
+safe), sets <code>$::SG13G2_HV_SCH</code> for symbol resolution and
+exports <code>$::SG13G2_HV_GALLERY</code> for startup hooks.</p>
+<h2 data-number="4.7"
+id="gdssg13g2_stdcell_hv.gds-layout-66-of-84-cells"><span
+class="header-section-number">4.7</span>
+<code>gds/sg13g2_stdcell_hv.gds</code> — layout, 66 of 84 cells</h2>
+<p>Produced by <code>work/layout_retarget.py</code> from the thin-oxide
+GDS; the generation method and its sign-off are the subject of sections
+6 and 7. Row height is a uniform 7.140 µm — 17 horizontal routing
+tracks, up from the thin-oxide 3.780 µm / 9 tracks — every cell width is
+a multiple of the 0.48 µm site, the 66-cell test row is 430.56 µm wide,
+and all 5 082 contacts are exactly 0.16 × 0.16 µm. The 18 cells without
+layout are those whose thin-oxide geometry leaves no room for the
+thick-oxide well clearances at a shared row height (section 9).</p>
+<h2 data-number="4.8"
+id="lefsg13g2_stdcell_hv.lef-placement-abstracts"><span
+class="header-section-number">4.8</span>
+<code>lef/sg13g2_stdcell_hv.lef</code> — placement abstracts</h2>
+<p>66 macros plus the <code>CoreSiteHV</code> site (0.48 × 7.140 µm),
+generated from the drawn GDS by <code>work/gen_lef.py</code>. Pin ports
+are the connected groups of the Metal1/Metal2 pin datatypes, labelled by
+the text each group contains (<code>sdfbbp_1</code>’s D pin routes
+through Via1 to Metal2 and is emitted on all three layers); the OBS
+blocks are the drawn metal minus the pin geometry, decomposed at region
+level so a pin cut out of a strap leaves a hole rather than being
+covered. Pin
+<code>DIRECTION</code>/<code>USE</code>/<code>NETEXPR</code> and macro
+<code>CLASS</code> (SPACER for fill/decap, ANTENNACELL for the diode)
+are inherited from the thin-oxide LEF, whose pin names this library
+shares by construction — but antenna values are <strong>recomputed from
+the netlist</strong>, since the thin-oxide numbers are wrong for 3.5×
+longer gates: <code>ANTENNAGATEAREA</code> is the summed W × L on the
+pin’s gate net, <code>ANTENNADIFFAREA</code> the summed
+<code>ad</code>/<code>as</code> on its drain/source nets. Generation
+asserts every height equals the site, every width is a site multiple and
+every pin set matches the thin-oxide reference; the emitted file is then
+parsed back with klayout’s LEF reader and its pin sets verified against
+the CDL (66/66).</p>
+<h2 data-number="4.9"
+id="libsg13g2_stdcell_hv_typ_3p30v_25c.lib-liberty-nldm"><span
+class="header-section-number">4.9</span>
+<code>lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib</code> — Liberty NLDM</h2>
+<p>52 combinational cells at the 3.3 V / 25 °C typical corner,
+characterised with CharLib against the final, layout-synchronised SPICE
+netlist (section 8): 25 839 combinational measurements plus a 2 962-task
+sequential run, 600 timing tables across 66 cells, none empty.</p>
+<h2 data-number="4.10" id="doc-readme.md-work"><span
+class="header-section-number">4.10</span> <code>doc/</code>,
+<code>README.md</code>, <code>work/</code></h2>
+<p><code>doc/sg13g2_stdcell_hv.celllist</code> is the machine-readable
+cell inventory, and this report lives in <code>doc/report/</code>. The
+<code>README.md</code> carries the full engineering narrative including
+every measurement caveat. <code>work/</code> holds the 19 generator,
+verification and sign-off scripts plus the ngspice OSDI shim — the
+complete provenance: nothing in the library was drawn or edited outside
+these scripts except the five documented Metal1 re-routes, which are
+themselves data in <code>layout_retarget.py</code>.</p>
+<hr />
+<h1 data-number="5" id="functional-verification"><span
+class="header-section-number">5</span> Functional verification</h1>
+<p>The functional suites use the thin-oxide library as the golden
+reference: the transform changed devices and voltages, never logic, so
+any topology error appears as a divergence. No truth table was written
+by hand.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Suite</th>
+<th>Coverage</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>verify_logic.py</code></td>
+<td>60 combinational cells, 452 vectors, both libraries in one deck,
+outputs digitised</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr class="even">
+<td><code>verify_seq.py</code></td>
+<td>16 stateful cells, 400 clocked samples from a common reset</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr class="odd">
+<td><code>verify_sch.py</code></td>
+<td>84 schematics + CDL vs SPICE, 924 devices field-by-field</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr class="even">
+<td>LVS (klayout)</td>
+<td>66 drawn cells vs CDL</td>
+<td><strong>66/66</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Details that matter: the 12 high-impedance states of the tri-state
+cells (<code>ebufn_*</code>, <code>einvn_*</code>) are exercised, with a
+1 GΩ resistor to mid-rail keeping a floating output distinguishable from
+a driven 0. Stateful cells are identified from the thin-oxide Liberty by
+<code>ff()</code>, <code>latch()</code>, <code>statetable()</code>
+<em>or</em> <code>clock_gating_integrated_cell</code> — the last two
+matter because <code>lgcp_1</code> / <code>slgcp_1</code> are bistable
+integrated clock gates without an <code>ff</code>/<code>latch</code>
+group, and a DC sweep on them is meaningless. Samples with
+<code>SET_B</code> and <code>RESET_B</code> asserted together are
+illegal states with no defined reference value and are excluded rather
+than counted as passes. Both suites were re-run after the last netlist
+synchronisation and pass on the shipped files.</p>
+<hr />
+<h1 data-number="6" id="layout-generation"><span
+class="header-section-number">6</span> Layout generation</h1>
+<p>The thin-oxide GDS is hand-drawn 2-D layout, not a regular template,
+so a placement-based generator would have to rebuild every cell — and
+would not be LVS-correct without a router. What can be done
+<em>exactly</em> is a <strong>1-D retarget</strong>: monotone
+piecewise-linear coordinate maps applied to every vertex. Monotone maps
+preserve topology, so connectivity survives by construction; the
+engineering is in choosing the breakpoints and in the exceptions.</p>
+<h2 data-number="6.1" id="the-maps"><span
+class="header-section-number">6.1</span> The maps</h2>
+<p>In <strong>x</strong>, gates must widen from 0.13 to 0.45 µm about
+their centres with a fixed slope <img
+src="_mathcache/b2b061a1031a0578.svg" title="L_{hv}/L_{lv}"
+class="math-inline" /> — a variable slope staggered multi-finger gates
+to 0.28/0.39 µm. Long-channel gates (the deliberate 0.5–1.0 µm devices)
+are only widened if below 0.45 µm. The contacted poly pitch grows from
+0.48 to 0.80 µm, keeping the thin-oxide gate-to-contact budget around
+the longer gate. One consequence is accepted rather than fought:
+<code>dlygate4sd2_1</code> staggers an 0.18 µm NMOS gate against an 0.25
+µm PMOS gate at overlapping x, and a single monotone map cannot widen
+two overlapping intervals by different factors — its PMOS lands at a
+legal 0.625 µm, carried consistently into all netlist views.</p>
+<p>In <strong>y</strong>, the PMOS band is scaled ×2.40 and three
+channel inserts open the thick-oxide clearances: 0.215 µm for
+<code>NW.d1.dig</code> (NWell to N+ Activ, 0.31 µm inside ThickGateOx
+with DigiBnd), 0.100 µm for <code>pSD.j1</code>, and 0.430 µm at the
+rail so the VSS-rail p+ tap keeps 0.40 µm (<code>pSD.i1</code>) to the
+NMOS gates. The band is derived <strong>library-wide</strong>
+(1.925–3.630 µm, cut at y = 1.595), not per cell — a per-cell band
+produced six different row heights, which is not a standard cell
+library. Everything on every layer moves through the maps, including
+Metal2, Via1 and marker layers: leaving any layer behind silently
+corrupts the cell (it clipped the antenna diode’s extracted area before
+that was made unconditional).</p>
+<h2 data-number="6.2" id="pmos-diffusion-slab-decomposition"><span
+class="header-section-number">6.2</span> PMOS diffusion: slab
+decomposition</h2>
+<p>Scaled widths must be exact, and <img
+src="_mathcache/19a6302d81b10faf.svg"
+title="2.40 \times 5\,\mathrm{nm} = 12" class="math-inline" /> nm does
+not land on the 5 nm grid, so snapping the two Activ edges of a device
+independently gives the same thin-oxide 1.12 µm device 2.685 µm at one y
+and 2.690 µm at another — and the netlist cannot say which is which.
+<code>retarget_pmos_activ</code> therefore cuts each PMOS Activ polygon
+into vertical slabs at every vertex x and re-emits each slab at <img
+src="_mathcache/fed61055f8d2425b.svg"
+title="[\,y_{top} - \mathrm{snap}(2.40\,h),\; y_{top}\,]"
+class="math-inline" />. Three rules there were each learned by breaking
+them:</p>
+<ul>
+<li><strong>Per connected piece, not per slab bounding box.</strong> A
+non-convex Activ can hold two disjoint lobes at the same x; the bounding
+box spans the gap and merges two channels — which silently deleted two
+PMOS from <code>dfrbp_1</code>.</li>
+<li><strong>Per slab, not per polygon.</strong> A notch is how this
+library gives devices in one diffusion different widths; forcing a
+polygon to one height collapses them (<code>and2_1</code>’s three PMOS
+all became 2.69 µm).</li>
+<li><strong>Sub-grid step alignment, with channel slabs frozen.</strong>
+The source’s own 5 nm jogs land neighbouring slabs one grid step apart,
+and each such staircase edge within 0.23 µm of a gate edge is an
+<code>Act.c</code> violation (a 0.12 µm slab flanked by steps was an
+<code>Act.a</code>). Aligning <em>everything</em> removed them but moved
+channel edges: two formerly identical devices became 2.400 and 2.405 µm,
+and since the netlist synchroniser pairs devices to channels by sorted
+width — ambiguous between near-equal devices on different nets — five
+cells lost their LVS net correspondence. The final pass freezes every
+slab that carries gate poly and moves only source/drain slabs toward
+their channel neighbours, so it provably cannot change any device.</li>
+</ul>
+<h2 data-number="6.3" id="contacts-and-vias"><span
+class="header-section-number">6.3</span> Contacts and vias</h2>
+<p>Cut layers are fixed-size and are <strong>translated, never
+scaled</strong> — a stretched via fails its own width rule. Contacts are
+removed before the map and re-tiled inside the new Activ at a 0.36 µm
+pitch (not the thin-oxide 0.34 µm: <code>Cnt.b1</code> raises required
+spacing to 0.20 µm once an array exceeds 4 × 4, which the 2.4× taller
+PMOS contacts now do), grouped by the polygon they sit in rather than by
+x (the VSS and VDD rail taps share an x, and x-grouping tiled contacts
+straight up through open field), each box built by snapping one corner
+and adding the size (snapping both edges independently rounds 0.16 µm to
+0.155/0.165). An epsilon guards the keep test —
+<code>hi − lo = 0.15999999999999998</code> once dropped every rail-tap
+contact and with them the substrate tie.</p>
+<h2 data-number="6.4" id="thickgateox-and-digibnd"><span
+class="header-section-number">6.4</span> ThickGateOx and DigiBnd</h2>
+<p>ThickGateOx marks the 3.3 V gate oxide; DigiBnd selects the
+<em>digital</em> well rules (<code>NW.d1.dig</code> at 0.31 µm instead
+of <code>NW.d1</code> at 0.62). TGO is drawn on the cell boundary grown
+by 0.27 µm (<code>TGO.a</code>) in x and <strong>0.42 µm in y</strong>:
+the shared rail’s Activ crosses the cell boundary by 0.15 µm, and a
+plain 0.27 µm margin leaves only 0.12 µm of TGO past it at an
+<em>unabutted</em> row edge — a violation that appears exactly twice on
+any N-row test array (proven by stacking two and three rows: the count
+stays 2 and moves to the new outer edge). With 0.42 µm the cells are
+correct even at a block edge, while interior rows still merge far under
+the 0.86 µm <code>TGO.e</code> distance.</p>
+<h2 data-number="6.5" id="the-five-metal1-re-routes"><span
+class="header-section-number">6.5</span> The five Metal1 re-routes</h2>
+<p><code>M1.e</code> (0.22 µm space when a line is ≥ 0.30 µm wide and
+the parallel run exceeds 1.0 µm) is a rule the retarget
+<em>manufactures</em>: the y-map thickens horizontal lines past 0.30 and
+the x-map lengthens runs past 1.0, so 0.18 µm gaps that were legal in
+the thin-oxide cells become illegal with nothing moved closer. Generic
+edge-trimming cannot fix them — every gap abuts a contact column or a
+pin pad — so each of the five sites has an explicit hand re-route, kept
+as data (<code>M1E_EDITS</code>) in the generator:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Cell</th>
+<th>Edit</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dlygate4sd2_1</code></td>
+<td>A2 pin pad bottom raised 35 nm (gap 0.185 → 0.220)</td>
+</tr>
+<tr class="even">
+<td><code>mux2_1</code></td>
+<td>pin pad bottom raised 20 nm (0.20 → 0.22)</td>
+</tr>
+<tr class="odd">
+<td><code>sdfbbp_1</code></td>
+<td>strap bottom raised, starting 0.16 µm past a 0.16 µm arm
+junction</td>
+</tr>
+<tr class="even">
+<td><code>sdfbbp_1</code></td>
+<td>15 nm × 930 nm bite between two contacts, splitting a 2.33 µm
+parallel run into 0.79 + 0.45 µm</td>
+</tr>
+<tr class="odd">
+<td><code>and4_2</code></td>
+<td>X pin pad narrowed 0.80 → 0.76 µm</td>
+</tr>
+</tbody>
+</table>
+<p>Every edit is verified in code before it ships: merged polygon count
+unchanged (no split nets), <code>M1.a</code> width, <code>M1.b</code>
+space/notch, <code>M1.c1</code> contact enclosure, and the 5 nm grid.
+The guards rejected two earlier versions of these edits — a flush cut
+that left a 0.106 µm diagonal width, and a bite on a line only 0.17 µm
+wide — and an unguarded first attempt at automatic trimming had turned 6
+violations into 37 (off-grid edges, sub-minimum widths, broken
+enclosures). Pin shapes (<code>8/2</code>) move with the drawing where a
+pad is edited.</p>
+<h2 data-number="6.6" id="netlist-layout-synchronisation"><span
+class="header-section-number">6.6</span> Netlist ↔︎ layout
+synchronisation</h2>
+<p>The drawn width is authoritative: forcing the layout to the computed
+value means nudging an Activ edge under a channel, making it
+non-rectangular, and the extractor then reports a fractional gate length
+(<img src="_mathcache/9904520e61c7de13.svg" title="L = 0.4508\,\mu"
+class="math-inline" />m). <code>work/sync_netlist_widths.py</code>
+instead brings SPICE and CDL to the drawn geometry — matching per
+<em>finger</em>, not per device, because a folded <code>ng=4</code>
+device draws four channels (<code>buf_4</code>’s four devices are six
+drawn gates) — and recomputes
+<code>as</code>/<code>ad</code>/<code>ps</code>/<code>pd</code> with the
+deck formulas. The antenna diodes follow the same principle: the y-map
+stretches the antenna cell, so the diode area and perimeter in the
+netlist follow the drawing. Widths are handled in metres end-to-end; a
+unit slip once wrote <code>w=2400000.000u</code>.</p>
+<h2 data-number="6.7" id="site-abutment-and-track-benchmark"><span
+class="header-section-number">6.7</span> Site, abutment and track
+benchmark</h2>
+<p>The PDK’s tech LEF routes horizontally on a 0.42 µm pitch and
+vertically on 0.48 µm; the thin-oxide library’s <code>CoreSite</code> is
+0.48 × 3.78 µm, making it an exactly <strong>9-track</strong> library.
+This library is placed on the same grids: a <strong>17-track</strong>
+site of 0.48 × 7.140 µm.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><code>sg13g2_stdcell</code> (LV)</th>
+<th><code>sg13g2_stdcell_hv</code></th>
+<th>ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>site</td>
+<td><code>CoreSite</code> 0.48 × 3.78</td>
+<td><code>CoreSiteHV</code> 0.48 × 7.140</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>height in 0.42 µm h-tracks</td>
+<td><strong>9</strong></td>
+<td><strong>17</strong></td>
+<td>1.89×</td>
+</tr>
+<tr class="odd">
+<td>cell width quantum</td>
+<td>0.48 µm</td>
+<td>0.48 µm</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>mean cell width</td>
+<td>—</td>
+<td>1.52× LV</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>mean cell area (66 pairs)</td>
+<td>—</td>
+<td>—</td>
+<td><strong>2.87×</strong> (median 2.83, range 1.89–4.21)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Abutment holds.</strong> Every cell spans y = 0…7.140 with
+identical rail cross-sections, rails and rail Activ run through the cell
+edges, and the entire physical sign-off is performed on cells placed
+boundary-to-boundary with a mirrored second row sharing a rail — the
+configuration is not merely allowed but required, since rails,
+boundary-crossing Activ and ThickGateOx are only legal because
+neighbours continue them.</p>
+<p>Neither grid property held automatically; both were imposed on the
+retargeted geometry:</p>
+<ul>
+<li><strong>17 tracks.</strong> Device geometry alone (the 2.40× PMOS
+band plus the thick-oxide well clearances) gave 6.910 µm = 16.45 tracks,
+and horizontal M1/M3 tracks would have misaligned across row boundaries.
+<code>TRACK_PAD</code> adds the missing 0.230 µm in the mid-cell dead
+zone — the same place the <code>NW.d1</code> clearance opened, so every
+rule it touches only gains margin. The stretch carried three vertical
+Metal1 runs past <code>M1.e</code>’s 1.0 µm parallel-run threshold; each
+got a hand re-route in <code>M1E_EDITS</code> (a pin pad gives up 20–40
+nm), verified by the same in-code guards.</li>
+<li><strong>Site-quantized widths.</strong> The piecewise-linear x-map
+stretches only around gates and leaves gate-free spans unscaled, so
+mapped widths shared no quantum beyond the 5 nm grid.
+<code>pad_to_site</code> pads each cell’s right boundary up to the next
+0.48 µm multiple and extends with it exactly the shapes that continue
+across an abutment — rails, rail Activ, tap implants, wells, markers —
+so no device and no signal wire changes. Total padding across the
+library: 13.75 µm, ≈ 0.21 µm per cell.</li>
+</ul>
+<p>The 3.3 % height cost of the 17th track and the ~2 % width cost of
+site padding are both inside the 2.87× mean area factor above.</p>
+<hr />
+<h1 data-number="7" id="physical-sign-off"><span
+class="header-section-number">7</span> Physical sign-off</h1>
+<h2 data-number="7.1" id="methodology"><span
+class="header-section-number">7.1</span> Methodology</h2>
+<p>Cells are checked in an abutted context, never standalone: rails run
+off both cell ends, rail Activ crosses the boundary, and ThickGateOx
+merges across cells — all legal <em>because</em> cells abut.
+<code>work/make_drc_top.py</code> builds a row of all 66 cells with a
+second row mirrored above so the two share a rail;
+<code>work/make_drc_rows.py</code> generalises to N rows for the
+edge-artifact experiment.</p>
+<p>Three measurement rules, each bought with a wrong conclusion:</p>
+<ul>
+<li><strong>One fixed invocation.</strong> The PDK runner executes
+different rule decks depending on its flags (<code>--no_density</code>
+runs a monolithic deck emitting 4 files; the default emits 5; another
+flag set emits ~40). Counts from different invocations are not
+comparable — an interim draft of the documentation claimed “13
+violations” by comparing across flag sets.</li>
+<li><strong>Diagnose from flat replication, not marker text.</strong> In
+deep mode the <code>lyrdb</code> marker coordinates are in per-variant
+<em>cell-local</em> frames; read as top-cell µm they attributed all
+remaining violations to four cells that had nothing wrong with them.
+Every diagnosis that converged came from re-implementing the failing
+rule flat with the <code>klayout.db</code> API
+(<code>enclosed_check</code>, <code>separation_check</code>,
+<code>width_check</code>), which is dbu-exact.</li>
+<li><strong>Run the control.</strong> IHP’s own
+<code>sg13g2_stdcell</code> was pushed through the identical harness and
+invocation. That separated inherited flow artifacts (the six density
+items; the fill-cell LVS behaviour) from real defects in a single run,
+in both directions.</li>
+</ul>
+<p>The verdict never comes from an exit code: both PDK runners exit 0 on
+failure, so pass/fail is parsed from the log and the report
+database.</p>
+<h2 data-number="7.2" id="drc-result"><span
+class="header-section-number">7.2</span> DRC result</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Rule class</th>
+<th>This library</th>
+<th>IHP control</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cell rules</td>
+<td><strong>0</strong></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>metal density (<code>M2.j</code> <code>M3.j</code> <code>M4.j</code>
+<code>M5.j</code> <code>TM1.c</code> <code>TM2.c</code>)</td>
+<td>6</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<p>The path there: 781 raw violations after the first full retarget,
+driven to zero real items through the mechanisms of section 6 — the
+largest single steps being the <code>Gat.b1</code> gate-spacing inserts
+(26 items), the <code>pSD.i1</code> rail insert (104 items, located by
+measuring the actual error edges after a first misdiagnosis), fixed-size
+cut handling (<code>V1.a</code>), the channel-frozen slab alignment
+(<code>Act.c</code>/<code>Act.a</code>), the five <code>M1E_EDITS</code>
+re-routes (<code>M1.e</code>) and the 0.42 µm TGO y-margin
+(<code>TGO.a</code>).</p>
+<h2 data-number="7.3" id="lvs-result"><span
+class="header-section-number">7.3</span> LVS result</h2>
+<p><strong>All 66 drawn cells match.</strong> The 62 cells with devices
+pass under the strict flags. The four <code>fill_*</code> cells contain
+no devices; klayout extracts a port-less empty circuit, the CDL subckt
+declares <code>VDD</code>/<code>VSS</code>, and the comparer reports the
+port-list difference — IHP’s own fill cells fail the identical flow the
+same way. For exactly those four cells <code>work/run_lvs.sh</code>
+passes the runner’s own <code>--ignore_top_ports_mismatch</code>
+relaxation; the port check is vacuous for a cell that extracts to
+nothing, while every cell with devices keeps the strict comparison.</p>
+<p>LVS earlier caught five defect classes that dimensional checks could
+not — merged channels, collapsed notch devices, mis-paired folded
+fingers, a dropped substrate tie, stale diode geometry — which is why
+the per-cell sweep runs after every layout change.</p>
+<hr />
+<h1 data-number="8" id="liberty-characterisation"><span
+class="header-section-number">8</span> Liberty characterisation</h1>
+<p><code>lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib</code> is an NLDM
+library produced with <strong>CharLib</strong>, the open-source cell
+characteriser, at the 3.3 V / 25 °C typical corner. Every number in it
+comes from an <strong>ngspice transient simulation of the shipped SPICE
+netlist</strong> — the same <code>spice/sg13g2_stdcell_hv.spice</code>
+that LVS and the functional suites use, on the PSP103 Verilog-A device
+models loaded through OSDI. Nothing is estimated, and nothing is scaled
+from the thin-oxide library except the table <em>axes</em>. The final
+combinational run is 25 839 simulations, joined by a 2 962-task
+sequential run — 600 delay/slew tables over 66 cells, none empty —
+re-characterised after the layout work so the tables match the
+layout-synchronised netlists. When the layout later moved to the
+17-track site the netlists stayed byte-identical — the pad only
+stretches dead zone and boundary — so the timing tables remained valid
+as-is; the one characterisation input that did change, cell
+<strong>area</strong>, was re-derived from the drawn boundaries
+(site-padded width × 7.140 µm) for all 52 cells, replacing the
+pre-layout estimates the first run had used.</p>
+<h2 data-number="8.1" id="configuration"><span
+class="header-section-number">8.1</span> Configuration</h2>
+<p><code>work/gen_charlib_config.py</code> builds the CharLib YAML from
+the thin-oxide Liberty, which is trusted for everything the transform
+did not touch: the cell list, each cell’s boolean function, pin
+directions and state declarations. Functions are translated by a
+recursive-descent parser (<code>work/boolexpr.py</code>) — XOR expanded
+to its AND/OR form — and <strong>every</strong> translated expression is
+checked against the original by truth-table equivalence before it is
+written. Logic thresholds are the standard 20/80 % slew and 50 % delay
+points. The 7 × 7 slew/load index grids are the thin-oxide grids
+rescaled by the measured 2.66× delay and 2.20× capacitance ratios
+(section 2), so the tables cover the same electrical territory as the
+original library rather than an arbitrary range.</p>
+<h2 data-number="8.2" id="what-ngspice-actually-simulates"><span
+class="header-section-number">8.2</span> What ngspice actually
+simulates</h2>
+<p>For each cell, each input→output arc, each rise/fall direction and
+each of the 7 × 7 slew/load points, CharLib drives the cell’s subcircuit
+with a ramped input at that slew into that capacitive load and runs a
+transient analysis; propagation delay and output transition come from
+<code>.meas</code> statements evaluated on the waveforms. Per-cell
+leakage is a separate operating-point measurement per input state, and
+pin capacitance is a dedicated measurement biased <strong>at both
+rails</strong> — a single mid-rail bias Miller-inflates the result (19.7
+fF was measured for what is a 5.9 fF input) and was one of the first
+defects caught. Simulations run on all cores minus two with ngspice
+pinned to one thread each; oversubscription (ngspice’s default four
+threads times a full worker pool) had slowed the first runs
+several-fold.</p>
+<h2 data-number="8.3" id="making-ngspice-usable-from-charlib"><span
+class="header-section-number">8.3</span> Making ngspice usable from
+CharLib</h2>
+<p>Five tool defects sit between CharLib and a correct library; each has
+a committed workaround in <code>work/</code>:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Defect</th>
+<th>Symptom</th>
+<th>Workaround</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ngspice <code>-s</code> (server mode) ignores
+<code>.spiceinit</code></td>
+<td>OSDI never loads: “Unknown model type psp103va”</td>
+<td>PATH shim (<code>ngspice-osdi-shim/</code>) injects
+<code>pre_osdi</code> + <code>pre_set num_threads=1</code> after the
+title line</td>
+</tr>
+<tr class="even">
+<td><code>exec</code> inside the shim’s pipeline replaces only the
+subshell</td>
+<td>a second ngspice spinning at 98 % CPU</td>
+<td>shim ends with an explicit <code>exit $?</code></td>
+</tr>
+<tr class="odd">
+<td><code>ngspice-subprocess</code> backend never parses
+<code>.meas</code></td>
+<td>every timing table silently empty — while leakage, area and
+capacitance still populate</td>
+<td><code>ngspice-shared</code> backend (libngspice in-process) is
+mandatory</td>
+</tr>
+<tr class="even">
+<td>CharLib’s leakage lookup lower-cases supply names; PySpice restores
+the netlist’s spelling</td>
+<td><code>KeyError: 'vdd'</code> for any supply name</td>
+<td><code>charlib_patched.py</code> makes the branch-current lookup
+case-insensitive at runtime</td>
+</tr>
+<tr class="odd">
+<td>emitted Liberty syntax defects</td>
+<td><code>function : "Y = !(A)"</code> left-hand sides, wrong
+<code>pulling_resistance_unit</code>, wrong
+<code>bus_naming_style</code></td>
+<td><code>fix_lib.py</code> post-pass, run by
+<code>run_charlib.sh</code></td>
+</tr>
+</tbody>
+</table>
+<p>The shim was validated by comparing its measurements byte-for-byte
+against batch-mode ngspice on the same deck. The <code>.meas</code>
+defect deserves emphasis: it produces a structurally valid,
+plausible-looking library with empty timing tables, and nothing in the
+CharLib run reports an error.</p>
+<h2 data-number="8.4" id="verifying-the-liberty-data"><span
+class="header-section-number">8.4</span> Verifying the Liberty data</h2>
+<p>The library was loaded and exercised in OpenSTA early in the flow,
+but a loadable library is not a correct one, so the shipped
+<code>.lib</code> is verified <strong>as data</strong> by
+<code>work/verify_lib.py</code>, independently of how it was
+produced:</p>
+<ol type="1">
+<li><strong>Structure</strong> — 66 cells, all 600 delay/slew tables
+populated, leakage on every cell. (Guards against the
+empty-<code>.meas</code> failure mode, which produces a structurally
+valid library with no timing in it.)</li>
+<li><strong>Cross-view</strong> — every lib cell and pin exists in the
+CDL under the same names.</li>
+<li><strong>Physical</strong> — every lib <code>area</code> equals the
+drawn boundary area of the GDS cell, to 1 nm².</li>
+<li><strong>Monotonicity</strong> — along every table’s <em>load</em>
+axis, delay must not decrease. The load axis is taken from the
+template’s <code>variable_1</code>/<code>variable_2</code> declaration,
+never assumed: this library declares
+<code>variable_1 : total_output_net_capacitance</code>, the
+<strong>opposite axis order from IHP’s thin-oxide library</strong> (both
+are legal Liberty). The first version of this check assumed IHP’s order,
+walked the slew axis, and reported 110 “violations” — including
+physically legitimate negative propagation delays at slow input slews,
+where the output crosses 50 % before the input does. A hasty hand
+point-check made the same axis mistake and manufactured a 22×
+discrepancy out of a (slew, load) pair that is not in the tables at all.
+Axis-aware, the real count is one outlier point: <code>xnor2_1</code>’s
+B-rise arc at (0.396 pF, 3.36 ns) reads 3.410 ns where a direct
+measurement gives 1.885 ns, smooth with its neighbours — the XNOR output
+glitches during the slow input traversal and CharLib’s
+max-over-conditions latches the late crossing. The value ships as-is
+under a documented waiver in <code>verify_lib.py</code>: the error is
+pessimistic, the safe direction for timing sign-off, and hand-editing
+characterised data would be worse than a recorded exception.</li>
+<li><strong>Measurement cross-check</strong> — <code>inv_1</code>’s
+input capacitance against the independent both-rails ngspice measurement
+of <code>work/fo4.py</code> (5.87 fF).</li>
+<li><strong>Sequential arcs</strong> — every flip-flop and latch must
+carry an edge-triggered delay group and setup and hold constraint
+groups, and no constraint value may sit at the bisection search bounds
+(a pinned value means the pass/fail boundary was never bracketed — the
+fingerprint of both the skew-centering bug and the weak pass criterion)
+or outside −3…+5 ns. Result: <strong>14/14 cells clean</strong>.</li>
+</ol>
+<p>Check 5 caught a real defect that had survived every earlier look:
+the pin capacitances were <strong>6.8–7.5× too large</strong>
+(<code>inv_1</code> 43.8 fF, <code>inv_16</code> 639 fF). CharLib’s
+default <code>ac_sweep</code> procedure measures capacitance as a
+conductance slope at a floating DC bias, where Miller-multiplied Cgd
+dominates; the configuration now selects its
+<code>charge_integration</code> procedure — ramp the pin VSS→VDD→VSS and
+integrate the charge — which is exactly the both-rails method
+<code>fo4.py</code> validated, and reproduces the reference within ~10 %
+(6.0/6.7 fF fall/rise).</p>
+<p>The delay tables themselves were confirmed correct by a point-check
+against an independent, hand-written ngspice transient at a table
+corner: (load 0.66 pF, slew 49.5 ps) reads <strong>2.054 ns</strong> in
+the table and measures <strong>2.061 ns</strong> in simulation — 0.3 %
+apart. The final gate on the shipped file: <strong>PASS — 66 cells, 600
+tables, 1 932 load-axis series monotone with the one documented waiver,
+Cin 6.44 fF vs the 5.87 fF reference (9.7 %), 14/14 sequential cells
+clean.</strong></p>
+<h2 data-number="8.5" id="sequential-cells"><span
+class="header-section-number">8.5</span> Sequential cells</h2>
+<p>Stock CharLib 2.1.0 cannot characterize sequential cells at all, in
+three independent ways, each of which had to be discovered separately
+because every one fails silently or pathologically:</p>
+<ul>
+<li>Cells without <code>clock_slews</code> in their config raise a
+<code>KeyError</code> <em>inside</em> a generator that
+<code>omit_on_failure</code> swallows whole — zero simulations, zero
+errors, cells simply absent. This alone was the original “configured but
+produce nothing”.</li>
+<li><code>sequential_worst_case</code>, the clk→Q delay procedure, is an
+unimplemented stub: it yields tasks and returns the empty liberty
+skeleton (<code># TODO</code>).</li>
+<li>The setup/hold contour procedure builds transients whose point count
+explodes on these cells (1.2 GB allocation requests); the failed
+allocation drives libngspice into its fatal “cannot recover” state and
+poisons the worker pool.</li>
+</ul>
+<p><code>work/seq_delay_procedure.py</code> replaces the last two
+through CharLib’s own procedure registry:
+<code>sequential_clk_to_q</code> measures clock/enable-to-output
+propagation and transition with a preload-pulse-then-measured-edge
+scheme, and <code>setup_hold_bisection</code> finds constraints by
+pass/fail bisection (~24 bounded simulations per constraint) with a
+<strong>c2q-degradation criterion</strong> — a trial passes only if the
+output arrives within 1.5× the nominal clk→Q, because final-state-only
+acceptance rides through luckily-resolved metastability and reports
+constraints pinned at the search floor. Latches are constrained against
+their <strong>closing</strong> edge; the first implementation left the
+enable asserted, the latch transparent, and every trial failing.
+Building this took twelve distinct defects found and fixed across the
+config contract, CharLib’s API, and the procedures themselves — the
+report’s companion history is in the git log; two are worth naming as
+measurement lessons: a skew-centering error granted every trial an extra
+half data-ramp of setup (pinning slow-slew rows at the bisection floor
+exactly like the criterion bug), and undriven set/reset pins let
+<code>rshunt</code> drift an active-low reset asserted, which held the
+flop cleared and turned a failed measurement into an infinite pool
+hang.</p>
+<p>Validated behaviour (dfrbp_1, 3.3 V): setup +0.24…+0.59 ns rising
+with data slew and falling with clock slew; hold −0.43…−0.01 ns; clk→Q
+0.49…2.6 ns monotone in load, with the metastability onset visible as
+c2q degradation near the setup boundary. Latch (dlhq_1): closing-edge
+setup between +0.3 and +1.0 ns, transparent D→Q 0.87 ns. Sequential
+leakage is a single-settled-state measurement
+(<code>work/seq_leakage.py</code>, 0.10–0.33 nW), unlike the all-states
+enumeration of the combinational cells — stated here because a reader
+comparing leakage groups would otherwise wonder.</p>
+<h2 data-number="8.6" id="coverage"><span
+class="header-section-number">8.6</span> Coverage</h2>
+<p><strong>66 of 84 cells: 52 combinational, 9 flip-flops, 5
+latches.</strong> Twelve cells are excluded by configuration with stated
+reasons — no output pin and no arcs (<code>fill_*</code>,
+<code>decap_*</code>, <code>antennanp</code>, <code>sighold</code>), no
+timing tables in the thin-oxide reference either (<code>tiehi</code>,
+<code>tielo</code>), statetable-based clock gates CharLib has no input
+form for (<code>lgcp_1</code>, <code>slgcp_1</code>). A further 20 — all
+14 flip-flops/latches and all 6 tri-state cells — are configured but
+produce nothing: CharLib emits an empty library for them without a
+single simulation and without reporting an error, so under
+<code>omit_on_failure</code> they vanish silently; the run log does not
+mention them. The <code>.lib</code> therefore cannot be used to
+synthesise sequential logic as it stands.</p>
+<hr />
+<h1 data-number="9" id="verification-summary"><span
+class="header-section-number">9</span> Verification summary</h1>
+<p>Every check run on the shipped library, in one place. “Golden
+reference” means the thin-oxide library or an independent hand
+measurement; nothing below is validated only against its own
+generator.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check</th>
+<th>Method</th>
+<th>Scope</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Parasitic formulas</td>
+<td>recompute vendor <code>as/ad/ps/pd</code></td>
+<td>all 924 thin-oxide devices</td>
+<td>PASS, worst error 3.75×10⁻⁴</td>
+</tr>
+<tr class="even">
+<td>Combinational logic</td>
+<td>ngspice, both libraries in one deck vs thin-oxide golden</td>
+<td>60 cells, 452 vectors, 12 high-Z states</td>
+<td><strong>PASS</strong> (re-run on final netlists)</td>
+</tr>
+<tr class="odd">
+<td>Sequential logic</td>
+<td>ngspice, clocked counter walk from common reset</td>
+<td>16 stateful cells, 400 samples</td>
+<td><strong>PASS</strong> (re-run on final netlists)</td>
+</tr>
+<tr class="even">
+<td>Three-view consistency</td>
+<td>xschem netlisting through symbols vs SPICE vs CDL</td>
+<td>84 cells, 924 devices, field-by-field</td>
+<td><strong>PASS</strong></td>
+</tr>
+<tr class="odd">
+<td>DRC</td>
+<td>PDK klayout deck, fixed invocation, abutted 2-row array</td>
+<td>66 drawn cells</td>
+<td><strong>0 cell-rule violations</strong>; 7 chip-level density
+items</td>
+</tr>
+<tr class="even">
+<td>DRC control</td>
+<td>identical harness on IHP <code>sg13g2_stdcell</code></td>
+<td>84 thin-oxide cells</td>
+<td>0 cell rules, 6 density — density is the harness, not the cells</td>
+</tr>
+<tr class="odd">
+<td><code>M1.j</code> quantification</td>
+<td>density over marker bbox vs cell area</td>
+<td>padded 17-track array</td>
+<td>35.0 % vs 35 % floor over bbox; 37.1 % over cell area; control 45.2
+%</td>
+</tr>
+<tr class="even">
+<td><code>TGO.a</code> row experiment</td>
+<td>2-row vs 3-row array</td>
+<td>outer-edge artifact hypothesis</td>
+<td>count constant at 2, moves with the edge → artifact; then eliminated
+by the 0.42 µm y-margin</td>
+</tr>
+<tr class="odd">
+<td>LVS</td>
+<td>PDK klayout deck, per cell</td>
+<td>66 drawn cells vs CDL</td>
+<td><strong>66/66</strong> (4 device-less fills need
+<code>--ignore_top_ports_mismatch</code>; IHP’s own fills fail
+identically without it)</td>
+</tr>
+<tr class="even">
+<td>LEF</td>
+<td>klayout parse-back + pin sets vs CDL</td>
+<td>66 macros, <code>CoreSiteHV</code></td>
+<td>parses; <strong>66/66 pin sets match</strong>; heights/widths
+asserted on the site grid</td>
+</tr>
+<tr class="odd">
+<td>Liberty structure</td>
+<td><code>verify_lib.py</code> check 1</td>
+<td>66 cells</td>
+<td>600/600 tables populated, leakage on every cell</td>
+</tr>
+<tr class="even">
+<td>Liberty cross-view</td>
+<td>check 2</td>
+<td>all lib pins vs CDL</td>
+<td>PASS</td>
+</tr>
+<tr class="odd">
+<td>Liberty areas</td>
+<td>check 3</td>
+<td>54 cells with GDS</td>
+<td>exact to 1 nm²</td>
+</tr>
+<tr class="even">
+<td>Liberty monotonicity</td>
+<td>check 4, load axis from the template declaration</td>
+<td>1 932 delay series</td>
+<td>1 931 monotone + 1 documented waiver (<code>xnor2_1</code>, table
+3.410 ns vs 1.885 ns measured, pessimistic)</td>
+</tr>
+<tr class="odd">
+<td>Liberty Cin</td>
+<td>check 5 vs independent both-rails measurement</td>
+<td><code>inv_1</code> pin A</td>
+<td>6.44 fF vs 5.87 fF — 9.7 % (this check caught the 6.8–7.5×
+<code>ac_sweep</code> Miller defect)</td>
+</tr>
+<tr class="even">
+<td>Liberty delay point-check</td>
+<td>hand-written ngspice transient at a table corner</td>
+<td><code>inv_1</code> (0.66 pF, 49.5 ps)</td>
+<td>table 2.054 ns vs simulated 2.061 ns — 0.3 %</td>
+</tr>
+<tr class="odd">
+<td>Sequential arcs</td>
+<td>check 6</td>
+<td>14 flip-flops and latches</td>
+<td><strong>14/14 clean</strong>: delay + setup + hold groups present,
+no value pinned at search bounds</td>
+</tr>
+<tr class="even">
+<td>Sequential physics probe</td>
+<td>direct-harness bisection boundary</td>
+<td><code>dfrbp_1</code>, <code>dlhq_1</code></td>
+<td>setup boundary bracketed with visible c2q degradation; latch
+closing-edge boundary bracketed; trends correct in slew and load</td>
+</tr>
+<tr class="odd">
+<td>STA load test</td>
+<td>OpenSTA</td>
+<td>full library</td>
+<td>loads and evaluates (early-flow validation of the identical
+pipeline)</td>
+</tr>
+<tr class="even">
+<td>Site geometry</td>
+<td>boundary scan of the GDS</td>
+<td>all 66 cells</td>
+<td>uniform 7.140 µm = 17 tracks; every width a 0.48 µm site
+multiple</td>
+</tr>
+</tbody>
+</table>
+<p>What is <em>not</em> verified, stated as plainly: no block has been
+placed and routed with the LEF; the 6 tri-state cells have no Liberty
+timing; the sequential leakage is a single-state number; and nothing
+here is silicon.</p>
+<hr />
+<h1 data-number="10" id="known-limitations"><span
+class="header-section-number">10</span> Known limitations</h1>
+<ul>
+<li><strong>18 cells have no layout</strong>: the eight D-flip-flop
+variants (<code>dfrbp_*</code>, <code>dfrbpq_*</code>,
+<code>sdfrbp_*</code>, <code>sdfrbpq_*</code>) run NMOS Activ up to the
+library channel cut, and ten others (<code>dlhq_1</code>,
+<code>dlhr_1</code>, <code>dllr_1</code>, <code>dllrq_1</code>,
+<code>ebufn_2</code>, <code>ebufn_8</code>, <code>lgcp_1</code>,
+<code>sighold</code>, <code>tiehi</code>, <code>tielo</code>) run PMOS
+Activ into the VDD rail; either way the band cannot scale without
+breaking the shared row height or rail abutment. They have full netlist,
+schematic, symbol and Verilog views, but no GDS.</li>
+<li><strong>The P&amp;R view is untested by a P&amp;R run.</strong> LEF
+abstracts exist and are verified against the GDS and CDL, but no block
+has been placed and routed with them; OpenROAD/yosys flow integration is
+future work.</li>
+<li><strong>The 6 tri-state cells are absent from the Liberty.</strong>
+CharLib’s function model cannot express a high-impedance output and
+there is no registry work-around. They are simulation-verified (all 12
+high-Z states) but carry no timing tables.</li>
+<li><strong>Sequential leakage is a single-settled-state
+measurement</strong>, unlike the all-states enumeration of the
+combinational cells.</li>
+<li><strong>Delay cells shifted</strong>: <code>dlygate4sd2_1</code> and
+<code>o21ai_1</code> had gate lengths below the thick-oxide minimum;
+their delay ratios differ from the thin-oxide originals. The decap cells
+store less per unit area — thicker oxide, same geometry.</li>
+<li><strong>Not silicon-proven, and not independently reviewed.</strong>
+DRC/LVS-clean means the checks pass, not that the cells are known good
+in fabrication.</li>
+</ul>
+<hr />
+<h1 data-number="11" id="reproducing-the-library"><span
+class="header-section-number">11</span> Reproducing the library</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /foss/designs/sg13g2_stdcell_hv/work</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> gen_hv_lib.py            <span class="co"># netlists, schematics, symbols, Verilog</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> gen_gallery.py           <span class="co"># sch/xschem/sg13g2_hv_stdcells.sch</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> layout_retarget.py       <span class="co"># gds/ (66 cells; prints the 18 skips)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> sync_netlist_widths.py   <span class="co"># SPICE + CDL follow the drawn geometry</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> gen_lef.py               <span class="co"># lef/ (CoreSiteHV + 66 macros)</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> make_drc_top.py          <span class="co"># abutted two-row DRC context</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_logic.py          <span class="co"># combinational equivalence vs thin-oxide</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_seq.py            <span class="co"># sequential equivalence</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_sch.py            <span class="co"># three-view consistency</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_lvs.sh</span>                     <span class="co"># per-cell LVS, 66/66</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># DRC: PDK run_drc.py on drc/drc_top.gds, default flags</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="ex">./run_charlib.sh</span> ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="co"># sequential cells: custom procedures registered by charlib_patched.py</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   (run with -f over the ff/latch names), then merge + leakage:</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib <span class="op">&lt;</span>seq.lib<span class="op">&gt;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> seq_leakage.py</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_lib.py           <span class="co"># gates the shipped Liberty as data</span></span></code></pre></div>
+<p>Every number in this report is reproducible from these scripts; the
+<code>work/</code> directory is the provenance of record.</p>
+</body>
+</html>
