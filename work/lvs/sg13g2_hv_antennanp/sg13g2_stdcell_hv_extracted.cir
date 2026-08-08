@@ -1,0 +1,6 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:19
+
+.SUBCKT sg13g2_hv_antennanp A VDD VSS
+D$1 VSS A dantenna A=0.6084p P=3.12u m=1
+D$2 A VDD dpantenna A=1.407p P=4.78u m=1
+.ENDS sg13g2_hv_antennanp

@@ -1,0 +1,12 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:20
+
+.SUBCKT sg13g2_hv_buf_8 A VDD VSS X
+M$1 \$3 A VSS VSS sg13_hv_nmos L=0.45u W=2.22u AS=0.5365p AD=0.4218p PS=4.41u
++ PD=3.36u rfmode=0
+M$4 VSS \$3 X VSS sg13_hv_nmos L=0.45u W=5.92u AS=1.1248p AD=1.2358p PS=8.96u
++ PD=10u rfmode=0
+M$12 \$3 A VDD VDD sg13_hv_pmos L=0.45u W=8.07u AS=1.9368p AD=1.5333p PS=12.2u
++ PD=9.21u rfmode=0
+M$15 VDD \$3 X VDD sg13_hv_pmos L=0.45u W=21.52u AS=4.0888p AD=4.50575p
++ PS=24.56u PD=27.56u rfmode=0
+.ENDS sg13g2_hv_buf_8
