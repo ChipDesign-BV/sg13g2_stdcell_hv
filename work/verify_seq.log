@@ -1,0 +1,22 @@
+16 stateful cells, clocked equivalence vs thin-oxide
+
+  sg13g2_dfrbp_1           16/  16 samples match
+  sg13g2_dfrbp_2           16/  16 samples match
+  sg13g2_dfrbpq_1           8/   8 samples match
+  sg13g2_dfrbpq_2           8/   8 samples match
+  sg13g2_dlhq_1             4/   4 samples match
+  sg13g2_dlhr_1            16/  16 samples match
+  sg13g2_dlhrq_1            8/   8 samples match
+  sg13g2_dllr_1            16/  16 samples match
+  sg13g2_dllrq_1            8/   8 samples match
+  sg13g2_lgcp_1             4/   4 samples match
+  sg13g2_sdfbbp_1          96/  96 samples match
+  sg13g2_sdfrbp_1          64/  64 samples match
+  sg13g2_sdfrbp_2          64/  64 samples match
+  sg13g2_sdfrbpq_1         32/  32 samples match
+  sg13g2_sdfrbpq_2         32/  32 samples match
+  sg13g2_slgcp_1            8/   8 samples match
+
+samples matching: 400/400
+
+RESULT: PASS
