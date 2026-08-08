@@ -1,0 +1,20 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:20
+
+.SUBCKT sg13g2_hv_ebufn_4 A TE_B VDD VSS Z
+M$1 \$3 A VSS VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.2516p AD=0.2368p PS=2.16u
++ PD=1.38u rfmode=0
+M$2 VSS TE_B \$4 VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.2368p AD=0.407p PS=1.38u
++ PD=2.58u rfmode=0
+M$3 \$2 \$4 VSS VSS sg13_hv_nmos L=0.45u W=2.96u AS=0.6734p AD=0.5624p PS=5.52u
++ PD=4.48u rfmode=0
+M$7 \$2 \$3 Z VSS sg13_hv_nmos L=0.45u W=2.96u AS=0.5698p AD=0.6808p PS=4.5u
++ PD=5.54u rfmode=0
+M$11 \$3 A VDD VDD sg13_hv_pmos L=0.45u W=2.69u AS=1.57365p AD=0.79355p
++ PS=6.55u PD=3.28u rfmode=0
+M$12 VDD TE_B \$4 VDD sg13_hv_pmos L=0.45u W=2.69u AS=0.79355p AD=0.9146p
++ PS=3.28u PD=6.06u rfmode=0
+M$13 \$8 TE_B VDD VDD sg13_hv_pmos L=0.45u W=10.76u AS=2.5555p AD=2.0444p
++ PS=15.35u PD=12.28u rfmode=0
+M$17 \$8 \$3 Z VDD sg13_hv_pmos L=0.45u W=10.76u AS=2.0713p AD=2.4748p PS=12.3u
++ PD=15.29u rfmode=0
+.ENDS sg13g2_hv_ebufn_4

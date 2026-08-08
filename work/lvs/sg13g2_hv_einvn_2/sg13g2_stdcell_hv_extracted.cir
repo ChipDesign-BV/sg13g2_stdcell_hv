@@ -1,0 +1,16 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:20
+
+.SUBCKT sg13g2_hv_einvn_2 A TE_B VDD VSS Z
+M$1 VSS TE_B \$4 VSS sg13_hv_nmos L=0.45u W=0.42u AS=0.1428p AD=0.1449p
++ PS=1.52u PD=1.53u rfmode=0
+M$2 \$3 \$4 VSS VSS sg13_hv_nmos L=0.45u W=1.48u AS=0.3922p AD=0.2812p PS=3.28u
++ PD=2.24u rfmode=0
+M$4 \$3 A Z VSS sg13_hv_nmos L=0.45u W=1.48u AS=0.29415p AD=0.40515p PS=2.275u
++ PD=3.315u rfmode=0
+M$6 VDD TE_B \$4 VDD sg13_hv_pmos L=0.45u W=1.535u AS=0.5219p AD=0.5219p
++ PS=3.75u PD=3.75u rfmode=0
+M$7 \$8 TE_B VDD VDD sg13_hv_pmos L=0.45u W=5.38u AS=1.4257p AD=1.0222p
++ PS=9.13u PD=6.14u rfmode=0
+M$9 \$8 A Z VDD sg13_hv_pmos L=0.45u W=5.38u AS=1.0222p AD=1.49295p PS=6.14u
++ PD=9.18u rfmode=0
+.ENDS sg13g2_hv_einvn_2
