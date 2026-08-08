@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="Koen Van Caekenberghe, Ph.D. — ChipDesign B.V. — info@chipdesign.be">
-  <meta name="dcterms.date" content="2026-08-04">
+  <meta name="author" content="Koen Van Caekenberghe, Ph.D.">
+  <meta name="author" content="ChipDesign B.V.">
+  <meta name="author" content="info@chipdesign.be">
+  <meta name="dcterms.date" content="2026-08-08">
   <title>sg13g2_stdcell_hv — Generation of a Thick-Oxide (3.3 V) Standard Cell Library</title>
   <link rel="stylesheet" href="chipdesign.css">
 </head>
@@ -15,9 +17,11 @@
 Thick-Oxide (3.3 V) Standard Cell Library</h1>
       <p class="cd-subtitle">IHP SG13G2 open PDK · derivation, all
 views, verification and physical sign-off</p>
-      <p class="cd-author">Koen Van Caekenberghe, Ph.D. — ChipDesign
-B.V. — <a href="mailto:info@chipdesign.be">info@chipdesign.be</a></p>
-      <p class="cd-date">2026-08-04</p>
+      <p class="cd-author">Koen Van Caekenberghe, Ph.D.</p>
+      <p class="cd-author">ChipDesign B.V.</p>
+      <p class="cd-author"><a
+href="mailto:info@chipdesign.be">info@chipdesign.be</a></p>
+      <p class="cd-date">2026-08-08</p>
     </div>
     <div class="cd-logo">
       <img src="ChipDesign_logo.png" alt="ChipDesign B.V.">
@@ -447,7 +451,7 @@ class="header-section-number">4.10</span> <code>doc/</code>,
 <p><code>doc/sg13g2_stdcell_hv.celllist</code> is the machine-readable
 cell inventory, and this report lives in <code>doc/report/</code>. The
 <code>README.md</code> carries the full engineering narrative including
-every measurement caveat. <code>work/</code> holds the 19 generator,
+every measurement caveat. <code>work/</code> holds the 25 generator,
 verification and sign-off scripts plus the ngspice OSDI shim — the
 complete provenance: nothing in the library was drawn or edited outside
 these scripts except the five documented Metal1 re-routes, which are
@@ -1029,8 +1033,105 @@ apart. The final gate on the shipped file: <strong>PASS — 66 cells, 600
 tables, 1 932 load-axis series monotone with the one documented waiver,
 Cin 6.44 fF vs the 5.87 fF reference (9.7 %), 14/14 sequential cells
 clean.</strong></p>
-<h2 data-number="8.5" id="sequential-cells"><span
-class="header-section-number">8.5</span> Sequential cells</h2>
+<h2 data-number="8.5" id="cross-characterization-with-lctime"><span
+class="header-section-number">8.5</span> Cross-characterization with
+lctime</h2>
+<p>All checks above compare the library against hand-written references;
+one more compares it against an entirely independent characterizer.
+<strong>lctime 0.0.26</strong> (LibreCell, T. Kramer, AGPL-3.0,
+<code>codeberg.org/librecell/lctime</code>) ships in the same
+IIC-OSIC-TOOLS container and shares nothing with CharLib — its own
+stimulus generation, its own measurement code, its own ngspice coupling.
+<code>work/lctime_compare.py</code> runs it over a representative
+eight-cell combinational subset (<code>inv_1</code>, <code>buf_4</code>,
+<code>nand2_1</code>, <code>nor2_1</code>, <code>a21oi_1</code>,
+<code>and2_1</code>, <code>xor2_1</code>, <code>o21ai_1</code>) on each
+cell’s own load/slew grid from the shipped lib, the same PSP103/OSDI
+models and the same 20/80/50 thresholds, then aligns all <strong>3
+132</strong> (arc, load, slew) delay and transition points of the two
+libraries.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Region</th>
+<th>Median</th>
+<th>p95</th>
+<th>Max</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>all points</td>
+<td>5.9 %</td>
+<td>32.3 %</td>
+<td>725 %</td>
+</tr>
+<tr class="even">
+<td>real loads (above the 2.2 fF column)</td>
+<td>4.1 %</td>
+<td>24.8 %</td>
+<td>127 %</td>
+</tr>
+<tr class="odd">
+<td>— delays, slews &lt; 1 ns</td>
+<td>2.9 %</td>
+<td>15.8 %</td>
+<td>25.9 %</td>
+</tr>
+<tr class="even">
+<td>— transitions, slews &lt; 1 ns</td>
+<td>0.0 %</td>
+<td>10.4 %</td>
+<td>26.7 %</td>
+</tr>
+<tr class="odd">
+<td>— delays, slews 1.7–6.7 ns</td>
+<td>13.9 %</td>
+<td>22.0 %</td>
+<td>28.1 %</td>
+</tr>
+</tbody>
+</table>
+<p>In the region STA actually exercises — real loads, input slews below
+a nanosecond — the two tools agree to a few percent, and the output
+transition tables are near-identical. Every region of disagreement
+traces to a stimulus or measurement <em>convention</em>, not to a data
+error:</p>
+<ul>
+<li><strong>The slow-slew band is a slew-definition difference, and
+CharLib is the correct one.</strong> lctime’s <code>StepWave</code> uses
+the given slew as the full 0→100 % ramp duration; Liberty slew, with the
+thresholds this library declares, is the 20–80 % time, which CharLib
+converts by ÷0.6. Interpolating our table at 0.6× the slew reproduces
+lctime’s number to 0.25 % — the two tools measure the same silicon under
+different stimuli. A direct ngspice measurement at <code>inv_1</code>
+cell_rise (0.396 pF, 3.36 ns) settles which stimulus is the Liberty one:
+<strong>2.3605 ns measured, 2.3571 ns in our table (+0.15 %), 1.9158 ns
+in lctime’s (−19 %)</strong>.</li>
+<li><strong>The minimum-load column</strong> (2.2 fF, far below any real
+fanout) carries delays of tens of picoseconds, where relative error is
+meaningless — the 725 % headline is 7 ps vs 57 ps.</li>
+<li><strong>The largest real-load deviations are all <code>xor2_1</code>
+output transitions at slow slews</strong> — the transmission-gate XOR
+glitches during the slow input traversal and the two tools latch
+different crossings, the same mechanism as the documented
+<code>xnor2_1</code> waiver above.</li>
+<li><strong>Input capacitance:</strong> lctime reports 8.92 fF for
+<code>inv_1</code> A — +52 % against the 5.87 fF direct reference where
+CharLib’s <code>charge_integration</code> lands at +9.7 %. The
+independent tool’s default also overestimates, which reinforces check
+5’s approach of validating Cin against a direct measurement rather than
+against any characterizer.</li>
+</ul>
+<p>Getting lctime to run took four environment fixes, recorded in the
+script: its liberty parser rejects CharLib’s backslash-continued value
+rows (so the script feeds it a minimal template of pin directions and
+functions), it wants the capacitance unit spelled <code>pf</code>, it
+expects the per-cell run directories to pre-exist, and its batch-ngspice
+backend picks OSDI up from a <code>.spiceinit</code> in the working
+directory — the one mode the OSDI shim doesn’t need to cover.</p>
+<h2 data-number="8.6" id="sequential-cells"><span
+class="header-section-number">8.6</span> Sequential cells</h2>
 <p>Stock CharLib 2.1.0 cannot characterize sequential cells at all, in
 three independent ways, each of which had to be discovered separately
 because every one fails silently or pathologically:</p>
@@ -1078,8 +1179,8 @@ leakage is a single-settled-state measurement
 (<code>work/seq_leakage.py</code>, 0.10–0.33 nW), unlike the all-states
 enumeration of the combinational cells — stated here because a reader
 comparing leakage groups would otherwise wonder.</p>
-<h2 data-number="8.6" id="coverage"><span
-class="header-section-number">8.6</span> Coverage</h2>
+<h2 data-number="8.7" id="coverage"><span
+class="header-section-number">8.7</span> Coverage</h2>
 <p><strong>66 of 84 cells: 52 combinational, 9 flip-flops, 5
 latches.</strong> Twelve cells are excluded by configuration with stated
 reasons — no output pin and no arcs (<code>fill_*</code>,
@@ -1221,6 +1322,22 @@ asserted on the site grid</td>
 <td>table 2.054 ns vs simulated 2.061 ns — 0.3 %</td>
 </tr>
 <tr class="odd">
+<td>Independent characterizer</td>
+<td>lctime (LibreCell) on each cell’s own grid,
+<code>lctime_compare.py</code></td>
+<td>8 combinational cells, 3 132 points</td>
+<td>median 2.9 % (delays) / 0.0 % (transitions) at real loads and STA
+slews; slow-slew band explained by lctime’s 0–100 % ramp convention,
+direct measurement sides with the shipped table (+0.15 % vs −19 %)</td>
+</tr>
+<tr class="even">
+<td>Liberty Cin, second opinion</td>
+<td>lctime input capacitance vs direct reference</td>
+<td><code>inv_1</code> pin A</td>
+<td>lctime 8.92 fF (+52 %) vs shipped 6.44 fF (+9.7 %) — corroborates
+measuring Cin against silicon, not a characterizer</td>
+</tr>
+<tr class="odd">
 <td>Sequential arcs</td>
 <td>check 6</td>
 <td>14 flip-flops and latches</td>
@@ -1310,7 +1427,8 @@ class="header-section-number">11</span> Reproducing the library</h1>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   (run with -f over the ff/latch names), then merge + leakage:</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib <span class="op">&lt;</span>seq.lib<span class="op">&gt;</span></span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> seq_leakage.py</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_lib.py           <span class="co"># gates the shipped Liberty as data</span></span></code></pre></div>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> verify_lib.py           <span class="co"># gates the shipped Liberty as data</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> lctime_compare.py       <span class="co"># independent characterizer cross-check</span></span></code></pre></div>
 <p>Every number in this report is reproducible from these scripts; the
 <code>work/</code> directory is the provenance of record.</p>
 </body>

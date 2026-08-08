@@ -2,8 +2,10 @@
 title: "sg13g2_stdcell_hv — Generation of a Thick-Oxide (3.3 V) Standard Cell Library"
 subtitle: "IHP SG13G2 open PDK · derivation, all views, verification and physical sign-off"
 author:
-  - "Koen Van Caekenberghe, Ph.D. — ChipDesign B.V. — [info@chipdesign.be](mailto:info@chipdesign.be)"
-date: "2026-08-04"
+  - "Koen Van Caekenberghe, Ph.D."
+  - "ChipDesign B.V."
+  - "[info@chipdesign.be](mailto:info@chipdesign.be)"
+date: "2026-08-08"
 logo: "ChipDesign_logo.png"
 ---
 
@@ -258,7 +260,7 @@ sequential run, 600 timing tables across 66 cells, none empty.
 `doc/sg13g2_stdcell_hv.celllist` is the machine-readable cell inventory, and
 this report lives in `doc/report/`. The `README.md` carries the full
 engineering narrative including every measurement caveat. `work/` holds the
-19 generator, verification and sign-off scripts plus the ngspice OSDI shim —
+25 generator, verification and sign-off scripts plus the ngspice OSDI shim —
 the complete provenance: nothing in the library was drawn or edited outside
 these scripts except the five documented Metal1 re-routes, which are
 themselves data in `layout_retarget.py`.
@@ -656,6 +658,65 @@ file: **PASS — 66 cells, 600 tables, 1 932 load-axis series monotone with
 the one documented waiver, Cin 6.44 fF vs the 5.87 fF reference (9.7 %),
 14/14 sequential cells clean.**
 
+## Cross-characterization with lctime
+
+All checks above compare the library against hand-written references; one
+more compares it against an entirely independent characterizer.
+**lctime 0.0.26** (LibreCell, T. Kramer, AGPL-3.0,
+`codeberg.org/librecell/lctime`) ships in the same IIC-OSIC-TOOLS
+container and shares nothing with CharLib — its own stimulus generation,
+its own measurement code, its own ngspice coupling. `work/lctime_compare.py`
+runs it over a representative eight-cell combinational subset (`inv_1`,
+`buf_4`, `nand2_1`, `nor2_1`, `a21oi_1`, `and2_1`, `xor2_1`, `o21ai_1`) on
+each cell's own load/slew grid from the shipped lib, the same PSP103/OSDI
+models and the same 20/80/50 thresholds, then aligns all **3 132**
+(arc, load, slew) delay and transition points of the two libraries.
+
+| Region | Median | p95 | Max |
+|---|---|---|---|
+| all points | 5.9 % | 32.3 % | 725 % |
+| real loads (above the 2.2 fF column) | 4.1 % | 24.8 % | 127 % |
+| — delays, slews < 1 ns | 2.9 % | 15.8 % | 25.9 % |
+| — transitions, slews < 1 ns | 0.0 % | 10.4 % | 26.7 % |
+| — delays, slews 1.7–6.7 ns | 13.9 % | 22.0 % | 28.1 % |
+
+In the region STA actually exercises — real loads, input slews below a
+nanosecond — the two tools agree to a few percent, and the output
+transition tables are near-identical. Every region of disagreement traces
+to a stimulus or measurement *convention*, not to a data error:
+
+* **The slow-slew band is a slew-definition difference, and CharLib is
+  the correct one.** lctime's `StepWave` uses the given slew as the full
+  0→100 % ramp duration; Liberty slew, with the thresholds this library
+  declares, is the 20–80 % time, which CharLib converts by ÷0.6.
+  Interpolating our table at 0.6× the slew reproduces lctime's number to
+  0.25 % — the two tools measure the same silicon under different
+  stimuli. A direct ngspice measurement at `inv_1` cell_rise (0.396 pF,
+  3.36 ns) settles which stimulus is the Liberty one: **2.3605 ns
+  measured, 2.3571 ns in our table (+0.15 %), 1.9158 ns in lctime's
+  (−19 %)**.
+* **The minimum-load column** (2.2 fF, far below any real fanout)
+  carries delays of tens of picoseconds, where relative error is
+  meaningless — the 725 % headline is 7 ps vs 57 ps.
+* **The largest real-load deviations are all `xor2_1` output transitions
+  at slow slews** — the transmission-gate XOR glitches during the slow
+  input traversal and the two tools latch different crossings, the same
+  mechanism as the documented `xnor2_1` waiver above.
+* **Input capacitance:** lctime reports 8.92 fF for `inv_1` A — +52 %
+  against the 5.87 fF direct reference where CharLib's
+  `charge_integration` lands at +9.7 %. The independent tool's default
+  also overestimates, which reinforces check 5's approach of validating
+  Cin against a direct measurement rather than against any
+  characterizer.
+
+Getting lctime to run took four environment fixes, recorded in the
+script: its liberty parser rejects CharLib's backslash-continued value
+rows (so the script feeds it a minimal template of pin directions and
+functions), it wants the capacitance unit spelled `pf`, it expects the
+per-cell run directories to pre-exist, and its batch-ngspice backend
+picks OSDI up from a `.spiceinit` in the working directory — the one
+mode the OSDI shim doesn't need to cover.
+
 ## Sequential cells
 
 Stock CharLib 2.1.0 cannot characterize sequential cells at all, in three
@@ -740,6 +801,8 @@ below is validated only against its own generator.
 | Liberty monotonicity | check 4, load axis from the template declaration | 1 932 delay series | 1 931 monotone + 1 documented waiver (`xnor2_1`, table 3.410 ns vs 1.885 ns measured, pessimistic) |
 | Liberty Cin | check 5 vs independent both-rails measurement | `inv_1` pin A | 6.44 fF vs 5.87 fF — 9.7 % (this check caught the 6.8–7.5× `ac_sweep` Miller defect) |
 | Liberty delay point-check | hand-written ngspice transient at a table corner | `inv_1` (0.66 pF, 49.5 ps) | table 2.054 ns vs simulated 2.061 ns — 0.3 % |
+| Independent characterizer | lctime (LibreCell) on each cell's own grid, `lctime_compare.py` | 8 combinational cells, 3 132 points | median 2.9 % (delays) / 0.0 % (transitions) at real loads and STA slews; slow-slew band explained by lctime's 0–100 % ramp convention, direct measurement sides with the shipped table (+0.15 % vs −19 %) |
+| Liberty Cin, second opinion | lctime input capacitance vs direct reference | `inv_1` pin A | lctime 8.92 fF (+52 %) vs shipped 6.44 fF (+9.7 %) — corroborates measuring Cin against silicon, not a characterizer |
 | Sequential arcs | check 6 | 14 flip-flops and latches | **14/14 clean**: delay + setup + hold groups present, no value pinned at search bounds |
 | Sequential physics probe | direct-harness bisection boundary | `dfrbp_1`, `dlhq_1` | setup boundary bracketed with visible c2q degradation; latch closing-edge boundary bracketed; trends correct in slew and load |
 | STA load test | OpenSTA | full library | loads and evaluates (early-flow validation of the identical pipeline) |
@@ -802,6 +865,7 @@ python3 verify_sch.py            # three-view consistency
 python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib <seq.lib>
 python3 seq_leakage.py
 python3 verify_lib.py           # gates the shipped Liberty as data
+python3 lctime_compare.py       # independent characterizer cross-check
 ```
 
 Every number in this report is reproducible from these scripts; the `work/`
