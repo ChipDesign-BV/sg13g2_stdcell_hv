@@ -1,0 +1,16 @@
+03-Aug-2026 23:05:26 | INFO    | Your Klayout version is: KLayout 0.30.9 (required >= 0.30.5)
+03-Aug-2026 23:05:26 | INFO    | Running SG13G2 LVS checks on design /foss/designs/sg13g2_stdcell_hv/gds/sg13g2_stdcell_hv.gds on cell sg13g2_hv_fill_2
+03-Aug-2026 23:05:30 | INFO    | ==============================================================================
+03-Aug-2026 23:05:30 | INFO    | Important Summary
+03-Aug-2026 23:05:30 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 23:05:30 | INFO    | | Status           | PASS                                                         |
+03-Aug-2026 23:05:31 | INFO    | | Mode             | COMPARE                                                      |
+03-Aug-2026 23:05:31 | INFO    | | Outcome          | Comparison mode: PASS (netlists match).                      |
+03-Aug-2026 23:05:31 | INFO    | | Layout           | sg13g2_stdcell_hv.gds                                        |
+03-Aug-2026 23:05:31 | INFO    | | Top Cell         | sg13g2_hv_fill_2                                             |
+03-Aug-2026 23:05:31 | INFO    | | Results Dir      | /foss/designs/sg13g2_stdcell_hv/work/lvs_test/fill_2_min     |
+03-Aug-2026 23:05:31 | INFO    | | Warnings         | 0                                                            |
+03-Aug-2026 23:05:31 | INFO    | | Errors           | 0                                                            |
+03-Aug-2026 23:05:31 | INFO    | | Run Time (s)     | 4.986                                                        |
+03-Aug-2026 23:05:31 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 23:05:31 | INFO    | ==============================================================================
