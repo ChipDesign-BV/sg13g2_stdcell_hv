@@ -1,0 +1,39 @@
+
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.5.1 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+Traceback (most recent call last):  File "/foss/designs/sg13g2_stdcell_hv/work/charlib_patched.py", line 32, in <module>
+    from PySpice.Probe.WaveForm import Analysis
+  File "/foss/tools/charlib/lib/python3.12/site-packages/PySpice/__init__.py", line 39, in <module>
+    from PySpice.Spice.Simulator import Simulator
+  File "/foss/tools/charlib/lib/python3.12/site-packages/PySpice/Spice/Simulator.py", line 27, in <module>
+    from .HSpice.Simulator import HSpiceSimulator
+  File "/foss/tools/charlib/lib/python3.12/site-packages/PySpice/Spice/HSpice/Simulator.py", line 4, in <module>
+    from .Server import HSpiceServer
+  File "/foss/tools/charlib/lib/python3.12/site-packages/PySpice/Spice/HSpice/Server.py", line 10, in <module>
+    from .hspicefile import hspice_read
+  File "/foss/tools/charlib/lib/python3.12/site-packages/PySpice/Spice/HSpice/hspicefile/__init__.py", line 4, in <module>
+    from .. import _hspice_read
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.12/dist-packages/numpy/core/_multiarray_umath.py", line 46, in __getattr__
+    raise ImportError(msg)
+ImportError: 
+A module that was compiled using NumPy 1.x cannot be run in
+NumPy 2.5.1 as it may crash. To support both 1.x and 2.x
+versions of NumPy, modules must be compiled with NumPy 2.0.
+Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+
+If you are a user of the module, the easiest solution will be to
+downgrade to 'numpy<2' or try to upgrade the affected module.
+We expect that some modules will need time to support NumPy 2.
+
+
+Characterizing: |          | 0/0 [00:00<?]Characterizing: |          | 0/0 [00:00<?]
+Results written to /foss/designs/sg13g2_stdcell_hv/work/charrun/dff.lib
+/foss/designs/sg13g2_stdcell_hv/work/charrun/dff.lib: stripped LHS from 0 function attributes, normalised 0 supply-pin references, corrected 2 header attributes
