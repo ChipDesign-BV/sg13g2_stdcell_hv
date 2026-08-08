@@ -1,0 +1,18 @@
+03-Aug-2026 15:34:04 | INFO    | Your Klayout version is: KLayout 0.30.9 (required >= 0.30.5)
+03-Aug-2026 15:34:04 | INFO    | Running SG13G2 LVS checks on design /foss/designs/sg13g2_stdcell_hv/gds/sg13g2_stdcell_hv.gds on cell sg13g2_hv_dfrbp_1
+03-Aug-2026 15:34:13 | INFO    | ==============================================================================
+03-Aug-2026 15:34:13 | INFO    | Important Summary
+03-Aug-2026 15:34:13 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 15:34:13 | INFO    | | Status           | FAIL                                                         |
+03-Aug-2026 15:34:13 | INFO    | | Mode             | COMPARE                                                      |
+03-Aug-2026 15:34:13 | INFO    | | Outcome          | Comparison mode: FAIL (netlists do not match).               |
+03-Aug-2026 15:34:13 | INFO    | | Layout           | sg13g2_stdcell_hv.gds                                        |
+03-Aug-2026 15:34:13 | INFO    | | Top Cell         | sg13g2_hv_dfrbp_1                                            |
+03-Aug-2026 15:34:13 | INFO    | | Results Dir      | /foss/designs/sg13g2_stdcell_hv/work/dbg_dff                 |
+03-Aug-2026 15:34:13 | INFO    | | Warnings         | 0                                                            |
+03-Aug-2026 15:34:13 | INFO    | | Errors           | 1                                                            |
+03-Aug-2026 15:34:13 | INFO    | | Run Time (s)     | 8.868                                                        |
+03-Aug-2026 15:34:13 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 15:34:13 | ERROR   | Key errors:
+03-Aug-2026 15:34:13 | ERROR   |   - 2026-08-03 15:34:13 +0200: Memory Usage (477784K) : ERROR : Netlists don't match
+03-Aug-2026 15:34:13 | INFO    | ==============================================================================

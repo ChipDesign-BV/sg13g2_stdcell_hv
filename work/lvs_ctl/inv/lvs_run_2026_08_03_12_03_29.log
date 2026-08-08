@@ -1,0 +1,16 @@
+03-Aug-2026 14:03:30 | INFO    | Your Klayout version is: KLayout 0.30.9 (required >= 0.30.5)
+03-Aug-2026 14:03:30 | INFO    | Running SG13G2 LVS checks on design /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/gds/sg13g2_stdcell.gds on cell sg13g2_inv_1
+03-Aug-2026 14:03:45 | INFO    | ==============================================================================
+03-Aug-2026 14:03:45 | INFO    | Important Summary
+03-Aug-2026 14:03:45 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 14:03:45 | INFO    | | Status           | PASS                                                         |
+03-Aug-2026 14:03:45 | INFO    | | Mode             | COMPARE                                                      |
+03-Aug-2026 14:03:45 | INFO    | | Outcome          | Comparison mode: PASS (netlists match).                      |
+03-Aug-2026 14:03:45 | INFO    | | Layout           | sg13g2_stdcell.gds                                           |
+03-Aug-2026 14:03:45 | INFO    | | Top Cell         | sg13g2_inv_1                                                 |
+03-Aug-2026 14:03:45 | INFO    | | Results Dir      | /foss/designs/sg13g2_stdcell_hv/work/lvs_ctl/inv             |
+03-Aug-2026 14:03:45 | INFO    | | Warnings         | 0                                                            |
+03-Aug-2026 14:03:45 | INFO    | | Errors           | 0                                                            |
+03-Aug-2026 14:03:45 | INFO    | | Run Time (s)     | 16.053                                                       |
+03-Aug-2026 14:03:45 | INFO    | +------------------+--------------------------------------------------------------+
+03-Aug-2026 14:03:45 | INFO    | ==============================================================================
