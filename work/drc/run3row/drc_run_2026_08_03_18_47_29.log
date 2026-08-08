@@ -1,0 +1,13 @@
+03-Aug-2026 20:47:29 | INFO    | KLayout version detected: 0.30.9 (required >= 0.30.5)
+03-Aug-2026 20:47:29 | INFO    | Using DRC JSON file: /foss/pdks/ihp-sg13g2/libs.tech/klayout/python/sg13g2_pycell_lib/sg13g2_tech_mod.json
+03-Aug-2026 20:47:29 | INFO    | Running IHP-SG13G2 main checks on design /foss/designs/sg13g2_stdcell_hv/work/drc/drc_top3.gds, topcell: drc_top
+03-Aug-2026 20:47:41 | INFO    | Running IHP-SG13G2 density checks on design /foss/designs/sg13g2_stdcell_hv/work/drc/drc_top3.gds, topcell: drc_top
+03-Aug-2026 20:47:44 | INFO    | Completed running Density checks.
+03-Aug-2026 20:47:44 | INFO    | Running IHP-SG13G2 sg13g2_maximal checks on design /foss/designs/sg13g2_stdcell_hv/work/drc/drc_top3.gds, topcell: drc_top
+03-Aug-2026 20:48:27 | INFO    | Completed running Sg13g2_maximal checks.
+03-Aug-2026 20:48:27 | ERROR   | ==================================================================================
+03-Aug-2026 20:48:27 | ERROR   | ❌ --- KLayout DRC Check Failed: Violations were detected in the layout. --- ❌
+03-Aug-2026 20:48:27 | ERROR   | ==================================================================================
+03-Aug-2026 20:48:27 | ERROR   | Violated rules are : {'M2.j', 'TGO.a', 'M1.e', 'M4.j', 'Act.c', 'Act.a', 'M5.j', 'TM1.c', 'M3.j', 'TM2.c'}
+
+03-Aug-2026 20:48:27 | INFO    | Total DRC Run time: 58.47 seconds (including execution, analysis, and reporting)

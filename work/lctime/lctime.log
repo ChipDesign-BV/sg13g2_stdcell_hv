@@ -1,0 +1,180 @@
+    INFO: Load SPICE netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Reading liberty: /foss/designs/sg13g2_stdcell_hv/work/lctime/template.lib
+    INFO: Operating conditions: {'typical'}
+    INFO: Default operating conditions: None
+ WARNING: No transistor model supplied. Use --include or -I.
+    INFO: Supply voltage = 3.300000 V
+    INFO: Temperature = 25.000000 V
+    INFO: timing corner: TYPICAL
+    INFO: Time resolution = 1e-11s
+    INFO: Capacitance unit: 1e-12 F
+    INFO: Time unit: 1e-09 s
+    INFO: Output capacitances [pF]: [0.0022  0.05148 0.0858  0.14256 0.2376  0.396   0.66   ]
+    INFO: Input slew times [ns]: [0.04948 0.25696 0.46284 0.8762  1.70453 3.35958 6.66968]
+    INFO: Cell: sg13g2_hv_inv_1
+    INFO: Cell: sg13g2_hv_buf_4
+    INFO: Cell: sg13g2_hv_nand2_1
+    INFO: Cell: sg13g2_hv_nor2_1
+    INFO: Pin 'Y' output ~A
+    INFO: Cell: sg13g2_hv_a21oi_1
+    INFO: Cell: sg13g2_hv_and2_1
+    INFO: Pin 'X' output A
+    INFO: Cell: sg13g2_hv_xor2_1
+    INFO: Pin 'Y' output ~(A & B)
+    INFO: Cell: sg13g2_hv_o21ai_1
+    INFO: Pin 'Y' output ~(A | B)
+    INFO: Pin 'A' input None
+    INFO: Pin 'Y' output ~(B1 | (A1 & A2))
+    INFO: Pin 'X' output A & B
+    INFO: Pin 'A' input None
+    INFO: Pin 'X' output (A & ~B) | (B & ~A)
+    INFO: Pin 'A' input None
+    INFO: Pin 'Y' output ~(B1 & (A1 | A2))
+    INFO: Pin 'A' input None
+    INFO: Input pins as defined in liberty: ['A']
+    INFO: Pin 'A1' input None
+    INFO: Pin 'A2' input None
+    INFO: Input pins as defined in liberty: ['A']
+    INFO: Pin 'B' input None
+    INFO: Input pins as defined in liberty: ['A', 'B']
+    INFO: Pin 'A1' input None
+    INFO: Pin 'B' input None
+    INFO: Output pins as defined in liberty: ['Y']
+    INFO: Pin 'A' input None
+    INFO: Pin 'B1' input None
+    INFO: Output pins as defined in liberty: ['X']
+    INFO: Pin 'A' input None
+    INFO: Output pins as defined in liberty: ['X']
+    INFO: Pin 'A2' input None
+    INFO: Input pins as defined in liberty: ['A', 'B']
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Pin 'B' input None
+    INFO: Input pins as defined in liberty: ['A1', 'A2', 'B1']
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Pin 'B' input None
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Pin 'B1' input None
+    INFO: Output pins as defined in liberty: ['Y']
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Output pins as defined in liberty: ['Y']
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Input pins as defined in liberty: ['A', 'B']
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Input pins as defined in liberty: ['A1', 'A2', 'B1']
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Input pins as defined in liberty: ['A', 'B']
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Run characterization for sg13g2_hv_inv_1
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Output pins as defined in liberty: ['Y']
+    INFO: Run characterization for sg13g2_hv_buf_4
+    INFO: Output pins as defined in liberty: ['Y']
+    INFO: Run characterization for sg13g2_hv_xor2_1
+    INFO: Output pins as defined in liberty: ['X']
+    INFO: Run characterization for sg13g2_hv_nor2_1
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Backend: ngspice-file-based
+    INFO: Backend: ngspice-file-based
+    INFO: Load netlist: /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+    INFO: Backend: ngspice-file-based
+    INFO: Run characterization for sg13g2_hv_a21oi_1
+    INFO: Backend: ngspice-file-based
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Measuring input capacitance: sg13g2_hv_inv_1 A
+    INFO: Measuring input capacitance: sg13g2_hv_buf_4 A
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Measuring input capacitance: sg13g2_hv_xor2_1 A
+    INFO: No transistors found in cell. (The netlist must be flattened, sub-circuits are not resolved). Characterization might work as well but recognition won't work.
+    INFO: Measuring input capacitance: sg13g2_hv_nor2_1 A
+    INFO: Run characterization for sg13g2_hv_nand2_1
+    INFO: Backend: ngspice-file-based
+    INFO: Run characterization for sg13g2_hv_o21ai_1
+    INFO: Run characterization for sg13g2_hv_and2_1
+    INFO: Measuring input capacitance: sg13g2_hv_a21oi_1 A1
+    INFO: Backend: ngspice-file-based
+    INFO: Measuring input capacitance: sg13g2_hv_nand2_1 A
+    INFO: Backend: ngspice-file-based
+    INFO: Measuring input capacitance: sg13g2_hv_o21ai_1 A1
+    INFO: Backend: ngspice-file-based
+    INFO: Measuring input capacitance: sg13g2_hv_and2_1 A
+    INFO: Timing arc: A -> Y
+    INFO: A->Y is negative unate when [{True: True}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: A -> X
+    INFO: A->X is positive unate when [{True: True}]
+    INFO: Timing sense: positive_unate
+    INFO: Measuring input capacitance: sg13g2_hv_and2_1 B
+    INFO: Measuring input capacitance: sg13g2_hv_nand2_1 B
+    INFO: Measuring input capacitance: sg13g2_hv_nor2_1 B
+    INFO: Measuring input capacitance: sg13g2_hv_xor2_1 B
+    INFO: Timing arc: A -> X
+    INFO: A->X is positive unate when [{B: True}]
+    INFO: Timing sense: positive_unate
+    INFO: Timing arc: A -> Y
+    INFO: A->Y is negative unate when [{B: False}]
+    INFO: Timing sense: negative_unate
+    INFO: Measuring input capacitance: sg13g2_hv_a21oi_1 A2
+    INFO: Timing arc: A -> Y
+    INFO: A->Y is negative unate when [{B: True}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Measuring input capacitance: sg13g2_hv_o21ai_1 A2
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: A -> X
+    INFO: A->X is positive unate when [{B: False}]
+    INFO: A->X is negative unate when [{B: True}]
+    INFO: Timing sense: positive_unate
+    INFO: Measuring input capacitance: sg13g2_hv_o21ai_1 B1
+    INFO: Measuring input capacitance: sg13g2_hv_a21oi_1 B1
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: A1 -> Y
+    INFO: A1->Y is negative unate when [{A2: True, B1: False}]
+    INFO: Timing sense: negative_unate
+    INFO: Timing arc: A1 -> Y
+    INFO: A1->Y is negative unate when [{B1: True, A2: False}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: B -> X
+    INFO: B->X is positive unate when [{A: True}]
+    INFO: Timing sense: positive_unate
+    INFO: Timing arc: B -> Y
+    INFO: B->Y is negative unate when [{A: True}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: B -> Y
+    INFO: B->Y is negative unate when [{A: False}]
+    INFO: Timing sense: negative_unate
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: A2 -> Y
+    INFO: A2->Y is negative unate when [{B1: True, A1: False}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: A2 -> Y
+    INFO: A2->Y is negative unate when [{A1: True, B1: False}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing arc: B -> X
+    INFO: B->X is positive unate when [{A: False}]
+    INFO: B->X is negative unate when [{A: True}]
+    INFO: Timing sense: positive_unate
+    INFO: Timing arc: B1 -> Y
+    INFO: B1->Y is negative unate when [{A1: False, A2: False}, {A2: True, A1: False}, {A1: True, A2: False}]
+    INFO: Timing sense: negative_unate
+    INFO: Timing arc: B1 -> Y
+    INFO: B1->Y is negative unate when [{A2: True, A1: True}, {A2: True, A1: False}, {A1: True, A2: False}]
+    INFO: Timing sense: negative_unate
+ WARNING: Negative switching energy: {switching_energy}
+    INFO: Timing sense: negative_unate
+    INFO: Write liberty: /foss/designs/sg13g2_stdcell_hv/work/lctime/lctime_out.lib
+This program is licenced under the AGPL-3.0-or-later licence. Source code:  https://codeberg.org/librecell/lctime

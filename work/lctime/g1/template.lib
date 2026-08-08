@@ -1,0 +1,36 @@
+library (tmpl) {
+  technology (cmos);
+  delay_model : table_lookup;
+  time_unit : "1ns";
+  voltage_unit : "1V";
+  leakage_power_unit : "1nW";
+  current_unit : "1uA";
+  pulling_resistance_unit : "1ohm";
+  capacitive_load_unit (1, pf);
+
+  nom_process : 1.0;
+  nom_voltage : 3.3;
+  nom_temperature : 25;
+  slew_upper_threshold_pct_rise : 80;
+  slew_lower_threshold_pct_rise : 20;
+  slew_upper_threshold_pct_fall : 80;
+  slew_lower_threshold_pct_fall : 20;
+  input_threshold_pct_rise : 50;
+  input_threshold_pct_fall : 50;
+  output_threshold_pct_rise : 50;
+  output_threshold_pct_fall : 50;
+  operating_conditions (typical) {
+    process : 1.0;
+    voltage : 3.3;
+    temperature : 25;
+  }
+  cell (sg13g2_hv_buf_4) {
+    pin (X) {
+      direction : output;
+      function : "A";
+    }
+    pin (A) {
+      direction : input;
+    }
+  }
+}
