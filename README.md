@@ -167,8 +167,9 @@ flip-flops and latches (`dfrbp_*`, `dfrbpq_*`, `dlh*`, `dll*`, `sdf*`) and all 6
 tri-state cells (`ebufn_*`, `einvn_*`). CharLib emits an empty library for
 them without running a single simulation and without reporting an error, so
 with `omit_on_failure` they vanish silently; the run log does not mention them
-at all. Getting them characterized needs work on CharLib itself, or a
-different characterizer.
+at all. The custom procedures above recovered the 14 flip-flops and latches;
+the 6 tri-state cells still need work on CharLib itself, or a different
+characterizer.
 
 Cell functions are translated from Liberty syntax into CharLib's by
 `work/boolexpr.py`. The two are not the same language — Liberty has `*`, `+`,
@@ -180,6 +181,19 @@ characterized from a wrong function.
 
 The result is validated by reading it back with OpenSTA (`sta -no_init`),
 which parses it without warnings.
+
+The shipped tables are also cross-checked against an **independent
+characterizer**: `work/lctime_compare.py` runs lctime (LibreCell,
+AGPL-3.0, also in the IIC-OSIC-TOOLS container) over eight representative
+combinational cells on the same grids and models and aligns all 3 132
+common table points. At real loads and STA-relevant slews the two tools
+agree to a median 2.9 % on delays and 0.0 % on output transitions; the
+systematic band at multi-ns slews is lctime interpreting slew as the full
+0–100 % ramp rather than Liberty's 20–80 % time (a direct ngspice
+measurement sides with the shipped table, +0.15 % vs −19 %), and lctime's
+input-capacitance estimate is +52 % against the direct reference where
+the shipped value is +9.7 %. Details in the report and in the script's
+docstring.
 
 ### Running CharLib here
 
@@ -553,6 +567,7 @@ env -u PYTHONPATH sh -c "PATH=$PWD/ngspice-osdi-shim:\$PATH \
 python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib seq.lib
 python3 seq_leakage.py          # single-state leakage for the 14 cells
 python3 verify_lib.py           # gates the shipped Liberty as data
+python3 lctime_compare.py       # independent characterizer cross-check
 
 python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
