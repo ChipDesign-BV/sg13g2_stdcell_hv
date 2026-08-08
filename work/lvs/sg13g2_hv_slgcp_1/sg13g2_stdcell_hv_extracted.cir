@@ -1,0 +1,48 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:23
+
+.SUBCKT sg13g2_hv_slgcp_1 CLK GATE GCLK SCE VDD VSS
+M$1 \$5 \$4 \$9 VSS sg13_hv_nmos L=0.45u W=0.42u AS=0.240025p AD=0.0525p
++ PS=1.58u PD=0.67u rfmode=0
+M$2 VSS \$6 \$9 VSS sg13_hv_nmos L=0.45u W=0.42u AS=0.2451p AD=0.0525p PS=1.69u
++ PD=0.67u rfmode=0
+M$3 \$3 \$2 \$5 VSS sg13_hv_nmos L=0.45u W=0.55u AS=0.231p AD=0.240025p
++ PS=1.94u PD=1.58u rfmode=0
+M$4 VSS \$5 \$6 VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.2451p AD=0.6512p PS=1.69u
++ PD=3.24u rfmode=0
+M$5 VSS SCE \$3 VSS sg13_hv_nmos L=0.45u W=0.55u AS=0.187p AD=0.1045p PS=1.78u
++ PD=0.93u rfmode=0
+M$6 VSS GATE \$3 VSS sg13_hv_nmos L=0.45u W=0.55u AS=0.28215p AD=0.1045p
++ PS=2.02u PD=0.93u rfmode=0
+M$7 VSS \$2 \$4 VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.28215p AD=0.2516p
++ PS=2.02u PD=2.16u rfmode=0
+M$8 \$2 CLK VSS VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.2516p AD=0.34675p
++ PS=2.16u PD=1.69u rfmode=0
+M$9 VSS CLK \$13 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.34675p AD=0.1472p
++ PS=1.69u PD=1.1u rfmode=0
+M$10 \$13 \$6 \$7 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.1472p AD=0.2464p
++ PS=1.1u PD=2.05u rfmode=0
+M$11 VSS \$7 GCLK VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.6845p AD=0.2516p
++ PS=3.33u PD=2.16u rfmode=0
+M$12 VDD \$2 \$4 VDD sg13_hv_pmos L=0.45u W=2.015u AS=0.94655p AD=0.6851p
++ PS=6.11u PD=4.71u rfmode=0
+M$13 \$3 \$4 \$5 VDD sg13_hv_pmos L=0.45u W=2.015u AS=0.735475p AD=1.0091375p
++ PS=4.76u PD=3.315u rfmode=0
+M$14 \$5 \$2 \$16 VDD sg13_hv_pmos L=0.45u W=1.01u AS=1.0091375p AD=0.12625p
++ PS=3.315u PD=1.26u rfmode=0
+M$15 VDD \$6 \$16 VDD sg13_hv_pmos L=0.45u W=1.01u AS=1.16015p AD=0.12625p
++ PS=3.64u PD=1.26u rfmode=0
+M$16 VDD \$5 \$6 VDD sg13_hv_pmos L=0.45u W=2.69u AS=1.16015p AD=0.9146p
++ PS=3.64u PD=6.06u rfmode=0
+M$17 \$2 CLK VDD VDD sg13_hv_pmos L=0.45u W=2.015u AS=1.702675p AD=1.407575p
++ PS=5.72u PD=4.225u rfmode=0
+M$18 VDD CLK \$7 VDD sg13_hv_pmos L=0.45u W=2.015u AS=1.407575p AD=0.533975p
++ PS=4.225u PD=2.545u rfmode=0
+M$19 VDD \$6 \$7 VDD sg13_hv_pmos L=0.45u W=2.015u AS=0.467225p AD=0.533975p
++ PS=3.07u PD=2.545u rfmode=0
+M$20 VDD \$7 GCLK VDD sg13_hv_pmos L=0.45u W=2.69u AS=0.467225p AD=2.43445p
++ PS=3.07u PD=7.19u rfmode=0
+M$21 VDD SCE \$15 VDD sg13_hv_pmos L=0.45u W=2.015u AS=0.6851p AD=0.38285p
++ PS=4.71u PD=2.395u rfmode=0
+M$22 \$15 GATE \$3 VDD sg13_hv_pmos L=0.45u W=2.015u AS=0.38285p AD=0.6851p
++ PS=2.395u PD=4.71u rfmode=0
+.ENDS sg13g2_hv_slgcp_1
