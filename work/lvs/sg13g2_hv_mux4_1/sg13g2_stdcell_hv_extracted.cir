@@ -1,0 +1,56 @@
+* Extracted by KLayout with SG13G2 LVS runset on : 04/08/2026 18:21
+
+.SUBCKT sg13g2_hv_mux4_1 A0 A1 A2 A3 S0 S1 VDD VSS X
+M$1 \$2 S0 VSS VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.2176p AD=0.3168p PS=1.96u
++ PD=1.63u rfmode=0
+M$2 VSS A0 \$9 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.3168p AD=0.08p PS=1.63u
++ PD=0.89u rfmode=0
+M$3 \$9 \$2 \$5 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.08p AD=0.1984p PS=0.89u
++ PD=1.26u rfmode=0
+M$4 \$5 S0 \$10 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.1984p AD=0.3328p PS=1.26u
++ PD=1.68u rfmode=0
+M$5 \$10 A1 VSS VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.3328p AD=0.2384p PS=1.68u
++ PD=1.385u rfmode=0
+M$6 VSS A2 \$11 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.2384p AD=0.08p PS=1.385u
++ PD=0.89u rfmode=0
+M$7 \$11 \$2 \$3 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.08p AD=0.256p PS=0.89u
++ PD=1.44u rfmode=0
+M$8 \$3 S0 \$12 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.256p AD=0.08p PS=1.44u
++ PD=0.89u rfmode=0
+M$9 \$12 A3 VSS VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.08p AD=0.3264p PS=0.89u
++ PD=2.3u rfmode=0
+M$10 VSS S1 \$7 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.1543p AD=0.5536p PS=1.18u
++ PD=3.01u rfmode=0
+M$11 VSS \$6 X VSS sg13_hv_nmos L=0.45u W=0.74u AS=0.1543p AD=0.2886p PS=1.18u
++ PD=2.26u rfmode=0
+M$12 \$3 S1 \$6 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.541875p AD=0.1856p
++ PS=3.42u PD=1.22u rfmode=0
+M$13 \$6 \$7 \$5 VSS sg13_hv_nmos L=0.45u W=0.64u AS=0.1856p AD=0.5728p
++ PS=1.22u PD=3.07u rfmode=0
+M$14 VDD A0 \$19 VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.5356875p AD=1.584p
++ PS=3.145u PD=3.72u rfmode=0
+M$15 \$19 S0 \$5 VDD sg13_hv_pmos L=0.45u W=2.4u AS=1.584p AD=0.648p PS=3.72u
++ PD=2.94u rfmode=0
+M$16 \$5 \$2 \$20 VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.648p AD=0.516p PS=2.94u
++ PD=2.83u rfmode=0
+M$17 \$20 A1 VDD VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.516p AD=0.70275p PS=2.83u
++ PD=3.585u rfmode=0
+M$18 VDD A2 \$21 VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.70275p AD=0.870125p
++ PS=3.585u PD=3.635u rfmode=0
+M$19 VDD S0 \$2 VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.5356875p AD=1.404p
++ PS=3.145u PD=5.97u rfmode=0
+M$20 \$21 S0 \$3 VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.870125p AD=1.632p
++ PS=3.635u PD=3.76u rfmode=0
+M$21 \$3 \$2 \$22 VDD sg13_hv_pmos L=0.45u W=2.4u AS=1.632p AD=0.324p PS=3.76u
++ PD=2.67u rfmode=0
+M$22 \$22 A3 VDD VDD sg13_hv_pmos L=0.45u W=2.4u AS=0.324p AD=0.816p PS=2.67u
++ PD=5.48u rfmode=0
+M$23 VDD S1 \$7 VDD sg13_hv_pmos L=0.45u W=2.4u AS=1.498325p AD=0.816p PS=3.9u
++ PD=5.48u rfmode=0
+M$24 VDD \$6 X VDD sg13_hv_pmos L=0.45u W=2.69u AS=1.498325p AD=0.9146p PS=3.9u
++ PD=6.06u rfmode=0
+M$25 \$5 S1 \$6 VDD sg13_hv_pmos L=0.45u W=2.4u AS=1.296p AD=1.2p PS=5.88u
++ PD=3.4u rfmode=0
+M$26 \$6 \$7 \$3 VDD sg13_hv_pmos L=0.45u W=2.4u AS=1.2p AD=0.816p PS=3.4u
++ PD=5.48u rfmode=0
+.ENDS sg13g2_hv_mux4_1
