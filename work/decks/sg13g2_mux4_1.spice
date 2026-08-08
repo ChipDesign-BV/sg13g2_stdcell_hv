@@ -1,0 +1,401 @@
+* sg13g2_mux4_1: exhaustive vectors, thin-oxide vs thick-oxide
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOSlv.lib mos_tt
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib mos_tt
+.include /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice
+.include /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+
+Vlv vlv 0 1.2
+Vhv vhv 0 3.3
+Vlvh vlvh 0 0.6
+Vhvh vhvh 0 1.65
+
+Xlv0 o_lv_0_X 0 0 0 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv0X o_lv_0_X vlvh 1G
+Xhv0 o_hv_0_X 0 0 0 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv0X o_hv_0_X vhvh 1G
+Xlv1 o_lv_1_X 0 0 0 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv1X o_lv_1_X vlvh 1G
+Xhv1 o_hv_1_X 0 0 0 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv1X o_hv_1_X vhvh 1G
+Xlv2 o_lv_2_X 0 0 0 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv2X o_lv_2_X vlvh 1G
+Xhv2 o_hv_2_X 0 0 0 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv2X o_hv_2_X vhvh 1G
+Xlv3 o_lv_3_X 0 0 0 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv3X o_lv_3_X vlvh 1G
+Xhv3 o_hv_3_X 0 0 0 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv3X o_hv_3_X vhvh 1G
+Xlv4 o_lv_4_X 0 0 0 vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv4X o_lv_4_X vlvh 1G
+Xhv4 o_hv_4_X 0 0 0 vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv4X o_hv_4_X vhvh 1G
+Xlv5 o_lv_5_X 0 0 0 vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv5X o_lv_5_X vlvh 1G
+Xhv5 o_hv_5_X 0 0 0 vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv5X o_hv_5_X vhvh 1G
+Xlv6 o_lv_6_X 0 0 0 vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv6X o_lv_6_X vlvh 1G
+Xhv6 o_hv_6_X 0 0 0 vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv6X o_hv_6_X vhvh 1G
+Xlv7 o_lv_7_X 0 0 0 vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv7X o_lv_7_X vlvh 1G
+Xhv7 o_hv_7_X 0 0 0 vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv7X o_hv_7_X vhvh 1G
+Xlv8 o_lv_8_X 0 0 vlv 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv8X o_lv_8_X vlvh 1G
+Xhv8 o_hv_8_X 0 0 vhv 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv8X o_hv_8_X vhvh 1G
+Xlv9 o_lv_9_X 0 0 vlv 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv9X o_lv_9_X vlvh 1G
+Xhv9 o_hv_9_X 0 0 vhv 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv9X o_hv_9_X vhvh 1G
+Xlv10 o_lv_10_X 0 0 vlv 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv10X o_lv_10_X vlvh 1G
+Xhv10 o_hv_10_X 0 0 vhv 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv10X o_hv_10_X vhvh 1G
+Xlv11 o_lv_11_X 0 0 vlv 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv11X o_lv_11_X vlvh 1G
+Xhv11 o_hv_11_X 0 0 vhv 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv11X o_hv_11_X vhvh 1G
+Xlv12 o_lv_12_X 0 0 vlv vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv12X o_lv_12_X vlvh 1G
+Xhv12 o_hv_12_X 0 0 vhv vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv12X o_hv_12_X vhvh 1G
+Xlv13 o_lv_13_X 0 0 vlv vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv13X o_lv_13_X vlvh 1G
+Xhv13 o_hv_13_X 0 0 vhv vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv13X o_hv_13_X vhvh 1G
+Xlv14 o_lv_14_X 0 0 vlv vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv14X o_lv_14_X vlvh 1G
+Xhv14 o_hv_14_X 0 0 vhv vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv14X o_hv_14_X vhvh 1G
+Xlv15 o_lv_15_X 0 0 vlv vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv15X o_lv_15_X vlvh 1G
+Xhv15 o_hv_15_X 0 0 vhv vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv15X o_hv_15_X vhvh 1G
+Xlv16 o_lv_16_X 0 vlv 0 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv16X o_lv_16_X vlvh 1G
+Xhv16 o_hv_16_X 0 vhv 0 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv16X o_hv_16_X vhvh 1G
+Xlv17 o_lv_17_X 0 vlv 0 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv17X o_lv_17_X vlvh 1G
+Xhv17 o_hv_17_X 0 vhv 0 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv17X o_hv_17_X vhvh 1G
+Xlv18 o_lv_18_X 0 vlv 0 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv18X o_lv_18_X vlvh 1G
+Xhv18 o_hv_18_X 0 vhv 0 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv18X o_hv_18_X vhvh 1G
+Xlv19 o_lv_19_X 0 vlv 0 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv19X o_lv_19_X vlvh 1G
+Xhv19 o_hv_19_X 0 vhv 0 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv19X o_hv_19_X vhvh 1G
+Xlv20 o_lv_20_X 0 vlv 0 vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv20X o_lv_20_X vlvh 1G
+Xhv20 o_hv_20_X 0 vhv 0 vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv20X o_hv_20_X vhvh 1G
+Xlv21 o_lv_21_X 0 vlv 0 vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv21X o_lv_21_X vlvh 1G
+Xhv21 o_hv_21_X 0 vhv 0 vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv21X o_hv_21_X vhvh 1G
+Xlv22 o_lv_22_X 0 vlv 0 vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv22X o_lv_22_X vlvh 1G
+Xhv22 o_hv_22_X 0 vhv 0 vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv22X o_hv_22_X vhvh 1G
+Xlv23 o_lv_23_X 0 vlv 0 vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv23X o_lv_23_X vlvh 1G
+Xhv23 o_hv_23_X 0 vhv 0 vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv23X o_hv_23_X vhvh 1G
+Xlv24 o_lv_24_X 0 vlv vlv 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv24X o_lv_24_X vlvh 1G
+Xhv24 o_hv_24_X 0 vhv vhv 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv24X o_hv_24_X vhvh 1G
+Xlv25 o_lv_25_X 0 vlv vlv 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv25X o_lv_25_X vlvh 1G
+Xhv25 o_hv_25_X 0 vhv vhv 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv25X o_hv_25_X vhvh 1G
+Xlv26 o_lv_26_X 0 vlv vlv 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv26X o_lv_26_X vlvh 1G
+Xhv26 o_hv_26_X 0 vhv vhv 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv26X o_hv_26_X vhvh 1G
+Xlv27 o_lv_27_X 0 vlv vlv 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv27X o_lv_27_X vlvh 1G
+Xhv27 o_hv_27_X 0 vhv vhv 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv27X o_hv_27_X vhvh 1G
+Xlv28 o_lv_28_X 0 vlv vlv vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv28X o_lv_28_X vlvh 1G
+Xhv28 o_hv_28_X 0 vhv vhv vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv28X o_hv_28_X vhvh 1G
+Xlv29 o_lv_29_X 0 vlv vlv vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv29X o_lv_29_X vlvh 1G
+Xhv29 o_hv_29_X 0 vhv vhv vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv29X o_hv_29_X vhvh 1G
+Xlv30 o_lv_30_X 0 vlv vlv vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv30X o_lv_30_X vlvh 1G
+Xhv30 o_hv_30_X 0 vhv vhv vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv30X o_hv_30_X vhvh 1G
+Xlv31 o_lv_31_X 0 vlv vlv vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv31X o_lv_31_X vlvh 1G
+Xhv31 o_hv_31_X 0 vhv vhv vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv31X o_hv_31_X vhvh 1G
+Xlv32 o_lv_32_X vlv 0 0 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv32X o_lv_32_X vlvh 1G
+Xhv32 o_hv_32_X vhv 0 0 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv32X o_hv_32_X vhvh 1G
+Xlv33 o_lv_33_X vlv 0 0 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv33X o_lv_33_X vlvh 1G
+Xhv33 o_hv_33_X vhv 0 0 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv33X o_hv_33_X vhvh 1G
+Xlv34 o_lv_34_X vlv 0 0 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv34X o_lv_34_X vlvh 1G
+Xhv34 o_hv_34_X vhv 0 0 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv34X o_hv_34_X vhvh 1G
+Xlv35 o_lv_35_X vlv 0 0 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv35X o_lv_35_X vlvh 1G
+Xhv35 o_hv_35_X vhv 0 0 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv35X o_hv_35_X vhvh 1G
+Xlv36 o_lv_36_X vlv 0 0 vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv36X o_lv_36_X vlvh 1G
+Xhv36 o_hv_36_X vhv 0 0 vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv36X o_hv_36_X vhvh 1G
+Xlv37 o_lv_37_X vlv 0 0 vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv37X o_lv_37_X vlvh 1G
+Xhv37 o_hv_37_X vhv 0 0 vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv37X o_hv_37_X vhvh 1G
+Xlv38 o_lv_38_X vlv 0 0 vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv38X o_lv_38_X vlvh 1G
+Xhv38 o_hv_38_X vhv 0 0 vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv38X o_hv_38_X vhvh 1G
+Xlv39 o_lv_39_X vlv 0 0 vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv39X o_lv_39_X vlvh 1G
+Xhv39 o_hv_39_X vhv 0 0 vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv39X o_hv_39_X vhvh 1G
+Xlv40 o_lv_40_X vlv 0 vlv 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv40X o_lv_40_X vlvh 1G
+Xhv40 o_hv_40_X vhv 0 vhv 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv40X o_hv_40_X vhvh 1G
+Xlv41 o_lv_41_X vlv 0 vlv 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv41X o_lv_41_X vlvh 1G
+Xhv41 o_hv_41_X vhv 0 vhv 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv41X o_hv_41_X vhvh 1G
+Xlv42 o_lv_42_X vlv 0 vlv 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv42X o_lv_42_X vlvh 1G
+Xhv42 o_hv_42_X vhv 0 vhv 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv42X o_hv_42_X vhvh 1G
+Xlv43 o_lv_43_X vlv 0 vlv 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv43X o_lv_43_X vlvh 1G
+Xhv43 o_hv_43_X vhv 0 vhv 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv43X o_hv_43_X vhvh 1G
+Xlv44 o_lv_44_X vlv 0 vlv vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv44X o_lv_44_X vlvh 1G
+Xhv44 o_hv_44_X vhv 0 vhv vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv44X o_hv_44_X vhvh 1G
+Xlv45 o_lv_45_X vlv 0 vlv vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv45X o_lv_45_X vlvh 1G
+Xhv45 o_hv_45_X vhv 0 vhv vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv45X o_hv_45_X vhvh 1G
+Xlv46 o_lv_46_X vlv 0 vlv vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv46X o_lv_46_X vlvh 1G
+Xhv46 o_hv_46_X vhv 0 vhv vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv46X o_hv_46_X vhvh 1G
+Xlv47 o_lv_47_X vlv 0 vlv vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv47X o_lv_47_X vlvh 1G
+Xhv47 o_hv_47_X vhv 0 vhv vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv47X o_hv_47_X vhvh 1G
+Xlv48 o_lv_48_X vlv vlv 0 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv48X o_lv_48_X vlvh 1G
+Xhv48 o_hv_48_X vhv vhv 0 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv48X o_hv_48_X vhvh 1G
+Xlv49 o_lv_49_X vlv vlv 0 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv49X o_lv_49_X vlvh 1G
+Xhv49 o_hv_49_X vhv vhv 0 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv49X o_hv_49_X vhvh 1G
+Xlv50 o_lv_50_X vlv vlv 0 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv50X o_lv_50_X vlvh 1G
+Xhv50 o_hv_50_X vhv vhv 0 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv50X o_hv_50_X vhvh 1G
+Xlv51 o_lv_51_X vlv vlv 0 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv51X o_lv_51_X vlvh 1G
+Xhv51 o_hv_51_X vhv vhv 0 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv51X o_hv_51_X vhvh 1G
+Xlv52 o_lv_52_X vlv vlv 0 vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv52X o_lv_52_X vlvh 1G
+Xhv52 o_hv_52_X vhv vhv 0 vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv52X o_hv_52_X vhvh 1G
+Xlv53 o_lv_53_X vlv vlv 0 vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv53X o_lv_53_X vlvh 1G
+Xhv53 o_hv_53_X vhv vhv 0 vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv53X o_hv_53_X vhvh 1G
+Xlv54 o_lv_54_X vlv vlv 0 vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv54X o_lv_54_X vlvh 1G
+Xhv54 o_hv_54_X vhv vhv 0 vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv54X o_hv_54_X vhvh 1G
+Xlv55 o_lv_55_X vlv vlv 0 vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv55X o_lv_55_X vlvh 1G
+Xhv55 o_hv_55_X vhv vhv 0 vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv55X o_hv_55_X vhvh 1G
+Xlv56 o_lv_56_X vlv vlv vlv 0 0 0 vlv 0 sg13g2_mux4_1
+Rklv56X o_lv_56_X vlvh 1G
+Xhv56 o_hv_56_X vhv vhv vhv 0 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv56X o_hv_56_X vhvh 1G
+Xlv57 o_lv_57_X vlv vlv vlv 0 0 vlv vlv 0 sg13g2_mux4_1
+Rklv57X o_lv_57_X vlvh 1G
+Xhv57 o_hv_57_X vhv vhv vhv 0 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv57X o_hv_57_X vhvh 1G
+Xlv58 o_lv_58_X vlv vlv vlv 0 vlv 0 vlv 0 sg13g2_mux4_1
+Rklv58X o_lv_58_X vlvh 1G
+Xhv58 o_hv_58_X vhv vhv vhv 0 vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv58X o_hv_58_X vhvh 1G
+Xlv59 o_lv_59_X vlv vlv vlv 0 vlv vlv vlv 0 sg13g2_mux4_1
+Rklv59X o_lv_59_X vlvh 1G
+Xhv59 o_hv_59_X vhv vhv vhv 0 vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv59X o_hv_59_X vhvh 1G
+Xlv60 o_lv_60_X vlv vlv vlv vlv 0 0 vlv 0 sg13g2_mux4_1
+Rklv60X o_lv_60_X vlvh 1G
+Xhv60 o_hv_60_X vhv vhv vhv vhv 0 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv60X o_hv_60_X vhvh 1G
+Xlv61 o_lv_61_X vlv vlv vlv vlv 0 vlv vlv 0 sg13g2_mux4_1
+Rklv61X o_lv_61_X vlvh 1G
+Xhv61 o_hv_61_X vhv vhv vhv vhv 0 vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv61X o_hv_61_X vhvh 1G
+Xlv62 o_lv_62_X vlv vlv vlv vlv vlv 0 vlv 0 sg13g2_mux4_1
+Rklv62X o_lv_62_X vlvh 1G
+Xhv62 o_hv_62_X vhv vhv vhv vhv vhv 0 vhv 0 sg13g2_hv_mux4_1
+Rkhv62X o_hv_62_X vhvh 1G
+Xlv63 o_lv_63_X vlv vlv vlv vlv vlv vlv vlv 0 sg13g2_mux4_1
+Rklv63X o_lv_63_X vlvh 1G
+Xhv63 o_hv_63_X vhv vhv vhv vhv vhv vhv vhv 0 sg13g2_hv_mux4_1
+Rkhv63X o_hv_63_X vhvh 1G
+
+.control
+op
+print v(o_lv_0_X)
+print v(o_hv_0_X)
+print v(o_lv_1_X)
+print v(o_hv_1_X)
+print v(o_lv_2_X)
+print v(o_hv_2_X)
+print v(o_lv_3_X)
+print v(o_hv_3_X)
+print v(o_lv_4_X)
+print v(o_hv_4_X)
+print v(o_lv_5_X)
+print v(o_hv_5_X)
+print v(o_lv_6_X)
+print v(o_hv_6_X)
+print v(o_lv_7_X)
+print v(o_hv_7_X)
+print v(o_lv_8_X)
+print v(o_hv_8_X)
+print v(o_lv_9_X)
+print v(o_hv_9_X)
+print v(o_lv_10_X)
+print v(o_hv_10_X)
+print v(o_lv_11_X)
+print v(o_hv_11_X)
+print v(o_lv_12_X)
+print v(o_hv_12_X)
+print v(o_lv_13_X)
+print v(o_hv_13_X)
+print v(o_lv_14_X)
+print v(o_hv_14_X)
+print v(o_lv_15_X)
+print v(o_hv_15_X)
+print v(o_lv_16_X)
+print v(o_hv_16_X)
+print v(o_lv_17_X)
+print v(o_hv_17_X)
+print v(o_lv_18_X)
+print v(o_hv_18_X)
+print v(o_lv_19_X)
+print v(o_hv_19_X)
+print v(o_lv_20_X)
+print v(o_hv_20_X)
+print v(o_lv_21_X)
+print v(o_hv_21_X)
+print v(o_lv_22_X)
+print v(o_hv_22_X)
+print v(o_lv_23_X)
+print v(o_hv_23_X)
+print v(o_lv_24_X)
+print v(o_hv_24_X)
+print v(o_lv_25_X)
+print v(o_hv_25_X)
+print v(o_lv_26_X)
+print v(o_hv_26_X)
+print v(o_lv_27_X)
+print v(o_hv_27_X)
+print v(o_lv_28_X)
+print v(o_hv_28_X)
+print v(o_lv_29_X)
+print v(o_hv_29_X)
+print v(o_lv_30_X)
+print v(o_hv_30_X)
+print v(o_lv_31_X)
+print v(o_hv_31_X)
+print v(o_lv_32_X)
+print v(o_hv_32_X)
+print v(o_lv_33_X)
+print v(o_hv_33_X)
+print v(o_lv_34_X)
+print v(o_hv_34_X)
+print v(o_lv_35_X)
+print v(o_hv_35_X)
+print v(o_lv_36_X)
+print v(o_hv_36_X)
+print v(o_lv_37_X)
+print v(o_hv_37_X)
+print v(o_lv_38_X)
+print v(o_hv_38_X)
+print v(o_lv_39_X)
+print v(o_hv_39_X)
+print v(o_lv_40_X)
+print v(o_hv_40_X)
+print v(o_lv_41_X)
+print v(o_hv_41_X)
+print v(o_lv_42_X)
+print v(o_hv_42_X)
+print v(o_lv_43_X)
+print v(o_hv_43_X)
+print v(o_lv_44_X)
+print v(o_hv_44_X)
+print v(o_lv_45_X)
+print v(o_hv_45_X)
+print v(o_lv_46_X)
+print v(o_hv_46_X)
+print v(o_lv_47_X)
+print v(o_hv_47_X)
+print v(o_lv_48_X)
+print v(o_hv_48_X)
+print v(o_lv_49_X)
+print v(o_hv_49_X)
+print v(o_lv_50_X)
+print v(o_hv_50_X)
+print v(o_lv_51_X)
+print v(o_hv_51_X)
+print v(o_lv_52_X)
+print v(o_hv_52_X)
+print v(o_lv_53_X)
+print v(o_hv_53_X)
+print v(o_lv_54_X)
+print v(o_hv_54_X)
+print v(o_lv_55_X)
+print v(o_hv_55_X)
+print v(o_lv_56_X)
+print v(o_hv_56_X)
+print v(o_lv_57_X)
+print v(o_hv_57_X)
+print v(o_lv_58_X)
+print v(o_hv_58_X)
+print v(o_lv_59_X)
+print v(o_hv_59_X)
+print v(o_lv_60_X)
+print v(o_hv_60_X)
+print v(o_lv_61_X)
+print v(o_hv_61_X)
+print v(o_lv_62_X)
+print v(o_hv_62_X)
+print v(o_lv_63_X)
+print v(o_hv_63_X)
+quit
+.endc
+.end

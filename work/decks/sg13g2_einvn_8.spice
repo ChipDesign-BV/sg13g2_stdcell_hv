@@ -1,0 +1,41 @@
+* sg13g2_einvn_8: exhaustive vectors, thin-oxide vs thick-oxide
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOSlv.lib mos_tt
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib mos_tt
+.include /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice
+.include /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+
+Vlv vlv 0 1.2
+Vhv vhv 0 3.3
+Vlvh vlvh 0 0.6
+Vhvh vhvh 0 1.65
+
+Xlv0 o_lv_0_Z 0 0 vlv 0 sg13g2_einvn_8
+Rklv0Z o_lv_0_Z vlvh 1G
+Xhv0 o_hv_0_Z 0 0 vhv 0 sg13g2_hv_einvn_8
+Rkhv0Z o_hv_0_Z vhvh 1G
+Xlv1 o_lv_1_Z 0 vlv vlv 0 sg13g2_einvn_8
+Rklv1Z o_lv_1_Z vlvh 1G
+Xhv1 o_hv_1_Z 0 vhv vhv 0 sg13g2_hv_einvn_8
+Rkhv1Z o_hv_1_Z vhvh 1G
+Xlv2 o_lv_2_Z vlv 0 vlv 0 sg13g2_einvn_8
+Rklv2Z o_lv_2_Z vlvh 1G
+Xhv2 o_hv_2_Z vhv 0 vhv 0 sg13g2_hv_einvn_8
+Rkhv2Z o_hv_2_Z vhvh 1G
+Xlv3 o_lv_3_Z vlv vlv vlv 0 sg13g2_einvn_8
+Rklv3Z o_lv_3_Z vlvh 1G
+Xhv3 o_hv_3_Z vhv vhv vhv 0 sg13g2_hv_einvn_8
+Rkhv3Z o_hv_3_Z vhvh 1G
+
+.control
+op
+print v(o_lv_0_Z)
+print v(o_hv_0_Z)
+print v(o_lv_1_Z)
+print v(o_hv_1_Z)
+print v(o_lv_2_Z)
+print v(o_hv_2_Z)
+print v(o_lv_3_Z)
+print v(o_hv_3_Z)
+quit
+.endc
+.end

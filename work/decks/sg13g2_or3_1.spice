@@ -1,0 +1,65 @@
+* sg13g2_or3_1: exhaustive vectors, thin-oxide vs thick-oxide
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOSlv.lib mos_tt
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib mos_tt
+.include /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice
+.include /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+
+Vlv vlv 0 1.2
+Vhv vhv 0 3.3
+Vlvh vlvh 0 0.6
+Vhvh vhvh 0 1.65
+
+Xlv0 o_lv_0_X 0 0 0 vlv 0 sg13g2_or3_1
+Rklv0X o_lv_0_X vlvh 1G
+Xhv0 o_hv_0_X 0 0 0 vhv 0 sg13g2_hv_or3_1
+Rkhv0X o_hv_0_X vhvh 1G
+Xlv1 o_lv_1_X 0 0 vlv vlv 0 sg13g2_or3_1
+Rklv1X o_lv_1_X vlvh 1G
+Xhv1 o_hv_1_X 0 0 vhv vhv 0 sg13g2_hv_or3_1
+Rkhv1X o_hv_1_X vhvh 1G
+Xlv2 o_lv_2_X 0 vlv 0 vlv 0 sg13g2_or3_1
+Rklv2X o_lv_2_X vlvh 1G
+Xhv2 o_hv_2_X 0 vhv 0 vhv 0 sg13g2_hv_or3_1
+Rkhv2X o_hv_2_X vhvh 1G
+Xlv3 o_lv_3_X 0 vlv vlv vlv 0 sg13g2_or3_1
+Rklv3X o_lv_3_X vlvh 1G
+Xhv3 o_hv_3_X 0 vhv vhv vhv 0 sg13g2_hv_or3_1
+Rkhv3X o_hv_3_X vhvh 1G
+Xlv4 o_lv_4_X vlv 0 0 vlv 0 sg13g2_or3_1
+Rklv4X o_lv_4_X vlvh 1G
+Xhv4 o_hv_4_X vhv 0 0 vhv 0 sg13g2_hv_or3_1
+Rkhv4X o_hv_4_X vhvh 1G
+Xlv5 o_lv_5_X vlv 0 vlv vlv 0 sg13g2_or3_1
+Rklv5X o_lv_5_X vlvh 1G
+Xhv5 o_hv_5_X vhv 0 vhv vhv 0 sg13g2_hv_or3_1
+Rkhv5X o_hv_5_X vhvh 1G
+Xlv6 o_lv_6_X vlv vlv 0 vlv 0 sg13g2_or3_1
+Rklv6X o_lv_6_X vlvh 1G
+Xhv6 o_hv_6_X vhv vhv 0 vhv 0 sg13g2_hv_or3_1
+Rkhv6X o_hv_6_X vhvh 1G
+Xlv7 o_lv_7_X vlv vlv vlv vlv 0 sg13g2_or3_1
+Rklv7X o_lv_7_X vlvh 1G
+Xhv7 o_hv_7_X vhv vhv vhv vhv 0 sg13g2_hv_or3_1
+Rkhv7X o_hv_7_X vhvh 1G
+
+.control
+op
+print v(o_lv_0_X)
+print v(o_hv_0_X)
+print v(o_lv_1_X)
+print v(o_hv_1_X)
+print v(o_lv_2_X)
+print v(o_hv_2_X)
+print v(o_lv_3_X)
+print v(o_hv_3_X)
+print v(o_lv_4_X)
+print v(o_hv_4_X)
+print v(o_lv_5_X)
+print v(o_hv_5_X)
+print v(o_lv_6_X)
+print v(o_hv_6_X)
+print v(o_lv_7_X)
+print v(o_hv_7_X)
+quit
+.endc
+.end

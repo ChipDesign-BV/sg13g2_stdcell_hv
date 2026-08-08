@@ -1,0 +1,113 @@
+* sg13g2_nand4_1: exhaustive vectors, thin-oxide vs thick-oxide
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOSlv.lib mos_tt
+.lib /foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib mos_tt
+.include /foss/pdks/ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice
+.include /foss/designs/sg13g2_stdcell_hv/spice/sg13g2_stdcell_hv.spice
+
+Vlv vlv 0 1.2
+Vhv vhv 0 3.3
+Vlvh vlvh 0 0.6
+Vhvh vhvh 0 1.65
+
+Xlv0 o_lv_0_Y 0 0 0 0 vlv 0 sg13g2_nand4_1
+Rklv0Y o_lv_0_Y vlvh 1G
+Xhv0 o_hv_0_Y 0 0 0 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv0Y o_hv_0_Y vhvh 1G
+Xlv1 o_lv_1_Y 0 0 0 vlv vlv 0 sg13g2_nand4_1
+Rklv1Y o_lv_1_Y vlvh 1G
+Xhv1 o_hv_1_Y 0 0 0 vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv1Y o_hv_1_Y vhvh 1G
+Xlv2 o_lv_2_Y 0 0 vlv 0 vlv 0 sg13g2_nand4_1
+Rklv2Y o_lv_2_Y vlvh 1G
+Xhv2 o_hv_2_Y 0 0 vhv 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv2Y o_hv_2_Y vhvh 1G
+Xlv3 o_lv_3_Y 0 0 vlv vlv vlv 0 sg13g2_nand4_1
+Rklv3Y o_lv_3_Y vlvh 1G
+Xhv3 o_hv_3_Y 0 0 vhv vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv3Y o_hv_3_Y vhvh 1G
+Xlv4 o_lv_4_Y 0 vlv 0 0 vlv 0 sg13g2_nand4_1
+Rklv4Y o_lv_4_Y vlvh 1G
+Xhv4 o_hv_4_Y 0 vhv 0 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv4Y o_hv_4_Y vhvh 1G
+Xlv5 o_lv_5_Y 0 vlv 0 vlv vlv 0 sg13g2_nand4_1
+Rklv5Y o_lv_5_Y vlvh 1G
+Xhv5 o_hv_5_Y 0 vhv 0 vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv5Y o_hv_5_Y vhvh 1G
+Xlv6 o_lv_6_Y 0 vlv vlv 0 vlv 0 sg13g2_nand4_1
+Rklv6Y o_lv_6_Y vlvh 1G
+Xhv6 o_hv_6_Y 0 vhv vhv 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv6Y o_hv_6_Y vhvh 1G
+Xlv7 o_lv_7_Y 0 vlv vlv vlv vlv 0 sg13g2_nand4_1
+Rklv7Y o_lv_7_Y vlvh 1G
+Xhv7 o_hv_7_Y 0 vhv vhv vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv7Y o_hv_7_Y vhvh 1G
+Xlv8 o_lv_8_Y vlv 0 0 0 vlv 0 sg13g2_nand4_1
+Rklv8Y o_lv_8_Y vlvh 1G
+Xhv8 o_hv_8_Y vhv 0 0 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv8Y o_hv_8_Y vhvh 1G
+Xlv9 o_lv_9_Y vlv 0 0 vlv vlv 0 sg13g2_nand4_1
+Rklv9Y o_lv_9_Y vlvh 1G
+Xhv9 o_hv_9_Y vhv 0 0 vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv9Y o_hv_9_Y vhvh 1G
+Xlv10 o_lv_10_Y vlv 0 vlv 0 vlv 0 sg13g2_nand4_1
+Rklv10Y o_lv_10_Y vlvh 1G
+Xhv10 o_hv_10_Y vhv 0 vhv 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv10Y o_hv_10_Y vhvh 1G
+Xlv11 o_lv_11_Y vlv 0 vlv vlv vlv 0 sg13g2_nand4_1
+Rklv11Y o_lv_11_Y vlvh 1G
+Xhv11 o_hv_11_Y vhv 0 vhv vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv11Y o_hv_11_Y vhvh 1G
+Xlv12 o_lv_12_Y vlv vlv 0 0 vlv 0 sg13g2_nand4_1
+Rklv12Y o_lv_12_Y vlvh 1G
+Xhv12 o_hv_12_Y vhv vhv 0 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv12Y o_hv_12_Y vhvh 1G
+Xlv13 o_lv_13_Y vlv vlv 0 vlv vlv 0 sg13g2_nand4_1
+Rklv13Y o_lv_13_Y vlvh 1G
+Xhv13 o_hv_13_Y vhv vhv 0 vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv13Y o_hv_13_Y vhvh 1G
+Xlv14 o_lv_14_Y vlv vlv vlv 0 vlv 0 sg13g2_nand4_1
+Rklv14Y o_lv_14_Y vlvh 1G
+Xhv14 o_hv_14_Y vhv vhv vhv 0 vhv 0 sg13g2_hv_nand4_1
+Rkhv14Y o_hv_14_Y vhvh 1G
+Xlv15 o_lv_15_Y vlv vlv vlv vlv vlv 0 sg13g2_nand4_1
+Rklv15Y o_lv_15_Y vlvh 1G
+Xhv15 o_hv_15_Y vhv vhv vhv vhv vhv 0 sg13g2_hv_nand4_1
+Rkhv15Y o_hv_15_Y vhvh 1G
+
+.control
+op
+print v(o_lv_0_Y)
+print v(o_hv_0_Y)
+print v(o_lv_1_Y)
+print v(o_hv_1_Y)
+print v(o_lv_2_Y)
+print v(o_hv_2_Y)
+print v(o_lv_3_Y)
+print v(o_hv_3_Y)
+print v(o_lv_4_Y)
+print v(o_hv_4_Y)
+print v(o_lv_5_Y)
+print v(o_hv_5_Y)
+print v(o_lv_6_Y)
+print v(o_hv_6_Y)
+print v(o_lv_7_Y)
+print v(o_hv_7_Y)
+print v(o_lv_8_Y)
+print v(o_hv_8_Y)
+print v(o_lv_9_Y)
+print v(o_hv_9_Y)
+print v(o_lv_10_Y)
+print v(o_hv_10_Y)
+print v(o_lv_11_Y)
+print v(o_hv_11_Y)
+print v(o_lv_12_Y)
+print v(o_hv_12_Y)
+print v(o_lv_13_Y)
+print v(o_hv_13_Y)
+print v(o_lv_14_Y)
+print v(o_hv_14_Y)
+print v(o_lv_15_Y)
+print v(o_hv_15_Y)
+quit
+.endc
+.end
