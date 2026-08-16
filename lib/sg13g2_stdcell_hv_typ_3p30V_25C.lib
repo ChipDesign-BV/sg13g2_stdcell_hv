@@ -11,14 +11,15 @@ library (sg13g2_stdcell_hv){
   nom_process : 1.00 ;
   nom_voltage : 3.30 ;
   nom_temperature : 25 ;
-  slew_upper_threshold_pct_rise : 0.80 ;
-  slew_lower_threshold_pct_rise : 0.20 ;
-  slew_upper_threshold_pct_fall : 0.80 ;
-  slew_lower_threshold_pct_fall : 0.20 ;
-  input_threshold_pct_rise : 0.50 ;
-  input_threshold_pct_fall : 0.50 ;
-  output_threshold_pct_rise : 0.50 ;
-  output_threshold_pct_fall : 0.50 ;
+  slew_upper_threshold_pct_rise : 80 ;
+  slew_derate_from_library : 1 ;
+  slew_lower_threshold_pct_rise : 20 ;
+  slew_upper_threshold_pct_fall : 80 ;
+  slew_lower_threshold_pct_fall : 20 ;
+  input_threshold_pct_rise : 50 ;
+  input_threshold_pct_fall : 50 ;
+  output_threshold_pct_rise : 50 ;
+  output_threshold_pct_fall : 50 ;
   operating_conditions (typical) {
     process : 1.00 ;
     voltage : 3.30 ;
@@ -10714,6 +10715,24 @@ library (sg13g2_stdcell_hv){
       value : 0.023854 ;
     } /* end leakage_power */
   } /* end cell */
+
+
+  cell (sg13g2_hv_tielo) {
+    area : 13.7088 ;
+    pin (L_LO) {
+      direction : output ;
+      function : "0" ;
+    } /* end pin */
+  } /* end cell */
+
+  cell (sg13g2_hv_tiehi) {
+    area : 13.7088 ;
+    pin (L_HI) {
+      direction : output ;
+      function : "1" ;
+    } /* end pin */
+  } /* end cell */
+
   cell (sg13g2_hv_xnor2_1) {
     area : 54.8352 ;
     pin (Y) {
@@ -11046,19 +11065,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.294153 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : D ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
-    ff (IQN, IQNinv) {
-      next_state : "!(D)" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "D";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11118,7 +11133,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(D)" ;
+      function : "IQN" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11251,19 +11266,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.296763 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : D ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
-    ff (IQN, IQNinv) {
-      next_state : "!(D)" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "D";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11323,7 +11334,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(D)" ;
+      function : "IQN" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11456,14 +11467,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.283157 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : D ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "D";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11596,14 +11607,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.286075 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : D ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "D";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -11736,13 +11747,13 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.097906 ;
     } /* end leakage_power */
-    latch (IQ, IQinv) {
-      data_in : D ;
-      enable : GATE ;
-    } /* end latch */
+    latch (IQ,IQN) {
+      data_in : "D";
+      enable : "GATE";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : GATE ;
         timing_type : rising_edge ;
@@ -11868,19 +11879,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.225646 ;
     } /* end leakage_power */
-    latch (IQ, IQinv) {
-      data_in : D ;
-      enable : GATE ;
-      clear : "RESET_B'" ;
-    } /* end latch */
-    latch (IQN, IQNinv) {
-      data_in : "!(D)" ;
-      enable : GATE ;
-      clear : "RESET_B'" ;
-    } /* end latch */
+    latch (IQ,IQN) {
+      clear : "!RESET_B";
+      data_in : "D";
+      enable : "GATE";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : GATE ;
         timing_type : rising_edge ;
@@ -11940,7 +11947,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(D)" ;
+      function : "IQN" ;
       timing () {
         related_pin : GATE ;
         timing_type : rising_edge ;
@@ -12072,14 +12079,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.189095 ;
     } /* end leakage_power */
-    latch (IQ, IQinv) {
-      data_in : D ;
-      enable : GATE ;
-      clear : "RESET_B'" ;
-    } /* end latch */
+    latch (IQ,IQN) {
+      clear : "!RESET_B";
+      data_in : "D";
+      enable : "GATE";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : GATE ;
         timing_type : rising_edge ;
@@ -12211,19 +12218,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.225079 ;
     } /* end leakage_power */
-    latch (IQ, IQinv) {
-      data_in : D ;
-      enable : "GATE_N'" ;
-      clear : "RESET_B'" ;
-    } /* end latch */
-    latch (IQN, IQNinv) {
-      data_in : "!(D)" ;
-      enable : "GATE_N'" ;
-      clear : "RESET_B'" ;
-    } /* end latch */
+    latch (IQ,IQN) {
+      clear : "!RESET_B";
+      data_in : "D";
+      enable : "!GATE_N";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : GATE_N ;
         timing_type : falling_edge ;
@@ -12283,7 +12286,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(D)" ;
+      function : "IQN" ;
       timing () {
         related_pin : GATE_N ;
         timing_type : falling_edge ;
@@ -12415,14 +12418,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.188647 ;
     } /* end leakage_power */
-    latch (IQ, IQinv) {
-      data_in : D ;
-      enable : "GATE_N'" ;
-      clear : "RESET_B'" ;
-    } /* end latch */
+    latch (IQ,IQN) {
+      clear : "!RESET_B";
+      data_in : "D";
+      enable : "!GATE_N";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = D" ;
+      function : "IQ" ;
       timing () {
         related_pin : GATE_N ;
         timing_type : falling_edge ;
@@ -12554,21 +12557,18 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.234680 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-      preset : "SET_B'" ;
-    } /* end ff */
-    ff (IQN, IQNinv) {
-      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-      preset : "SET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clear_preset_var1 : "H";
+      clear_preset_var2 : "L";
+      clocked_on : "CLK";
+      next_state : "((SCE & SCD) | (!(SCE) & D))";
+      preset : "!SET_B";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -12628,7 +12628,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      function : "IQN" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -12859,19 +12859,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.325929 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
-    ff (IQN, IQNinv) {
-      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "((SCE & SCD) | (!(SCE) & D))";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -12931,7 +12927,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      function : "IQN" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -13156,19 +13152,15 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.328607 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
-    ff (IQN, IQNinv) {
-      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "((SCE & SCD) | (!(SCE) & D))";
+    }
+    
     pin (Q) {
       direction : output ;
-      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -13228,7 +13220,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
-      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      function : "IQN" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -13453,14 +13445,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.302310 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "((SCE & SCD) | (!(SCE) & D))";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
@@ -13685,14 +13677,14 @@ library (sg13g2_stdcell_hv){
     leakage_power () {
       value : 0.307002 ;
     } /* end leakage_power */
-    ff (IQ, IQinv) {
-      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
-      clocked_on : CLK ;
-      clear : "RESET_B'" ;
-    } /* end ff */
+    ff (IQ,IQN) {
+      clear : "!RESET_B";
+      clocked_on : "CLK";
+      next_state : "((SCE & SCD) | (!(SCE) & D))";
+    }
     pin (Q) {
       direction : output ;
-      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      function : "IQ" ;
       timing () {
         related_pin : CLK ;
         timing_type : rising_edge ;
