@@ -1157,23 +1157,11 @@ XN6 net6 CLKbb net7 VSS sg13_hv_nmos w=0.420u l=0.450u ng=1 ad=1.428e-13 as=1.42
 * Library name: sg13g2_stdcell_hv
 * Cell name: sg13g2_hv_tiehi
 * View name: schematic
-.subckt sg13g2_hv_tiehi L_HI VDD VSS
-XN1 net3 net2 VSS VSS sg13_hv_nmos w=0.795u l=0.450u ng=1 ad=2.703e-13 as=2.703e-13 pd=2.27e-06 ps=2.27e-06 m=1
-XN0 net1 net1 VSS VSS sg13_hv_nmos w=0.300u l=0.450u ng=1 ad=1.02e-13 as=1.02e-13 pd=1.28e-06 ps=1.28e-06 m=1
-XP1 L_HI net3 VDD VDD sg13_hv_pmos w=2.770u l=0.450u ng=1 ad=9.418e-13 as=9.418e-13 pd=6.22e-06 ps=6.22e-06 m=1
-XP0 net2 net1 VDD VDD sg13_hv_pmos w=1.585u l=0.450u ng=1 ad=5.389e-13 as=5.389e-13 pd=3.85e-06 ps=3.85e-06 m=1
-.ends
 * End of subcircuit definition.
 
 * Library name: sg13g2_stdcell_hv
 * Cell name: sg13g2_hv_tielo
 * View name: schematic
-.subckt sg13g2_hv_tielo L_LO VDD VSS
-XN0 net3 net2 VSS VSS sg13_hv_nmos w=0.385u l=0.450u ng=1 ad=1.309e-13 as=1.309e-13 pd=1.45e-06 ps=1.45e-06 m=1
-XN1 L_LO net1 VSS VSS sg13_hv_nmos w=0.880u l=0.450u ng=1 ad=2.992e-13 as=2.992e-13 pd=2.44e-06 ps=2.44e-06 m=1
-XP0 net2 net2 VDD VDD sg13_hv_pmos w=0.720u l=0.450u ng=1 ad=2.448e-13 as=2.448e-13 pd=2.12e-06 ps=2.12e-06 m=1
-XP1 net1 net3 VDD VDD sg13_hv_pmos w=2.510u l=0.450u ng=1 ad=8.534e-13 as=8.534e-13 pd=5.7e-06 ps=5.7e-06 m=1
-.ends
 * End of subcircuit definition.
 
 * Library name: sg13g2_stdcell_hv
@@ -1534,3 +1522,13 @@ XP14 net1 net5 VDD VDD sg13_hv_pmos w=2.690u l=0.450u ng=1 ad=9.146e-13 as=9.146
 .subckt sg13g2_hv_fill_8 VDD VSS
 .ends
 * End of subcircuit definition.
+
+.subckt sg13g2_hv_tielo L_LO VDD VSS
+XN0 L_LO VDD VSS VSS sg13_hv_nmos w=0.740u l=0.450u ng=1 ad=2.516e-13 as=2.516e-13 pd=2.16e-06 ps=2.16e-06 m=1
+XP0 L_LO VDD VDD VDD sg13_hv_pmos w=2.690u l=0.450u ng=1 ad=9.146e-13 as=9.146e-13 pd=6.06e-06 ps=6.06e-06 m=1
+.ends
+
+.subckt sg13g2_hv_tiehi L_HI VDD VSS
+XN0 L_HI VSS VSS VSS sg13_hv_nmos w=0.740u l=0.450u ng=1 ad=2.516e-13 as=2.516e-13 pd=2.16e-06 ps=2.16e-06 m=1
+XP0 L_HI VSS VDD VDD sg13_hv_pmos w=2.690u l=0.450u ng=1 ad=9.146e-13 as=9.146e-13 pd=6.06e-06 ps=6.06e-06 m=1
+.ends
