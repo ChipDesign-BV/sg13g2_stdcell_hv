@@ -78,6 +78,27 @@ def spice_devices():
             cur = None
         elif cur and re.match(r"x\S+\s", low):
             t = s.split()
+
+            # The antenna cell holds two diodes rather than MOSFETs, written
+            # as two-terminal instances: XD1 <n1> <n2> dantenna w= l=. Their
+            # junction is the diffusion an antenna diode exists to provide, so
+            # it has to reach ANTENNADIFFAREA -- without it OpenROAD refuses
+            # the cell with "[GRT-0244] Diode <cell>/A ANTENNADIFFAREA is
+            # zero". The area belongs to whichever node is not a supply.
+            if len(t) >= 4 and t[3].lower() in ("dantenna", "dpantenna"):
+                def dval(key, low=low):
+                    mm = re.search(rf"\b{key}=([0-9.e+-]+)([a-z]*)", low)
+                    if not mm:
+                        return 0.0
+                    return float(mm.group(1)) * {
+                        "u": 1e-6, "n": 1e-9, "p": 1e-12, "f": 1e-15,
+                        "": 1.0}[mm.group(2)]
+                area = dval("w") * dval("l") * 1e12
+                for node in (t[1], t[2]):
+                    if node.upper() not in ("VDD", "VSS"):
+                        out[cur].append((node, None, None, 0.0, area, 0.0))
+                continue
+
             if len(t) < 6 or not t[5].startswith("sg13_hv_"):
                 continue
             d, g, srcn = t[1], t[2], t[3]
@@ -221,7 +242,10 @@ def main():
                     for lname in per:
                         lines.append(f"      ANTENNAGATEAREA {gate:.4f} "
                                      f"LAYER {lname} ;")
-                if any("OUTPUT" in s for s in mlines) and diff > 0:
+                # Diffusion is normally on an output, but the antenna diode
+                # puts it on an input, so this keys off the area itself
+                # rather than the pin direction.
+                if diff > 0:
                     lines.append(f"    ANTENNADIFFAREA {diff:.4f} "
                                  "LAYER Metal1 ;")
             lines.append("    PORT")

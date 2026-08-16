@@ -3125,20 +3125,6 @@ endmodule
 //   cell_description : Constant logic 0
 //*****************************************************************
 
-module sg13g2_hv_tiehi (L_HI);
-		
-	output L_HI;
-
-	// Function
-
-	buf (L_HI, 1'b1);
-
-        // Timing
-
-	specify
-	endspecify
-
-endmodule
 `endcelldefine
 
 
@@ -3151,20 +3137,6 @@ endmodule
 //   cell_description : Constant logic 1
 //*****************************************************************
 
-module sg13g2_hv_tielo (L_LO);
-		
-	output L_LO;
-
-	// Function
-
-	buf (L_LO, 1'b0);
-
-        // Timing
-
-	specify
-	endspecify
-
-endmodule
 `endcelldefine
 
 
@@ -3271,3 +3243,33 @@ module sg13g2_hv_xor2_1 (X, A, B);
 
 endmodule
 `endcelldefine
+
+module sg13g2_hv_tielo (L_LO);
+
+	output L_LO;
+
+	// Function
+
+	buf (L_LO, 1'b0);
+
+	// Timing
+
+	specify
+	endspecify
+
+endmodule
+
+module sg13g2_hv_tiehi (L_HI);
+
+	output L_HI;
+
+	// Function
+
+	buf (L_HI, 1'b1);
+
+	// Timing
+
+	specify
+	endspecify
+
+endmodule

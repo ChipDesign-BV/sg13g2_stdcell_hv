@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<report-database>
+ <description>Density DRC Run Report at</description>
+ <original-file/>
+ <generator>drc: script='/foss/pdks/ihp-sg13g2/libs.tech/klayout/tech/drc/rule_decks/density.drc'</generator>
+ <top-cell>shared_rail</top-cell>
+ <tags>
+ </tags>
+ <categories>
+  <category>
+   <name>M1.j</name>
+   <description>5.16. M1.j: Min. global Metal1 density [%]: 35.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M2.j</name>
+   <description>5.17. M2.j: Min. global Metal2 density [%]: 35.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M3.j</name>
+   <description>5.17. M3.j: Min. global Metal3 density [%]: 35.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M4.j</name>
+   <description>5.17. M4.j: Min. global Metal4 density [%]: 35.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>M5.j</name>
+   <description>5.17. M5.j: Min. global Metal5 density [%]: 35.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>TM1.c</name>
+   <description>5.22. TM1.c: Min. global TopMetal1 density [%]: 25.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>TM2.c</name>
+   <description>5.25. TM2.c: Min. global TopMetal2 density [%]: 25.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_M1</name>
+   <description>Min. metal1:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_M2</name>
+   <description>Min. metal2:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_M3</name>
+   <description>Min. metal3:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_M4</name>
+   <description>Min. metal4:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_M5</name>
+   <description>Min. metal5:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_TM1</name>
+   <description>Min. topmetal1:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+  <category>
+   <name>Slt.i_TM2</name>
+   <description>Min. topmetal2:slit density for any Metal plate bigger than 35µm x 35µm [%] is 6.00.</description>
+   <categories>
+   </categories>
+  </category>
+ </categories>
+ <cells>
+  <cell>
+   <name>shared_rail</name>
+   <variant/>
+   <layout-name/>
+   <references>
+   </references>
+  </cell>
+ </cells>
+ <items>
+  <item>
+   <tags/>
+   <category>'M1.j'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 4399.113'</value>
+    <value>text: 'ratio_percent     : 34.402'</value>
+    <value>text: 'limit_percent     : 35.000 (min)'</value>
+    <value>text: 'gap_percent       : 0.598 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 76.420'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M2.j'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 16.390'</value>
+    <value>text: 'ratio_percent     : 0.128'</value>
+    <value>text: 'limit_percent     : 35.000 (min)'</value>
+    <value>text: 'gap_percent       : 34.872 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 4459.142'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M3.j'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 0.000'</value>
+    <value>text: 'ratio_percent     : 0.000'</value>
+    <value>text: 'limit_percent     : 35.000 (min)'</value>
+    <value>text: 'gap_percent       : 35.000 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 4475.533'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M4.j'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 0.000'</value>
+    <value>text: 'ratio_percent     : 0.000'</value>
+    <value>text: 'limit_percent     : 35.000 (min)'</value>
+    <value>text: 'gap_percent       : 35.000 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 4475.533'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'M5.j'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 0.000'</value>
+    <value>text: 'ratio_percent     : 0.000'</value>
+    <value>text: 'limit_percent     : 35.000 (min)'</value>
+    <value>text: 'gap_percent       : 35.000 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 4475.533'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'TM1.c'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 0.000'</value>
+    <value>text: 'ratio_percent     : 0.000'</value>
+    <value>text: 'limit_percent     : 25.000 (min)'</value>
+    <value>text: 'gap_percent       : 25.000 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 3196.809'</value>
+   </values>
+  </item>
+  <item>
+   <tags/>
+   <category>'TM2.c'</category>
+   <cell>shared_rail</cell>
+   <visited>false</visited>
+   <multiplicity>1</multiplicity>
+   <comment/>
+   <image/>
+   <values>
+    <value>polygon: (-0.27,-0.42;-0.27,28.98;434.67,28.98;434.67,-0.42)</value>
+    <value>text: 'Global Density Violation'</value>
+    <value>text: 'chip_bbox_um      : (-0.270,-0.420) - (434.670,28.980)'</value>
+    <value>text: 'chip_area_um2     : 12787.236'</value>
+    <value>text: 'layer_area_um2    : 0.000'</value>
+    <value>text: 'ratio_percent     : 0.000'</value>
+    <value>text: 'limit_percent     : 25.000 (min)'</value>
+    <value>text: 'gap_percent       : 25.000 (below limit)'</value>
+    <value>text: 'area_gap_um2      : 3196.809'</value>
+   </values>
+  </item>
+ </items>
+</report-database>
