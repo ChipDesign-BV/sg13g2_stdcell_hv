@@ -1362,13 +1362,6 @@ MN6 net6 CLKbb net7 VSS sg13_hv_nmos m=1 w=0.420u l=0.450u ng=1
 * View Name:    schematic
 ************************************************************************
 
-.SUBCKT sg13g2_hv_tiehi L_HI VDD VSS
-*.PININFO L_HI:O VDD:B VSS:B
-MN1 net3 net2 VSS VSS sg13_hv_nmos m=1 w=0.795u l=0.450u ng=1
-MN0 net1 net1 VSS VSS sg13_hv_nmos m=1 w=0.300u l=0.450u ng=1
-MP1 L_HI net3 VDD VDD sg13_hv_pmos m=1 w=2.770u l=0.450u ng=1
-MP0 net2 net1 VDD VDD sg13_hv_pmos m=1 w=1.585u l=0.450u ng=1
-.ENDS
 
 ************************************************************************
 * Library Name: sg13g2_stdcell_hv
@@ -1376,13 +1369,6 @@ MP0 net2 net1 VDD VDD sg13_hv_pmos m=1 w=1.585u l=0.450u ng=1
 * View Name:    schematic
 ************************************************************************
 
-.SUBCKT sg13g2_hv_tielo L_LO VDD VSS
-*.PININFO L_LO:O VDD:B VSS:B
-MN0 net3 net2 VSS VSS sg13_hv_nmos m=1 w=0.385u l=0.450u ng=1
-MN1 L_LO net1 VSS VSS sg13_hv_nmos m=1 w=0.880u l=0.450u ng=1
-MP0 net2 net2 VDD VDD sg13_hv_pmos m=1 w=0.720u l=0.450u ng=1
-MP1 net1 net3 VDD VDD sg13_hv_pmos m=1 w=2.510u l=0.450u ng=1
-.ENDS
 
 ************************************************************************
 * Library Name: sg13g2_stdcell_hv
@@ -1780,4 +1766,16 @@ MP14 net1 net5 VDD VDD sg13_hv_pmos m=1 w=2.690u l=0.450u ng=1
 
 .SUBCKT sg13g2_hv_fill_8 VDD VSS
 *.PININFO VDD:B VSS:B
+.ENDS
+
+.SUBCKT sg13g2_hv_tielo L_LO VDD VSS
+*.PININFO L_LO:O VDD:B VSS:B
+MN0 L_LO VDD VSS VSS sg13_hv_nmos m=1 w=0.740u l=0.450u ng=1
+MP0 L_LO VDD VDD VDD sg13_hv_pmos m=1 w=2.690u l=0.450u ng=1
+.ENDS
+
+.SUBCKT sg13g2_hv_tiehi L_HI VDD VSS
+*.PININFO L_HI:O VDD:B VSS:B
+MN0 L_HI VSS VSS VSS sg13_hv_nmos m=1 w=0.740u l=0.450u ng=1
+MP0 L_HI VSS VDD VDD sg13_hv_pmos m=1 w=2.690u l=0.450u ng=1
 .ENDS

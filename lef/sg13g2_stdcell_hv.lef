@@ -1105,6 +1105,7 @@ MACRO sg13g2_hv_antennanp
   PIN A
     DIRECTION INPUT ;
     USE SIGNAL ;
+    ANTENNADIFFAREA 2.0154 LAYER Metal1 ;
     PORT
       LAYER Metal1 ;
         RECT 0.38 1.56 0.63 4.065 ;
@@ -5374,6 +5375,94 @@ MACRO sg13g2_hv_slgcp_1
         RECT 14.71 1.73 14.87 3.225 ;
   END
 END sg13g2_hv_slgcp_1
+
+MACRO sg13g2_hv_tiehi
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  FOREIGN sg13g2_hv_tiehi 0 0 ;
+  SIZE 1.92 BY 7.14 ;
+  SYMMETRY X Y ;
+  SITE CoreSiteHV ;
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    SHAPE ABUTMENT ;
+    NETEXPR "VDD VDD!" ;
+    PORT
+      LAYER Metal1 ;
+        RECT 0 6.825 1.92 7.36 ;
+    END
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    SHAPE ABUTMENT ;
+    NETEXPR "VSS VSS!" ;
+    PORT
+      LAYER Metal1 ;
+        RECT 0 -0.22 1.92 0.22 ;
+    END
+  END VSS
+  PIN L_HI
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 1.1662 LAYER Metal1 ;
+    PORT
+      LAYER Metal1 ;
+        RECT 1.175 1.04 1.405 5.9 ;
+    END
+  END L_HI
+  OBS
+      LAYER Metal1 ;
+        RECT 0.31 1.95 0.625 2.725 ;
+        RECT 0.33 0.22 0.59 1.95 ;
+        RECT 0.33 3.645 0.59 6.825 ;
+  END
+END sg13g2_hv_tiehi
+
+MACRO sg13g2_hv_tielo
+  CLASS CORE ;
+  ORIGIN 0 0 ;
+  FOREIGN sg13g2_hv_tielo 0 0 ;
+  SIZE 1.92 BY 7.14 ;
+  SYMMETRY X Y ;
+  SITE CoreSiteHV ;
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    SHAPE ABUTMENT ;
+    NETEXPR "VDD VDD!" ;
+    PORT
+      LAYER Metal1 ;
+        RECT 0 6.825 1.92 7.36 ;
+    END
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    SHAPE ABUTMENT ;
+    NETEXPR "VSS VSS!" ;
+    PORT
+      LAYER Metal1 ;
+        RECT 0 -0.22 1.92 0.22 ;
+    END
+  END VSS
+  PIN L_LO
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    ANTENNADIFFAREA 1.1662 LAYER Metal1 ;
+    PORT
+      LAYER Metal1 ;
+        RECT 1.175 1.04 1.405 5.9 ;
+    END
+  END L_LO
+  OBS
+      LAYER Metal1 ;
+        RECT 0.31 1.95 0.625 2.725 ;
+        RECT 0.33 0.22 0.59 1.64 ;
+        RECT 0.33 2.725 0.59 6.825 ;
+  END
+END sg13g2_hv_tielo
 
 MACRO sg13g2_hv_xnor2_1
   CLASS CORE ;

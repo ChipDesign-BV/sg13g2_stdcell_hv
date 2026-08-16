@@ -8,13 +8,14 @@ all pads, fillers and a corner, and nothing you can synthesise and place.
 
 This library fills that gap: all 84 cells of `sg13g2_stdcell`, rebuilt on the
 thick-oxide devices, with the same topology, the same pin names and the same
-pin order. Layout covers 66 of the 84 cells, and those 66 are **DRC clean and
+pin order, plus two tie cells built here (see [Tie cells](#tie-cells)). Layout
+covers 68 cells, and those 68 are **DRC clean and
 LVS clean** against the PDK's own klayout decks (the remaining DRC report
 lines are chip-level metal-density rules that only apply to a filled die —
 see the DRC result section) — placed on a 17-track site with LEF
 abstracts. See [Layout](#layout) and
 [What this library is not](#what-this-library-is-not) for what is still
-missing: 18 cells have no GDS.
+missing: 16 cells have no GDS.
 
 The cells are named `sg13g2_hv_*` and coexist with the thin-oxide library, so
 1.2 V and 3.3 V logic can appear in one netlist.
@@ -171,6 +172,35 @@ at all. The custom procedures above recovered the 14 flip-flops and latches;
 the 6 tri-state cells still need work on CharLib itself, or a different
 characterizer.
 
+### What CharLib gets wrong in the emitted Liberty
+
+CharLib's output is not directly usable and is post-processed by
+`work/fix_lib.py` (header and combinational defects) and
+`work/fix_lib_seq.py` (sequential ones). All of these were found by feeding
+the library to real tools, not by reading the file:
+
+| defect | what CharLib writes | correct | why it matters |
+|---|---|---|---|
+| function LHS | `function : "Y = !(A)"` | `"!(A)"` | `function` is the expression alone; the `Y = ` prefix makes the attribute invalid |
+| sequential output function | `function : "Q = D"` | `"IQ"` / `"IQN"` | the output of a flip-flop is the state variable of its `ff` group, not the next-state expression |
+| state groups | `ff (IQ, IQinv)` **and** `ff (IQN, IQNinv)` | one `ff (IQ,IQN)` | a state group already declares both the variable and its complement |
+| both clear and preset | neither `clear_preset_var*` | `H` / `L` | required once a group carries both, to define Q/QN when both assert |
+| logic thresholds | `0.20` / `0.80` / `0.50` | `20` / `80` / `50` | `*_threshold_pct_*` is a percentage; the fraction says the transition was measured over a 0.6 % window instead of 60 % |
+| `pulling_resistance_unit` | `1uA` | `1ohm` | a current unit for a resistance |
+| `bus_naming_style` | `%s-%d` | `%s[%d]` | not a form OpenSTA accepts |
+
+The two sequential defects are the ones that stop a flow outright. With the
+next-state expression on the output pin, every flip-flop looks combinational:
+Yosys' `dfflibmap` finds no async-reset flip-flop in the library at all and
+aborts with *"dffs with async set or reset are not supported"*, and a timing
+tool sees a D→Q combinational arc instead of a clock boundary. The threshold
+defect surfaces later and less obviously, in OpenROAD's resizer as
+*"[RSZ-0101] RC slew modeling shape factor is out of range"*.
+
+The measurements themselves are sound in every case -- CharLib was configured
+with the usual 20/80/50 thresholds and the tables reflect that. Only the
+header and the sequential bookkeeping are wrong.
+
 Cell functions are translated from Liberty syntax into CharLib's by
 `work/boolexpr.py`. The two are not the same language — Liberty has `*`, `+`,
 `^` and postfix `'`, CharLib understands only `!`, `~`, `&`, `|` and has no XOR
@@ -253,7 +283,7 @@ around. None is caused by the library.
 
 ## Layout
 
-`gds/sg13g2_stdcell_hv.gds` holds **66 of the 84 cells**, produced by
+`gds/sg13g2_stdcell_hv.gds` holds **68 cells** -- 66 of the 84 produced by
 `work/layout_retarget.py`.
 
 The thin-oxide GDS is hand-drawn 2-D layout, not a regular template, so a
@@ -356,9 +386,49 @@ area it is 37.1 % — while the denser, unpadded thin-oxide control array
 reads 45.2 % and never trips it. A placed block carries metal fill and does
 not see this.
 
-Getting to zero took three fixes beyond the retarget itself, each reached by
-replicating the failing rule flat with the `klayout.db` API rather than
-reading marker text (lyrdb coordinates are in per-variant cell frames in deep
+#### The shared-rail blind spot
+
+The harness above has a blind spot, found only when a placed block went
+through signoff: it never actually shares a rail between *different* cells.
+`make_drc_top.py` stacks each cell in its own column (the vertical neighbour
+is always the same cell) and, despite its docstring, places the mirrored row
+at the padded bbox pitch (2 × 7.98 µm), 0.84 µm clear of the first — so the
+rail centreline, which every cell taps with contacts straddling y = 0 and
+y = 7.14, was never merged between two different cells at all.
+
+A placed block merges it everywhere. The retarget mapped each cell's rail
+contacts through that cell's own x-map, leaving them at cell-specific x
+positions, and wherever two different cells met across a rail their tap
+contacts overlapped partially into 0.19–0.32 µm bars — not a legal 0.16 µm
+contact (`Cnt.a`/`Cnt.b`) and shorter than a legal 0.34 µm `ContBar`
+(`CntB.a1`/`CntB.b2`). On a ~700-cell `spi_slave` block this was ~19 000
+markers, all on rails.
+
+`work/fix_rail_contacts.py` re-tiles every rail-straddling contact onto the
+site-centred grid x = 0.24 + 0.48k in the cell frame. Site centres are
+preserved by the FS row flip and by the x-mirroring detailed placement
+applies (cell widths are site multiples), so any two cells sharing a rail
+now land their taps either exactly on top of each other — a merged legal
+square — or a full site apart (0.32 µm edge-to-edge ≥ `Cnt.b` 0.18). Each
+new contact is guarded in code: correct implant (p+ tap inside `pSD` at VSS,
+n+ tap inside NWell at VDD — a contact on the wrong implant would short a
+butted diffusion to the supply), 0.07 µm Activ enclosure, 0.09 µm Metal1
+enclosure, 0.11 µm to any gate, 0.18 µm to any untouched contact, and every
+tap strip that had a contact keeps at least one. Rail contact count went
+from 1134 to 1810 (the 0.48 µm pitch tiles the full strip).
+
+The regression harness that would have caught this from the start is
+`work/make_shared_rail_rows.py`: four rows at the true 7.14 µm pitch
+(orientations N, S, FS — so rails are shared both mirrored and unmirrored),
+each row the full cell list in a rotated order so vertical neighbours
+differ, cells advanced by LEF width so the drawn margins overlap exactly as
+placed. After the fix it reports **zero cell-rule violations** — only the
+chip-level density markers discussed above — and the per-cell LVS was re-run
+afterwards: all 68 cells still match.
+
+Getting to zero in the original harness took three fixes beyond the retarget
+itself, each reached by replicating the failing rule flat with the
+`klayout.db` API rather than reading marker text (lyrdb coordinates are in per-variant cell frames in deep
 mode, and mapping them as top-cell µm attributes violations to the wrong
 cells — an earlier draft of this file blamed four cells that had nothing
 wrong with them):
@@ -448,7 +518,11 @@ Two details there are load-bearing, and both were learned by breaking them:
   cannot scale two overlapping intervals independently, so its PMOS lands at
   0.625 µm — legal, and carried consistently in the SPICE, CDL *and*
   schematic views (`verify_sch.py` checks all three).
-* All 5082 contacts are exactly 0.16 × 0.16 µm.
+* All 5758 contacts are exactly 0.16 × 0.16 µm, and every rail-tap contact
+  sits on the site-centred 0.48 µm grid, so cells sharing a rail in a placed
+  block merge their taps legally — verified on the shared-rail mixed-row
+  array (`work/make_shared_rail_rows.py`), which is DRC-clean of all cell
+  rules.
 
 ### Not done
 
@@ -460,17 +534,112 @@ Two details there are load-bearing, and both were learned by breaking them:
   DRC/LVS-clean means the checks pass, not that the cells are known good in
   fabrication.
 
-Cells checked in an abutted context, not standalone: `work/make_drc_top.py`
-builds a row of every cell with a second row mirrored above it so the two
-share a rail, because the rails and ThickGateOx are only legal because cells
-abut.
+Cells checked in an abutted context, not standalone: the rails and
+ThickGateOx are only legal because cells abut. `work/make_drc_top.py` builds
+the original padded array; `work/make_shared_rail_rows.py` builds the
+stricter one — true 7.14 µm row pitch with shared rails, mixed vertical
+neighbours, mirrored placements and overlapping margins — which is what a
+placed block actually looks like (see
+[the shared-rail blind spot](#the-shared-rail-blind-spot)).
+
+### Pins are not on the routing track grid
+
+The x-map widens every gate 0.13 → 0.45 µm and `pad_to_site` then pads the
+cell to a whole number of sites. Both move the internal geometry sideways,
+and nothing puts it back on the 0.48 µm Metal1 track grid. The result, from
+`work/grid_align_pins.py`:
+
+| | signal pins with no vertical track through them |
+|---|---|
+| `sg13g2_stdcell` (thin oxide) | 2 (both scan pins of `sdfbbp_1`, unused by the reference flow) |
+| `sg13g2_stdcell_hv` | **25** |
+
+Metal1 sits below the usual `RT_MIN_LAYER` of Metal2, so such a pin can only
+be reached by dropping a via from Metal2 — and a via wants a track. The
+router copes with most of them, but not all: the first place-and-route of
+this library left four `nand4_1` B pins with no metal on them at all, and
+Netgen reported the two nets they belonged to as split (devices matched,
+nets did not).
+
+Two ways round it, and the design flow that ships with the SPI slave uses
+the second:
+
+* widen the pin sideways to the nearest track — `grid_align_pins.py --apply`
+  does this for the 12 pins that have room, but 11 (including that
+  `nand4_1` B pin) cannot be widened without breaking `M1.b`;
+* let the router onto Metal1 (`RT_MIN_LAYER: Metal1`), which lets it jog to
+  an off-grid pin. The LEF's OBS block already covers every non-pin Metal1
+  strap, so Metal1 routing cannot short a cell's internals.
+
+The real fix is to place the pins on the grid during the retarget, which
+means teaching `layout_retarget.py` a snap step. That is not done here.
+
+## Tie cells
+
+`sg13g2_hv_tiehi` and `sg13g2_hv_tielo` are not retargets -- the thin-oxide
+tie cells are among the cells the 1-D map has to skip. They are built by
+`work/gen_tie_cells.py` from `sg13g2_hv_inv_1`, which did retarget, by tying
+its input off inside the cell:
+
+| cell | input tied to | on device | output |
+|---|---|---|---|
+| `sg13g2_hv_tielo` | VDD | NMOS | VSS (`L_LO`) |
+| `sg13g2_hv_tiehi` | VSS | PMOS | VDD (`L_HI`) |
+
+The tie is one Metal1 rectangle. In the retargeted inverter the A pin
+(x 0.310-0.625, y 1.950-2.725 um) sits between the two source straps, which
+occupy the same x range (0.330-0.590) and stop at y 1.640 below and y 3.645
+above. Filling either gap at the strap width merges the gate metal into that
+rail and touches nothing else: the only other Metal1 in the band is the
+output strap at x >= 1.175, which keeps 0.585 um of clearance. The cells keep
+the inverter's footprint, 1.92 x 7.14 um.
+
+This is topologically **not** what the thin-oxide library does. Its tie cells
+use a four-transistor chain and never put a gate on a supply rail, which is
+the classical way to keep the gate off a large charge-collecting net. Here
+the gate is on the rail -- and the rail carries the cells' own well and
+substrate taps, so it is diffusion-clamped and the gate is diode-protected.
+That is a claim the deck can check rather than an argument to be believed:
+the antenna rule set (`run_drc.py --antenna_only`) passes on the library
+array with these cells in it.
+
+Both cells are DRC clean and LVS clean under the same harness as the rest of
+the library. They carry no timing arcs (a constant output has none) and no
+`cell_leakage_power`, because the inverter they come from carries none either
+and a borrowed number would read as measured.
+
+Without them the library cannot be used by a digital flow at all: LibreLane
+calls Yosys' `hilomap` and OpenROAD's `insert_tiecells` unconditionally, and
+a constant reaching a cell input has nowhere else to go.
+
+### Simulating the Verilog models
+
+The models are vendor-style: each sequential cell feeds its UDP from
+`delayed_*` wires and drives a `notifier` reg, and both are produced by the
+timing checks **inside** the specify block. Icarus Verilog cannot compile
+those blocks -- it rejects `ifnone` on an edge-sensitive path -- and deleting
+them is not enough on its own, because `delayed_*` is then undriven and
+`notifier` sits at X, so every flip-flop output stays X for the whole run and
+the simulation looks broken rather than unsupported.
+
+`work/make_functional_models.py` writes a zero-delay copy for exactly this
+case: it drops the specify blocks, adds `assign delayed_<PORT> = <PORT>;`
+for each delayed wire, and initialises the notifiers.
+
+```sh
+python3 work/make_functional_models.py verilog/sg13g2_stdcell_hv.v hv_func.v
+iverilog -g2012 $PDK/libs.ref/sg13g2_stdcell/verilog/sg13g2_udp.v \
+    hv_func.v <netlist>.v <testbench>.v
+```
+
+The UDP primitives are not shipped here (see the note under
+[Directory layout](#directory-layout)); use the PDK's `sg13g2_udp.v`.
 
 ## What this library is not
 
-- **Layout is partial.** 66 of 84 cells have GDS (see [Layout](#layout)); 18
-  do not. The 66 are DRC clean and LVS clean and carry LEF abstracts on a
-  17-track site, but no block has actually been placed and routed with
-  them yet.
+- **Layout is partial.** 68 cells have GDS (see [Layout](#layout)); 16 of the
+  84 do not. The 68 are DRC clean and LVS clean and carry LEF abstracts on a
+  17-track site.
 - **Not silicon proven.** Everything here is simulation against the PDK models.
 - **Delay cells behave differently.** `dlygate4sd2_1` and `o21ai_1` used gate
   lengths below the thick-oxide minimum, so their delay ratios have shifted.
@@ -488,9 +657,9 @@ sg13g2_stdcell_hv/
 ├── sch/xschem/*.sch                  84 schematics
 │   └── sg13g2_hv_stdcells.sch        all 84 cells on one sheet (the gallery)
 ├── sym/xschem/*.sym                  84 symbols (copies of the thin-oxide ones)
-├── lef/sg13g2_stdcell_hv.lef         66 macros + CoreSiteHV (0.48 x 7.14)
+├── lef/sg13g2_stdcell_hv.lef         68 macros + CoreSiteHV (0.48 x 7.14)
 ├── lib/                              Liberty, 3.3 V typical
-├── gds/sg13g2_stdcell_hv.gds         66 of 84 cells, retargeted (see Layout)
+├── gds/sg13g2_stdcell_hv.gds         68 cells: 66 retargeted + 2 tie (see Layout)
 ├── doc/sg13g2_stdcell_hv.celllist
 ├── xschem_lib_sg13g2_stdcell_hv.tcl  xschem registration
 └── work/                             generator, verification and provenance
@@ -570,11 +739,14 @@ python3 verify_lib.py           # gates the shipped Liberty as data
 python3 lctime_compare.py       # independent characterizer cross-check
 
 python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
+python3 fix_rail_contacts.py    # rail taps onto the site-centred 0.48 um grid
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
 python3 gen_lef.py              # lef/ (site + 66 macros)
-python3 make_drc_top.py         # abutted 2-row DRC context
+python3 make_drc_top.py         # abutted 2-row DRC context (padded pitch)
+python3 make_shared_rail_rows.py  # shared-rail mixed-row DRC context
 ./run_lvs.sh                    # per-cell LVS
-# DRC: PDK run_drc.py on work/drc/drc_top.gds, default flags
+# DRC: PDK run_drc.py on work/drc/drc_top.gds and work/drc/shared_rail.gds,
+# default flags
 ```
 
 `gen_hv_lib.py` refuses to generate if its parasitic formulas stop reproducing
