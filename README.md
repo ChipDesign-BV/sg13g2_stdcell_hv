@@ -661,6 +661,7 @@ sg13g2_stdcell_hv/
 ├── lib/                              Liberty, 3.3 V typical
 ├── gds/sg13g2_stdcell_hv.gds         68 cells: 66 retargeted + 2 tie (see Layout)
 ├── doc/sg13g2_stdcell_hv.celllist
+├── klayout/pymacros/*.lym            KLayout cell-library registration
 ├── xschem_lib_sg13g2_stdcell_hv.tcl  xschem registration
 └── work/                             generator, verification and provenance
 ```
@@ -696,6 +697,23 @@ names, same pin order. Two things differ: the template prefix is
 which the `.tcl` sets. The thin-oxide symbols instead go through the PDK's
 `hierarchy_config` proc, which is hard-wired to the `sg13g2_stdcell` schematic
 directory and has no thick-oxide view.
+
+### klayout
+
+`klayout/pymacros/sg13g2_stdcell_hv.lym` registers the GDS as a KLayout
+**cell library**: all 68 drawn cells appear in the Instance dialog under
+the library name `sg13g2_stdcell_hv`, next to the PDK's own libraries, and
+place like any library cell. Enable it by adding the repository's
+`klayout/` directory to the KLayout search path,
+
+```sh
+export KLAYOUT_PATH=/foss/designs/sg13g2_stdcell_hv/klayout:$KLAYOUT_PATH
+```
+
+or by symlinking the macro into `~/.klayout/pymacros/` (it finds the GDS
+relative to its own location; `SG13G2_HV_HOME` overrides that if the macro
+is copied elsewhere). Layer display comes from the PDK's sg13g2 technology
+as usual — open or create layouts with that technology selected.
 
 ### ngspice
 

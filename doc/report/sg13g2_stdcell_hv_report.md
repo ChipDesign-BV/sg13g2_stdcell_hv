@@ -111,6 +111,9 @@ All netlist views are re-emitted from one internal model by
   numbers are wrong for 3.5× longer gates). Parsed back with klayout and
   pin sets verified against the CDL.
 * **`lib/`** — Liberty NLDM at 3.3 V / 25 °C typical (section 7).
+* **`klayout/`** — a cell-library registration macro: with the repository's
+  `klayout/` directory on `KLAYOUT_PATH`, all 68 drawn cells appear in
+  KLayout's Instance dialog as library `sg13g2_stdcell_hv`.
 
 ---
 
