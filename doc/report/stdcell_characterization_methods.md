@@ -542,7 +542,7 @@ in the shipped file traces to the CharLib flow, and **none to lctime**:
 | pin `capacitance` / `rise_capacitance` / `fall_capacitance` | CharLib `charge_integration` procedure |
 | per-state `leakage_power` groups (combinational) | CharLib all-states DC enumeration |
 | clk→Q and en→Q arcs, setup/hold constraint tables | local `seq_delay_procedure.py` inside CharLib's registry, merged by `merge_lib.py`, fixed by `fix_lib_seq.py` |
-| sequential `cell_leakage_power` | local `seq_leakage.py` (transient average) |
+| sequential and tie-cell `cell_leakage_power` | local `seq_leakage.py` / `tie_leakage.py` (transient average) |
 | slew and load index grids | thin-oxide grids × the fo4.py ratios (2.66 delay, 2.20 capacitance) |
 | functions, pin directions, `ff`/`latch` groups | lifted from the thin-oxide Liberty (logic unchanged by the transform) |
 

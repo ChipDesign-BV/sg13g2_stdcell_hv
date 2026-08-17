@@ -1,39 +1,40 @@
 #!/usr/bin/env python3
-"""Assemble the IHP-Open-PDK contribution overlay from this repository.
+"""Apply the sg13g2_stdcell_hv contribution to an IHP-Open-PDK checkout.
 
-Builds a directory tree shaped like ihp-sg13g2/ that can be rsync'ed onto a
-fresh IHP-Open-PDK checkout:
+Targets the *dev* branch conventions (the branch IHP pull requests merge
+into). dev keeps every standard-cell view under libs.ref -- commits
+1c0757e0 / c90378d8 moved the xschem symbols and schematics INTO
+libs.ref/sg13g2_stdcell/{sym,sch}/xschem, which is exactly this
+repository's layout -- so the library drops in unchanged:
 
-  libs.ref/sg13g2_stdcell_hv/{cdl,doc,gds,lef,lib,spice,verilog}
-  libs.tech/xschem/sg13g2_stdcells_hv/          symbols (+ schematics)
+  libs.ref/sg13g2_stdcell_hv/{cdl,doc,gds,lef,lib,spice,verilog,sym,sch}
   libs.tech/klayout/tech/pymacros/sg13g2_stdcell_hv.lym
+  libs.tech/xschem/xschemrc                              (2-line patch)
 
-Three deliberate transforms happen on the way -- the repository itself is
-the source of truth and stays untouched:
+The symbols keep their schematic="tcleval($::SG13G2_HV_SCH/...)" pointer.
+Upstream's own stdcell symbols resolve schematics through the
+hierarchy_config proc, which is hard-wired to the thin-oxide sch
+directory; rather than generalize that proc (a maintainer decision), the
+xschemrc patch defines ::SG13G2_HV_SCH next to the mirrored
+XSCHEM_LIBRARY_PATH append -- two added lines, no existing line touched,
+idempotent.
 
-  * The symbols' schematic="tcleval($::SG13G2_HV_SCH/...)" pointer is
-    stripped. In the repo, sym/ and sch/ are separate directories and the
-    pointer (set up by xschem_lib_sg13g2_stdcell_hv.tcl) bridges them; in
-    the PDK the two live in ONE directory, where xschem's default
-    same-directory .sym -> .sch resolution works with no tcl at all.
-    Without --with-schematics only the symbols ship (the upstream
-    sg13g2_stdcells convention) and there is nothing to descend into.
+The KLayout macro gets the PDK-relative GDS candidate prepended
+(tech/pymacros -> ../../../../libs.ref/sg13g2_stdcell_hv/gds/); upstream
+registers no stdcell GDS as a KLayout library today, so the macro is
+flagged as a maintainer question in the PR.
 
-  * The KLayout macro's GDS search gets the PDK-relative candidate
-    (tech/pymacros -> ../../../../libs.ref/sg13g2_stdcell_hv/gds/)
-    prepended; the SG13G2_HV_HOME override stays.
+doc/ ships the celllist, ReleaseNotes.txt and the two PDF reports -- not
+work/, the README or the repo licence files (the PDK's top-level
+Apache-2.0 covers the contribution; attribution lives in ReleaseNotes.txt
+and per-file headers).
 
-  * doc/ ships the celllist, ReleaseNotes.txt and the two PDF reports --
-    not the work/ scripts, the README or the repo licence files (the PDK's
-    top-level Apache-2.0 covers the contribution; attribution lives in
-    ReleaseNotes.txt and the per-file headers).
+After applying, the schematics are netlisted through the installed
+symbols with xschem USING THE CHECKOUT'S OWN (patched) xschemrc, and
+every cell's device multiset is compared against the SPICE netlist --
+the same gate verify_sch.py runs against this repository.
 
-With --with-schematics the overlay is verified the same way the repo is:
-the schematics are netlisted through the overlay symbols with xschem and
-every cell's device multiset is compared against the SPICE netlist
-(verify_sch.py's own machinery, pointed at the overlay directory).
-
-Usage: python3 make_pdk_pr.py [--out DIR] [--with-schematics]
+Usage: python3 make_pdk_pr.py --pdk <IHP-Open-PDK checkout root>
 """
 import argparse
 import pathlib
@@ -46,22 +47,23 @@ import tempfile
 import verify_sch
 
 HV = pathlib.Path(__file__).resolve().parent.parent
-POINTER = re.compile(r'^schematic="tcleval\(\$::SG13G2_HV_SCH/[^"]*\)"\n',
-                     re.M)
 XSCHEM = "/foss/tools/bin/xschem"
 
-RC = """
-set ::env(PDK) ihp-sg13g2
-set ::env(PDK_ROOT) /foss/pdks
-source /foss/pdks/ihp-sg13g2/libs.tech/xschem/xschemrc
-append XSCHEM_LIBRARY_PATH :{overlay}
-set netlist_dir {out}
-""".strip()
+ANCHOR = ("append XSCHEM_LIBRARY_PATH "
+          ":${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell/sym/xschem")
+PATCH = (
+    "append XSCHEM_LIBRARY_PATH "
+    ":${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sym/xschem\n"
+    "# thick-oxide stdcell symbols resolve their schematics through this\n"
+    "set ::SG13G2_HV_SCH "
+    "${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sch/xschem\n")
 
 
-def copy_libs_ref(out):
-    ref = out / "libs.ref" / "sg13g2_stdcell_hv"
-    for d in ("cdl", "gds", "lef", "lib", "spice", "verilog"):
+def copy_libs_ref(pdk):
+    ref = pdk / "ihp-sg13g2" / "libs.ref" / "sg13g2_stdcell_hv"
+    if ref.exists():
+        shutil.rmtree(ref)
+    for d in ("cdl", "gds", "lef", "lib", "spice", "verilog", "sym", "sch"):
         shutil.copytree(HV / d, ref / d)
     doc = ref / "doc"
     doc.mkdir(parents=True)
@@ -69,33 +71,28 @@ def copy_libs_ref(out):
     shutil.copy2(HV / "doc" / "ReleaseNotes.txt", doc)
     for pdf in (HV / "doc" / "report").glob("*.pdf"):
         shutil.copy2(pdf, doc)
+    n = sum(1 for p in ref.rglob("*") if p.is_file())
+    print(f"libs.ref/sg13g2_stdcell_hv: {n} files")
     return ref
 
 
-def copy_xschem(out, with_sch):
-    xs = out / "libs.tech" / "xschem" / "sg13g2_stdcells_hv"
-    xs.mkdir(parents=True)
-    stripped = 0
-    for sym in sorted((HV / "sym" / "xschem").glob("*.sym")):
-        text = sym.read_text()
-        text, n = POINTER.subn("", text)
-        stripped += n
-        (xs / sym.name).write_text(text)
-    assert not any("SG13G2_HV_SCH" in (xs / p.name).read_text()
-                   for p in (HV / "sym" / "xschem").glob("*.sym")), \
-        "schematic pointer survived the strip"
-    if with_sch:
-        for sch in sorted((HV / "sch" / "xschem").glob("*.sch")):
-            shutil.copy2(sch, xs / sch.name)
-    print(f"xschem: {stripped} schematic pointers stripped, "
-          f"{'symbols + schematics' if with_sch else 'symbols only'}")
-    return xs
+def patch_xschemrc(pdk):
+    rc = pdk / "ihp-sg13g2" / "libs.tech" / "xschem" / "xschemrc"
+    text = rc.read_text()
+    if "sg13g2_stdcell_hv/sym/xschem" in text:
+        print("xschemrc: already patched")
+        return rc
+    assert ANCHOR in text, "thin-oxide sym append not found in xschemrc"
+    text = text.replace(ANCHOR, ANCHOR + "\n" + PATCH.rstrip(), 1)
+    rc.write_text(text)
+    print("xschemrc: 3 lines added after the thin-oxide sym append")
+    return rc
 
 
-def copy_klayout(out):
+def copy_klayout(pdk):
     src = HV / "klayout" / "pymacros" / "sg13g2_stdcell_hv.lym"
-    dst = out / "libs.tech" / "klayout" / "tech" / "pymacros" / src.name
-    dst.parent.mkdir(parents=True)
+    dst = (pdk / "ihp-sg13g2" / "libs.tech" / "klayout" / "tech" /
+           "pymacros" / src.name)
     old = ('        candidates.append(os.path.join(here, "..", "..", "gds",\n'
            '                                       LIB_NAME + ".gds"))')
     new = ('        candidates.append(os.path.join(\n'
@@ -106,16 +103,23 @@ def copy_klayout(out):
     text = src.read_text()
     assert old in text, "GDS candidate block not found in the .lym"
     dst.write_text(text.replace(old, new))
-    print(f"klayout: {dst.relative_to(out)} (PDK-relative GDS path added)")
+    print(f"klayout: {dst.name} (PDK-relative GDS path prepended)")
 
 
-def verify_overlay(xs):
-    """Netlist the schematics through the overlay symbols; compare devices."""
+def verify_install(pdk):
+    """Netlist all schematics through the installed symbols, with the
+    checkout's own xschemrc, and compare devices against SPICE."""
     spice = verify_sch.spice_cells()
-    cells = sorted(p.stem for p in xs.glob("sg13g2_hv_*.sch")
+    sch_dir = (pdk / "ihp-sg13g2" / "libs.ref" / "sg13g2_stdcell_hv" /
+               "sch" / "xschem")
+    cells = sorted(p.stem for p in sch_dir.glob("sg13g2_hv_*.sch")
                    if p.stem != "sg13g2_hv_stdcells")
-    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pdkoverlay_"))
-    (tmp / "xschemrc").write_text(RC.format(overlay=xs, out=tmp))
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="pdkinstall_"))
+    (tmp / "xschemrc").write_text(
+        f"set ::env(PDK) ihp-sg13g2\n"
+        f"set ::env(PDK_ROOT) {pdk}\n"
+        f"source {pdk}/ihp-sg13g2/libs.tech/xschem/xschemrc\n"
+        f"set netlist_dir {tmp}\n")
     (tmp / "all_cells.sch").write_text(verify_sch.wrapper(cells))
     subprocess.run([XSCHEM, "--rcfile", str(tmp / "xschemrc"), "-n", "-q",
                     "--no_x", str(tmp / "all_cells.sch")],
@@ -133,41 +137,34 @@ def verify_overlay(xs):
             print(f"  FAIL {cell}: devices differ from SPICE")
             bad += 1
     shutil.rmtree(tmp, ignore_errors=True)
-    print(f"overlay netlist check: {len(cells) - bad}/{len(cells)} cells "
-          f"match the SPICE netlist")
+    print(f"install netlist check (checkout xschemrc): "
+          f"{len(cells) - bad}/{len(cells)} cells match the SPICE netlist")
     return bad == 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=str(HV / "work" / "pdk_overlay"))
-    ap.add_argument("--with-schematics", action="store_true")
+    ap.add_argument("--pdk", required=True,
+                    help="IHP-Open-PDK checkout root (on the dev branch)")
     args = ap.parse_args()
+    pdk = pathlib.Path(args.pdk).resolve()
+    assert (pdk / "ihp-sg13g2" / "libs.ref").is_dir(), \
+        f"{pdk} is not an IHP-Open-PDK checkout"
 
-    out = pathlib.Path(args.out)
-    if out.exists():
-        shutil.rmtree(out)
-    ref = copy_libs_ref(out)
-    xs = copy_xschem(out, args.with_schematics)
-    copy_klayout(out)
-    n = sum(1 for _ in out.rglob("*") if _.is_file())
-    print(f"overlay: {n} files under {out}")
+    copy_libs_ref(pdk)
+    patch_xschemrc(pdk)
+    copy_klayout(pdk)
+    ok = verify_install(pdk)
 
-    ok = True
-    if args.with_schematics:
-        ok = verify_overlay(xs)
-
-    print(f"""
-Next steps (in a fresh IHP-Open-PDK clone; check CONTRIBUTING.md and
-whether PRs target main or dev):
-  rsync -a {out}/ <clone>/ihp-sg13g2/
-  register sg13g2_stdcells_hv in ihp-sg13g2/libs.tech/xschem the same way
-    sg13g2_stdcells is registered (xschemrc / install.py);
-  re-run signoff there: PDK run_drc.py on the two work/drc arrays, LVS,
-    OpenSTA read of {ref.relative_to(out)}/lib, iverilog with the PDK's
-    sg13g2_udp.v;
-  open the PR as a draft; flag the cell-set choice (view_matrix.py),
-    schematics yes/no, and the pymacros placement as maintainer questions.
+    print("""
+Next steps in the checkout (PRs target the dev branch; commits need a
+Developer Certificate of Origin sign-off, i.e. git commit -s):
+  re-run signoff with the checkout's decks: run_drc.py on the two
+    work/drc arrays, per-cell LVS, OpenSTA read of the .lib, iverilog
+    against the checkout's sg13g2_udp.v;
+  branch from dev, commit, push to a fork, open the PR as a draft;
+  flag as maintainer questions: cell set (view_matrix.py), the KLayout
+    macro, hierarchy_config unification, missing qucs-s views.
 """)
     return 0 if ok else 1
 

@@ -5,7 +5,7 @@ author:
   - "Koen Van Caekenberghe, Ph.D."
   - "ChipDesign B.V."
   - "[info@chipdesign.be](mailto:info@chipdesign.be)"
-date: "2026-08-16 (rev. 3, condensed: tie cells, shared-rail contact fix, P&R validation)"
+date: "2026-08-17 (rev. 4: tie-cell schematics + measured leakage, pin widening, PDK dev-branch signoff, upstream PR)"
 logo: "ChipDesign_logo.png"
 ---
 
@@ -19,7 +19,7 @@ so both libraries coexist in one netlist.
 
 | Deliverable | Coverage | Status |
 |---|---|---|
-| SPICE netlist (`spice/`) | 84 cells, 924 devices | verified against 3 independent views |
+| SPICE netlist (`spice/`) | 84 cells, 920 devices | verified against 3 independent views |
 | CDL netlist (`cdl/`) | 84 cells + 2 tie cells | LVS reference, all 68 drawn cells match |
 | Verilog (`verilog/`) | 84 modules | shared `ihp_*` UDPs, deliberately not duplicated |
 | xschem symbols / schematics | 84 + gallery sheet | netlist-equivalence proven |
@@ -90,7 +90,7 @@ delivers *more* current per micron at 3.3 V than the thin-oxide at 1.2 V
 All netlist views are re-emitted from one internal model by
 `work/gen_hv_lib.py`, so a device cannot silently diverge between views.
 
-* **`spice/`** — 84 subckts, 924 PSP103 devices (OSDI/ngspice); widths
+* **`spice/`** — 84 subckts, 920 PSP103 devices (OSDI/ngspice); widths
   synchronised to the drawn layout.
 * **`cdl/`** — the same subcircuits as `M`-cards with `*.PININFO`, the LVS
   reference; compared field-by-field against SPICE by `verify_sch.py`.
@@ -98,7 +98,7 @@ All netlist views are re-emitted from one internal model by
   `ihp_*` UDPs are shared — a second copy would collide).
 * **`sym/`, `sch/`** — 84 symbols (thin-oxide drawn geometry, thick-oxide
   netlist prefix, `$::SG13G2_HV_SCH` resolution) and 84 schematics plus a
-  generated gallery sheet; three-view consistency proven on all 924
+  generated gallery sheet; three-view consistency proven on all 920
   devices.
 * **`gds/`** — 68 cells: 66 by 1-D retarget (section 4), tie cells built
   by `work/gen_tie_cells.py`. Uniform 7.140 µm row height (17 tracks),
@@ -162,7 +162,7 @@ exceptions:
 |---|---|---|
 | `verify_logic.py` | 60 combinational cells, 452 vectors, both libraries in one deck | **PASS** |
 | `verify_seq.py` | 16 stateful cells, 400 clocked samples | **PASS** |
-| `verify_sch.py` | 84 schematics + CDL vs SPICE, 924 devices field-by-field | **PASS** |
+| `verify_sch.py` | 84 schematics + CDL vs SPICE, 920 devices field-by-field | **PASS** |
 
 The thin-oxide library is the golden reference — the transform changed
 devices, never logic. The 12 high-impedance states of the tri-state cells
@@ -256,9 +256,13 @@ and a direct measurement sides with the shipped table (+0.15 % vs −19 %
 at the probe point). lctime's input capacitance (+52 %) also corroborates
 validating Cin against a direct measurement, not a characteriser.
 
-Excluded from the Liberty, by configuration and with stated reasons: the
-device-less cells, `tiehi`/`tielo`, the statetable clock gates, and the 6
-tri-state cells (CharLib cannot express high-impedance outputs).
+Excluded from characterization, by configuration and with stated reasons:
+the device-less cells, the statetable clock gates, and the 6 tri-state
+cells (CharLib cannot express high-impedance outputs). `tiehi`/`tielo`
+are present in the Liberty without timing arcs (a constant output has
+none) and with directly measured leakage — `work/tie_leakage.py` applies
+the sequential cells' settled-tail average to the tie netlists
+(0.011 / 0.013 nW), so no number is borrowed from `inv_1`.
 
 ---
 
@@ -269,7 +273,7 @@ tri-state cells (CharLib cannot express high-impedance outputs).
 | Parasitic formulas | recompute vendor `as/ad/ps/pd` | all 924 thin-oxide devices | PASS, worst error 3.75×10⁻⁴ |
 | Combinational logic | ngspice vs thin-oxide golden | 60 cells, 452 vectors, 12 high-Z states | **PASS** |
 | Sequential logic | ngspice, clocked walk from reset | 16 stateful cells, 400 samples | **PASS** |
-| Three-view consistency | symbols vs SPICE vs CDL | 84 cells, 924 devices | **PASS** |
+| Three-view consistency | symbols vs SPICE vs CDL | 84 cells, 920 devices | **PASS** |
 | DRC, padded array | PDK deck, fixed invocation | 68 drawn cells | **0 cell rules**; 7 density items |
 | DRC, shared-rail array | same deck, true-pitch mixed/mirrored rows | 68 cells × 4 rows | **0 cell rules**; density only |
 | DRC control | identical harness on IHP `sg13g2_stdcell` | 84 cells | 0 cell rules, 6 density |
@@ -283,6 +287,17 @@ tri-state cells (CharLib cannot express high-impedance outputs).
 | Independent characteriser | lctime, 8 cells, 3 132 points | STA region | median 2.9 % / 0.0 % |
 | Sequential arcs | `verify_lib.py` 6 | 14 flip-flops/latches | **14/14 clean** |
 | Site geometry | boundary scan | all 68 cells | 7.140 µm, widths on 0.48 µm site |
+| Tie-cell leakage | `tie_leakage.py` settled-tail average | `tiehi`/`tielo` | 0.011 / 0.013 nW, in the Liberty |
+| Pin track alignment | `grid_align_pins.py --apply` + full re-signoff | 12 of 25 off-track pins widened | DRC 0 cell rules ×2, LVS 68/68 |
+| PDK dev-branch re-run | IHP-Open-PDK `dev` decks (KLayout 0.30.9) | both DRC arrays, 68-cell LVS | main tables **clean**, LVS **68/68** |
+
+The library is submitted upstream as
+[IHP-Open-PDK PR #1103](https://github.com/IHP-GmbH/IHP-Open-PDK/pull/1103)
+(draft): `libs.ref/sg13g2_stdcell_hv` following the dev-branch layout, a
+two-line `xschemrc` registration, and an optional KLayout autorun macro,
+with the cell-set choice, the macro, and xschem view-machinery
+unification flagged as maintainer questions. `work/make_pdk_pr.py`
+assembles and verifies the contribution against a checkout.
 
 ---
 
