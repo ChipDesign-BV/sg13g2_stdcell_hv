@@ -21,4 +21,4 @@ doc/report/render.err
 __pycache__/
 *.pyc
 work/drc_run_*/
-work/pdk_overlay/
+work/flop_pilot/

@@ -550,6 +550,24 @@ Two details there are load-bearing, and both were learned by breaking them:
   block merge their taps legally — verified on the shared-rail mixed-row
   array (`work/make_shared_rail_rows.py`), which is DRC-clean of all cell
   rules.
+* **The N-wells satisfy the strict analog HV rules, not just the DigiBnd
+  digital ones.** The retarget originally placed the well bottom for
+  NW.c1.dig (0.31 µm); Magic's tech has no DigiBnd concept and applies the
+  analog NW.c1/NW.d1 (0.62 µm) unconditionally, flagging every cell by
+  25 nm (mux4_1/slgcp_1 by ~210 nm). `work/fix_well_nwc1.py` rebuilds the
+  well layer only — bottom edge 2.625 → 2.570 µm, deeper jogs over the two
+  deep P-active bands, lateral overhang 0.24 → 0.62 µm so the outermost
+  cell of a row is enclosure-clean without a neighbour — leaving a
+  0.62 µm-clean library with **zero device changes and no
+  re-characterization** (wells are not device terminals; the HV PSP models
+  carry no well-proximity parameters). Verified: Magic reports 0 NW.*
+  errors on the abutted array, and both KLayout decks (modular + maximal,
+  including NW.c1.dig) stay clean. Magic's remaining array flags — Cnt.c
+  (0.07 µm contact-overlap interpretation) and wide-metal M1.e — are
+  Magic-vs-KLayout interpretation differences on geometry both KLayout
+  decks accept; NW.e1 can still appear at the outermost block rows where
+  the VDD tap has only its own 0.24 µm top overhang (legal under
+  NW.e1.dig, merged away wherever rows abut).
 
 ### Not done
 
@@ -560,19 +578,6 @@ Two details there are load-bearing, and both were learned by breaking them:
   and tielo — were later drawn from scratch by `gen_tie_cells.py` (see
   [Tie cells](#tie-cells)). The remaining 16 are the 8 dfrbp/sdfrbp flops,
   4 of the 5 latches, 2 of the 3 ebufn drives, `lgcp_1` and `sighold`.
-* **Magic DRC flags NW.c1 on every cell.** Magic's SG13G2 tech has no
-  DigiBnd concept, so it applies the strict analog N-well rules (0.62 µm
-  enclosure of HV P-diff) unconditionally; these cells carry the DigiBnd
-  marker and are built to the relaxed digital rules (NW.c1.dig, 0.31 µm),
-  which the KLayout maximal deck verifies clean. Measured against the
-  strict rule, 65 of 68 cells miss by exactly 25 nm (mux4_1 by 210 nm,
-  slgcp_1 by 215 nm), and a well-bottom-only fix — moving the N-well
-  bottom edge 2625 → 2570 nm globally, deepening the existing jogs in
-  mux4_1/slgcp_1 — satisfies the strict rules without touching a single
-  device (no re-characterization; the wells are not device terminals and
-  the HV PSP models carry no well-proximity parameters). Planned as a
-  follow-up; the isolated-cell NW.e1 flags are a block-boundary artifact
-  that vanishes once rows abut.
 * Not silicon-proven, and not reviewed by anyone who was not also its author.
   DRC/LVS-clean means the checks pass, not that the cells are known good in
   fabrication.
@@ -847,6 +852,7 @@ python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
 python3 fix_rail_contacts.py    # rail taps onto the site-centred 0.48 um grid
 python3 grid_align_pins.py --apply  # widen off-track pins that have room
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
+python3 fix_well_nwc1.py        # wells to the strict analog HV rules
 python3 gen_lef.py              # lef/ (site + 68 macros)
 python3 make_drc_top.py         # abutted 2-row DRC context (padded pitch)
 python3 make_shared_rail_rows.py  # shared-rail mixed-row DRC context
