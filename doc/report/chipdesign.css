@@ -82,7 +82,7 @@ h3 {
 
 /* ── Math rendered to SVG by the texmath_svg.py filter ───────────────────── */
 img.math-inline { vertical-align: -0.25em; }
-img.math-display { display: block; margin: 0.9em auto; }
+img.math-display { display: block; margin: 0.9em auto; max-width: 100%; height: auto; }
 
 /* ── Branded horizontal rule (Markdown `---` / `* * *`) ──────────────────── */
 hr {

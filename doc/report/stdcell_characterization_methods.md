@@ -204,9 +204,11 @@ $$\Delta t = \frac{1}{I}\int_{0.2 V_{DD}}^{0.8 V_{DD}} C_{in}(v)\,dv \;\;\Righta
 The window $[0.2, 0.8]\,V_{DD}$ *contains* the Miller peak at $V_M$ and
 *excludes* the low-capacitance tails near the rails; the Miller charge is
 divided by $0.6\,V_{DD}$ instead of $V_{DD}$. Both effects push the same
-direction, which orders the three estimators from first principles alone:
+direction, which orders the three estimators from first principles alone —
+the Miller-free endpoint sample below the full-swing mean below the
+peak-window mean:
 
-$$C_{AC}\ \mathrm{(endpoints,\ no\ Miller)} \;<\; C_{int}\ \mathrm{(full\ swing\ mean)} \;<\; C_{slope}\ \mathrm{(peak\ window\ mean)}$$
+$$C_{AC} \;<\; C_{int} \;<\; C_{slope}$$
 
 — and the measurements land in exactly that order: 5.87 < 6.44 < 8.92 fF,
 the slope method **+52 %** above the reference. lctime averages the result
@@ -418,10 +420,11 @@ polished: it measures the pushout curve itself. `find_min_data_delay`
 doubles the setup/hold window until $t_{C2Q}$ converges to
 $t_{C2Q,\infty}$ (abstol 1 ps); the constraint is then the root of
 
-$$t_{C2Q}(t_{su}) - \left(t_{C2Q,\infty} + \Delta d\right) = 0, \qquad \Delta d = 10\ \mathrm{ps\ (default\ max\_pushout\_time)},$$
+$$t_{C2Q}(t_{su}) - \left(t_{C2Q,\infty} + \Delta d\right) = 0,$$
 
-found with Brent's method (`optimize.brentq`, xtol = 1 fs) after
-exponential bracketing — an *absolute* pushout criterion, in contrast to
+with $\Delta d = 10$ ps (the default `max_pushout_time`), found with
+Brent's method (`optimize.brentq`, xtol = 1 fs) after exponential
+bracketing — an *absolute* pushout criterion, in contrast to
 CharLib-local's relative one. It then re-solves setup with hold fixed at
 its unconditional minimum plus a 10 ps margin (and vice versa), which is
 what populates the constraint tables. Min-pulse-width uses the same
