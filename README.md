@@ -108,7 +108,7 @@ Stateful cells are identified from the thin-oxide Liberty file by `ff()`,
 matter, because `lgcp_1` and `slgcp_1` are integrated clock gates that hold
 state without an `ff`/`latch` group and are bistable.
 
-**Views agree — 84 cells, 924 devices each, PASS.** The schematics, the CDL
+**Views agree — 84 cells, 920 devices, PASS.** The schematics, the CDL
 and the SPICE netlist come out of different code paths in the generator, so a
 device that got the wrong size in one view but not another would pass every
 simulation check above (they all run on the SPICE netlist). All 84 schematics
@@ -273,13 +273,13 @@ around. None is caused by the library.
    `work/fix_lib.py` corrects all three; `run_charlib.sh` applies it
    automatically.
 
-> **`area` in the Liberty file is an estimate, not a measurement.** This
-> library has no layout. The estimate assumes each cell keeps the thin-oxide
-> device arrangement, so the poly pitch count per cell is unchanged and only
-> the pitch and row height grow: contacted poly pitch 0.48 → 0.80 µm (keeping
-> the thin-oxide gate-to-contact budget around the longer gate) and row height
-> 3.78 → 5.39 µm (to fit the widest PMOS finger, 1.155 → 2.770 µm). Treat it
-> as an order-of-magnitude figure for synthesis, not as silicon area.
+> **`area` in the Liberty file is measured for the 56 drawn cells and an
+> estimate for the 12 undrawn ones.** For every Liberty cell that has a LEF
+> macro the value is the real footprint, LEF width × the 7.14 µm row height
+> (`work/update_lib_area.py` keeps the two views in step and reports any
+> drift). The 12 characterized flip-flops and latches without GDS keep the
+> pre-layout estimate — thin-oxide poly pitch count at 0.80 µm contacted
+> pitch — and only those should be treated as order-of-magnitude figures.
 
 ## Layout
 
@@ -552,7 +552,8 @@ and nothing puts it back on the 0.48 µm Metal1 track grid. The result, from
 | | signal pins with no vertical track through them |
 |---|---|
 | `sg13g2_stdcell` (thin oxide) | 2 (both scan pins of `sdfbbp_1`, unused by the reference flow) |
-| `sg13g2_stdcell_hv` | **25** |
+| `sg13g2_stdcell_hv` before widening | 25 |
+| `sg13g2_stdcell_hv` shipped | **11** (`grid_align_pins.py --apply` widened the 12 that had room) |
 
 Metal1 sits below the usual `RT_MIN_LAYER` of Metal2, so such a pin can only
 be reached by dropping a via from Metal2 — and a via wants a track. The
@@ -565,7 +566,8 @@ Two ways round it, and the design flow that ships with the SPI slave uses
 the second:
 
 * widen the pin sideways to the nearest track — `grid_align_pins.py --apply`
-  does this for the 12 pins that have room, but 11 (including that
+  did this for the 12 pins that have room, and the shipped GDS/LEF carry the
+  result (DRC and LVS re-run clean). The remaining 11 (including that
   `nand4_1` B pin) cannot be widened without breaking `M1.b`;
 * let the router onto Metal1 (`RT_MIN_LAYER: Metal1`), which lets it jog to
   an off-grid pin. The LEF's OBS block already covers every non-pin Metal1
@@ -604,9 +606,11 @@ the antenna rule set (`run_drc.py --antenna_only`) passes on the library
 array with these cells in it.
 
 Both cells are DRC clean and LVS clean under the same harness as the rest of
-the library. They carry no timing arcs (a constant output has none) and no
-`cell_leakage_power`, because the inverter they come from carries none either
-and a borrowed number would read as measured.
+the library. They carry no timing arcs (a constant output has none). Their
+leakage is measured directly on the tie netlists — one deck per cell, the
+same settled-tail average the sequential cells use (`work/tie_leakage.py`:
+0.011 / 0.013 nW) — not borrowed from `inv_1`, so `cell_leakage_power` is a
+measurement like every other leakage number in the file.
 
 Without them the library cannot be used by a digital flow at all: LibreLane
 calls Yosys' `hilomap` and OpenROAD's `insert_tiecells` unconditionally, and
@@ -753,11 +757,15 @@ env -u PYTHONPATH sh -c "PATH=$PWD/ngspice-osdi-shim:\$PATH \
   -o seq.lib -j 6"
 python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib seq.lib
 python3 seq_leakage.py          # single-state leakage for the 14 cells
+python3 tie_leakage.py          # measured tie-cell leakage into the Liberty
+python3 update_lib_area.py      # Liberty area from the LEF (reports drift)
 python3 verify_lib.py           # gates the shipped Liberty as data
 python3 lctime_compare.py       # independent characterizer cross-check
+python3 view_matrix.py          # per-cell view coverage matrix
 
 python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
 python3 fix_rail_contacts.py    # rail taps onto the site-centred 0.48 um grid
+python3 grid_align_pins.py --apply  # widen off-track pins that have room
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
 python3 gen_lef.py              # lef/ (site + 66 macros)
 python3 make_drc_top.py         # abutted 2-row DRC context (padded pitch)
