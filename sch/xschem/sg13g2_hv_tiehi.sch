@@ -19,43 +19,26 @@ K {}
 V {}
 S {}
 E {}
-N -450 -100 -450 -150 {}
-N -450 -100 -430 -100 {}
-N -450 -150 -390 -150 {}
-N -390 -130 -390 -150 {}
-N -390 -150 -390 -380 {}
-N -370 -40 -370 -100 {}
-N -390 -40 -390 -70 {}
-N -310 -100 -270 -100 {}
-N -470 -440 -310 -440 {}
-N -370 -40 -230 -40 {}
-N -390 -100 -370 -100 {}
-N -390 -380 -350 -380 {}
-N -310 -410 -310 -440 {}
-N -290 -380 -290 -440 {}
-N -310 -380 -290 -380 {}
-N -310 -440 -290 -440 {}
-N -310 -100 -310 -350 {}
-N -390 -40 -370 -40 {}
-N -230 -40 -230 -70 {}
-N -210 -40 -210 -100 {}
-N -230 -40 -210 -40 {}
-N -230 -100 -210 -100 {}
-N -230 -130 -230 -380 {}
-N -230 -380 -180 -380 {}
-N -290 -440 -140 -440 {}
-N -140 -340 -140 -350 {}
-N -140 -410 -140 -440 {}
-N -470 -40 -390 -40 {}
-N -140 -440 -120 -440 {}
-N -140 -380 -120 -380 {}
-N -140 -340 -70 -340 {}
-N -120 -380 -120 -440 {}
-C {devices/opin.sym} -70 -340 0 0 {name=p3 lab=L_HI}
-C {devices/lab_pin.sym} -470 -440 0 0 {name=p1 sig_type=std_logic lab=VDD}
-C {devices/lab_pin.sym} -470 -40 0 0 {name=p2 sig_type=std_logic lab=VSS}
-C {sg13_hv_nmos.sym} -410 -100 0 0 {name=M1 w=0.300u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
-C {sg13_hv_nmos.sym} -250 -100 0 0 {name=M2 w=0.795u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
-C {sg13_hv_pmos.sym} -330 -380 0 0 {name=M3 w=1.585u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
-C {sg13_hv_pmos.sym} -160 -380 0 0 {name=M4 w=2.770u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
-C {devices/title-3.sym} -1520 640 0 0 {name=l1 author="IHP PDK AUTHORS"}
+N 20 -150 20 -170 {}
+N 20 -400 60 -400 {}
+N 20 -230 20 -400 {}
+N -80 -400 -20 -400 {}
+N -20 -200 -20 -400 {}
+N 20 -600 40 -600 {}
+N 20 -630 20 -650 {}
+N -20 -400 -20 -600 {}
+N 20 -400 20 -570 {}
+N 20 -650 40 -650 {}
+N 40 -600 40 -650 {}
+N 20 -200 40 -200 {}
+N -106 -650 20 -650 {}
+N 40 -150 40 -200 {}
+N -106 -150 20 -150 {}
+N 20 -150 40 -150 {}
+C {devices/opin.sym} 60 -400 0 0 {name=p1 lab=L_HI}
+C {devices/lab_pin.sym} -80 -400 0 0 {name=p2 sig_type=std_logic lab=VSS}
+C {devices/lab_pin.sym} -106 -650 0 0 {name=p3 sig_type=std_logic lab=VDD}
+C {devices/lab_pin.sym} -106 -150 0 0 {name=p4 sig_type=std_logic lab=VSS}
+C {sg13_hv_nmos.sym} 0 -200 0 0 {name=M1 w=0.740u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
+C {sg13_hv_pmos.sym} 0 -600 0 0 {name=M2 w=2.690u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
+C {devices/title-3.sym} -1270 480 0 0 {name=l1 author="IHP PDK AUTHORS"}

@@ -19,44 +19,26 @@ K {}
 V {}
 S {}
 E {}
-N -80 220 -50 220 {}
-N -140 -40 -120 -40 {}
-N -80 220 -80 10 {}
-N 150 300 150 250 {}
-N 90 -70 90 -110 {}
-N 90 -10 100 -10 {}
-N -260 300 -10 300 {}
-N 110 -40 110 -110 {}
-N -80 -40 -60 -40 {}
-N -10 190 -10 -40 {}
-N -140 10 -80 10 {}
-N -80 -70 -80 -110 {}
-N 10 300 10 220 {}
-N -10 300 -10 250 {}
-N 150 90 220 90 {}
-N -10 220 10 220 {}
-N -10 -40 50 -40 {}
-N 100 220 110 220 {}
-N -80 10 -80 -10 {}
-N -80 -110 -60 -110 {}
-N 100 220 100 -10 {}
-N -250 -110 -80 -110 {}
-N 90 -40 110 -40 {}
-N -60 -110 90 -110 {}
-N -10 300 10 300 {}
-N 150 300 170 300 {}
-N 150 190 150 90 {}
-N 90 -110 110 -110 {}
-N 150 220 170 220 {}
-N 10 300 150 300 {}
-N -60 -40 -60 -110 {}
-N 170 300 170 220 {}
-N -140 10 -140 -40 {}
-C {devices/opin.sym} 220 90 0 0 {name=p3 lab=L_LO}
-C {devices/lab_pin.sym} -250 -110 0 0 {name=p1 sig_type=std_logic lab=VDD}
-C {devices/lab_pin.sym} -260 300 0 0 {name=p2 sig_type=std_logic lab=VSS}
-C {sg13_hv_nmos.sym} -30 220 0 0 {name=M1 w=0.385u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
-C {sg13_hv_nmos.sym} 130 220 0 0 {name=M2 w=0.880u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
-C {sg13_hv_pmos.sym} -100 -40 0 0 {name=M3 w=0.720u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
-C {sg13_hv_pmos.sym} 70 -40 0 0 {name=M4 w=2.510u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
-C {devices/title-3.sym} -1270 980 0 0 {name=l1 author="IHP PDK AUTHORS"}
+N 20 -150 20 -170 {}
+N 20 -400 60 -400 {}
+N 20 -230 20 -400 {}
+N -80 -400 -20 -400 {}
+N -20 -200 -20 -400 {}
+N 20 -600 40 -600 {}
+N 20 -630 20 -650 {}
+N -20 -400 -20 -600 {}
+N 20 -400 20 -570 {}
+N 20 -650 40 -650 {}
+N 40 -600 40 -650 {}
+N 20 -200 40 -200 {}
+N -106 -650 20 -650 {}
+N 40 -150 40 -200 {}
+N -106 -150 20 -150 {}
+N 20 -150 40 -150 {}
+C {devices/opin.sym} 60 -400 0 0 {name=p1 lab=L_LO}
+C {devices/lab_pin.sym} -80 -400 0 0 {name=p2 sig_type=std_logic lab=VDD}
+C {devices/lab_pin.sym} -106 -650 0 0 {name=p3 sig_type=std_logic lab=VDD}
+C {devices/lab_pin.sym} -106 -150 0 0 {name=p4 sig_type=std_logic lab=VSS}
+C {sg13_hv_nmos.sym} 0 -200 0 0 {name=M1 w=0.740u l=0.450u ng=1 m=1 model=sg13_hv_nmos}
+C {sg13_hv_pmos.sym} 0 -600 0 0 {name=M2 w=2.690u l=0.450u ng=1 m=1 model=sg13_hv_pmos}
+C {devices/title-3.sym} -1270 480 0 0 {name=l1 author="IHP PDK AUTHORS"}
