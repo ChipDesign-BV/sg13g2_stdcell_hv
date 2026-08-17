@@ -10719,6 +10719,10 @@ library (sg13g2_stdcell_hv){
 
   cell (sg13g2_hv_tielo) {
     area : 13.7088 ;
+    cell_leakage_power : 0.012997 ;
+    leakage_power () {
+      value : 0.012997 ;
+    } /* end leakage_power */
     pin (L_LO) {
       direction : output ;
       function : "0" ;
@@ -10727,6 +10731,10 @@ library (sg13g2_stdcell_hv){
 
   cell (sg13g2_hv_tiehi) {
     area : 13.7088 ;
+    cell_leakage_power : 0.011215 ;
+    leakage_power () {
+      value : 0.011215 ;
+    } /* end leakage_power */
     pin (L_HI) {
       direction : output ;
       function : "1" ;
