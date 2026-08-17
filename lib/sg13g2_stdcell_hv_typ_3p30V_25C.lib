@@ -1,4 +1,4 @@
-library (sg13g2_stdcell_hv){
+library (sg13g2_stdcell_hv_typ_3p30V_25C){
   technology : cmos ;
   delay_model : table_lookup ;
   bus_naming_style : "%s[%d]" ;
@@ -8,6 +8,8 @@ library (sg13g2_stdcell_hv){
   current_unit : "1uA" ;
   pulling_resistance_unit : "1ohm" ;
   capacitive_load_unit (1, pF);
+  default_max_capacitance : 0.66 ;
+  default_max_transition : 6.66968 ;
   nom_process : 1.00 ;
   nom_voltage : 3.30 ;
   nom_temperature : 25 ;
@@ -47,6 +49,8 @@ library (sg13g2_stdcell_hv){
     area : 44.5536 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((A1 & A2) | B1)" ;
       timing () {
         related_pin : A1 ;
@@ -231,18 +235,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005266 ;
       fall_capacitance : 0.005189 ;
       capacitance : 0.005266 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006074 ;
       fall_capacitance : 0.005999 ;
       capacitance : 0.006074 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005902 ;
       fall_capacitance : 0.004891 ;
       capacitance : 0.005902 ;
@@ -292,6 +299,8 @@ library (sg13g2_stdcell_hv){
     area : 47.9808 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "((A1 & A2) | B1)" ;
       timing () {
         related_pin : A1 ;
@@ -476,18 +485,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005357 ;
       fall_capacitance : 0.005280 ;
       capacitance : 0.005357 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006294 ;
       fall_capacitance : 0.006219 ;
       capacitance : 0.006294 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006099 ;
       fall_capacitance : 0.005097 ;
       capacitance : 0.006099 ;
@@ -537,6 +549,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A1 & A2) | B1))" ;
       timing () {
         related_pin : A1 ;
@@ -721,18 +735,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005924 ;
       fall_capacitance : 0.005864 ;
       capacitance : 0.005924 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006850 ;
       fall_capacitance : 0.006786 ;
       capacitance : 0.006850 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006653 ;
       fall_capacitance : 0.005516 ;
       capacitance : 0.006653 ;
@@ -782,6 +799,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!(((A1 & A2) | B1))" ;
       timing () {
         related_pin : A1 ;
@@ -966,18 +985,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.011574 ;
       fall_capacitance : 0.011516 ;
       capacitance : 0.011574 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013432 ;
       fall_capacitance : 0.013363 ;
       capacitance : 0.013432 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013028 ;
       fall_capacitance : 0.010775 ;
       capacitance : 0.013028 ;
@@ -1027,6 +1049,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((((A1 & A2) | (B1 & B2)) | C1))" ;
       timing () {
         related_pin : A1 ;
@@ -1331,30 +1355,35 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005919 ;
       fall_capacitance : 0.005863 ;
       capacitance : 0.005919 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006844 ;
       fall_capacitance : 0.006785 ;
       capacitance : 0.006844 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005900 ;
       fall_capacitance : 0.005578 ;
       capacitance : 0.005900 ;
     } /* end pin */
     pin (B2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006826 ;
       fall_capacitance : 0.006501 ;
       capacitance : 0.006826 ;
     } /* end pin */
     pin (C1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006642 ;
       fall_capacitance : 0.005414 ;
       capacitance : 0.006642 ;
@@ -1500,6 +1529,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A1 & A2) | (B1 & B2)))" ;
       timing () {
         related_pin : A1 ;
@@ -1744,24 +1775,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005925 ;
       fall_capacitance : 0.005893 ;
       capacitance : 0.005925 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006851 ;
       fall_capacitance : 0.006815 ;
       capacitance : 0.006851 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006849 ;
       fall_capacitance : 0.006804 ;
       capacitance : 0.006849 ;
     } /* end pin */
     pin (B2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005923 ;
       fall_capacitance : 0.005880 ;
       capacitance : 0.005923 ;
@@ -1843,6 +1878,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "(A & B)" ;
       timing () {
         related_pin : A ;
@@ -1967,12 +2004,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004530 ;
       fall_capacitance : 0.004444 ;
       capacitance : 0.004530 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005338 ;
       fall_capacitance : 0.005260 ;
       capacitance : 0.005338 ;
@@ -2006,6 +2045,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "(A & B)" ;
       timing () {
         related_pin : A ;
@@ -2130,12 +2171,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004530 ;
       fall_capacitance : 0.004457 ;
       capacitance : 0.004530 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005337 ;
       fall_capacitance : 0.005271 ;
       capacitance : 0.005337 ;
@@ -2169,6 +2212,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((A & B) & C)" ;
       timing () {
         related_pin : A ;
@@ -2353,18 +2398,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004543 ;
       fall_capacitance : 0.004496 ;
       capacitance : 0.004543 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004666 ;
       fall_capacitance : 0.004654 ;
       capacitance : 0.004666 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005344 ;
       fall_capacitance : 0.005300 ;
       capacitance : 0.005344 ;
@@ -2414,6 +2462,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "((A & B) & C)" ;
       timing () {
         related_pin : A ;
@@ -2598,18 +2648,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004541 ;
       fall_capacitance : 0.004501 ;
       capacitance : 0.004541 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004665 ;
       fall_capacitance : 0.004658 ;
       capacitance : 0.004665 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005342 ;
       fall_capacitance : 0.005304 ;
       capacitance : 0.005342 ;
@@ -2659,6 +2712,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "(((A & B) & C) & D)" ;
       timing () {
         related_pin : A ;
@@ -2903,24 +2958,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004548 ;
       fall_capacitance : 0.004522 ;
       capacitance : 0.004548 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004668 ;
       fall_capacitance : 0.004675 ;
       capacitance : 0.004675 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004670 ;
       fall_capacitance : 0.004677 ;
       capacitance : 0.004677 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005346 ;
       fall_capacitance : 0.005321 ;
       capacitance : 0.005346 ;
@@ -3002,6 +3061,8 @@ library (sg13g2_stdcell_hv){
     area : 47.9808 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "(((A & B) & C) & D)" ;
       timing () {
         related_pin : A ;
@@ -3246,24 +3307,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004546 ;
       fall_capacitance : 0.004523 ;
       capacitance : 0.004546 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004667 ;
       fall_capacitance : 0.004677 ;
       capacitance : 0.004677 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004669 ;
       fall_capacitance : 0.004679 ;
       capacitance : 0.004679 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005345 ;
       fall_capacitance : 0.005323 ;
       capacitance : 0.005345 ;
@@ -3345,6 +3410,8 @@ library (sg13g2_stdcell_hv){
     area : 20.5632 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3409,6 +3476,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005023 ;
       fall_capacitance : 0.004572 ;
       capacitance : 0.005023 ;
@@ -3434,6 +3502,8 @@ library (sg13g2_stdcell_hv){
     area : 137.088 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 10.56 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3498,6 +3568,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.038303 ;
       fall_capacitance : 0.034984 ;
       capacitance : 0.038303 ;
@@ -3523,6 +3594,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3587,6 +3660,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005917 ;
       fall_capacitance : 0.005362 ;
       capacitance : 0.005917 ;
@@ -3612,6 +3686,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 2.64 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3676,6 +3752,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.009166 ;
       fall_capacitance : 0.008236 ;
       capacitance : 0.009166 ;
@@ -3701,6 +3778,8 @@ library (sg13g2_stdcell_hv){
     area : 71.9712 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 5.28 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3765,6 +3844,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.019437 ;
       fall_capacitance : 0.017678 ;
       capacitance : 0.019437 ;
@@ -3790,6 +3870,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3854,6 +3936,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.002882 ;
       fall_capacitance : 0.002661 ;
       capacitance : 0.002882 ;
@@ -3879,6 +3962,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -3943,6 +4028,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.002879 ;
       fall_capacitance : 0.002657 ;
       capacitance : 0.002879 ;
@@ -3968,6 +4054,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "A" ;
       timing () {
         related_pin : A ;
@@ -4032,6 +4120,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.002880 ;
       fall_capacitance : 0.002660 ;
       capacitance : 0.002880 ;
@@ -4057,6 +4146,8 @@ library (sg13g2_stdcell_hv){
     area : 13.7088 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(A)" ;
       timing () {
         related_pin : A ;
@@ -4121,6 +4212,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006654 ;
       fall_capacitance : 0.006014 ;
       capacitance : 0.006654 ;
@@ -4146,6 +4238,8 @@ library (sg13g2_stdcell_hv){
     area : 102.816 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 10.56 ;
+      max_transition : 6.66968 ;
       function : "!(A)" ;
       timing () {
         related_pin : A ;
@@ -4210,6 +4304,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.098752 ;
       fall_capacitance : 0.089943 ;
       capacitance : 0.098752 ;
@@ -4235,6 +4330,8 @@ library (sg13g2_stdcell_hv){
     area : 20.5632 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!(A)" ;
       timing () {
         related_pin : A ;
@@ -4299,6 +4396,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013021 ;
       fall_capacitance : 0.011807 ;
       capacitance : 0.013021 ;
@@ -4324,6 +4422,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 2.64 ;
+      max_transition : 6.66968 ;
       function : "!(A)" ;
       timing () {
         related_pin : A ;
@@ -4388,6 +4488,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.025578 ;
       fall_capacitance : 0.023311 ;
       capacitance : 0.025578 ;
@@ -4413,6 +4514,8 @@ library (sg13g2_stdcell_hv){
     area : 54.8352 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 5.28 ;
+      max_transition : 6.66968 ;
       function : "!(A)" ;
       timing () {
         related_pin : A ;
@@ -4477,6 +4580,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.050283 ;
       fall_capacitance : 0.045988 ;
       capacitance : 0.050283 ;
@@ -4502,6 +4606,8 @@ library (sg13g2_stdcell_hv){
     area : 54.8352 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((!(S) & A0) | (S & A1))" ;
       timing () {
         related_pin : A0 ;
@@ -4686,18 +4792,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A0) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005793 ;
       fall_capacitance : 0.004803 ;
       capacitance : 0.005793 ;
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004946 ;
       fall_capacitance : 0.004290 ;
       capacitance : 0.004946 ;
     } /* end pin */
     pin (S) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.011312 ;
       fall_capacitance : 0.010721 ;
       capacitance : 0.011312 ;
@@ -4747,6 +4856,8 @@ library (sg13g2_stdcell_hv){
     area : 61.6896 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "((!(S) & A0) | (S & A1))" ;
       timing () {
         related_pin : A0 ;
@@ -4931,18 +5042,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A0) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005796 ;
       fall_capacitance : 0.004802 ;
       capacitance : 0.005796 ;
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004983 ;
       fall_capacitance : 0.004404 ;
       capacitance : 0.004983 ;
     } /* end pin */
     pin (S) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.011314 ;
       fall_capacitance : 0.010728 ;
       capacitance : 0.011314 ;
@@ -4992,6 +5106,8 @@ library (sg13g2_stdcell_hv){
     area : 126.8064 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((((A0 & (!(S0) & !(S1))) | (A1 & (S0 & !(S1)))) | (A2 & (!(S0) & S1))) | (A3 & (S0 & S1)))" ;
       timing () {
         related_pin : A0 ;
@@ -5356,36 +5472,42 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A0) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006084 ;
       fall_capacitance : 0.005541 ;
       capacitance : 0.006084 ;
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005865 ;
       fall_capacitance : 0.005739 ;
       capacitance : 0.005865 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006078 ;
       fall_capacitance : 0.005539 ;
       capacitance : 0.006078 ;
     } /* end pin */
     pin (A3) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005865 ;
       fall_capacitance : 0.005739 ;
       capacitance : 0.005865 ;
     } /* end pin */
     pin (S0) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.016114 ;
       fall_capacitance : 0.014901 ;
       capacitance : 0.016114 ;
     } /* end pin */
     pin (S1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.010947 ;
       fall_capacitance : 0.010170 ;
       capacitance : 0.010947 ;
@@ -5659,6 +5781,8 @@ library (sg13g2_stdcell_hv){
     area : 20.5632 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((A & B))" ;
       timing () {
         related_pin : A ;
@@ -5783,12 +5907,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005924 ;
       fall_capacitance : 0.005971 ;
       capacitance : 0.005971 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006850 ;
       fall_capacitance : 0.006894 ;
       capacitance : 0.006894 ;
@@ -5822,6 +5948,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!((A & B))" ;
       timing () {
         related_pin : A ;
@@ -5946,12 +6074,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.011531 ;
       fall_capacitance : 0.011690 ;
       capacitance : 0.011690 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013339 ;
       fall_capacitance : 0.013488 ;
       capacitance : 0.013488 ;
@@ -5985,6 +6115,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((!(A_N) & B))" ;
       timing () {
         related_pin : A_N ;
@@ -6109,12 +6241,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A_N) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005039 ;
       fall_capacitance : 0.004573 ;
       capacitance : 0.005039 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006872 ;
       fall_capacitance : 0.006001 ;
       capacitance : 0.006872 ;
@@ -6148,6 +6282,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!((!(A_N) & B))" ;
       timing () {
         related_pin : A_N ;
@@ -6272,12 +6408,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A_N) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005013 ;
       fall_capacitance : 0.004546 ;
       capacitance : 0.005013 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012435 ;
       fall_capacitance : 0.011700 ;
       capacitance : 0.012435 ;
@@ -6311,6 +6449,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A & B) & C))" ;
       timing () {
         related_pin : A ;
@@ -6495,18 +6635,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005924 ;
       fall_capacitance : 0.005971 ;
       capacitance : 0.005971 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006058 ;
       fall_capacitance : 0.006137 ;
       capacitance : 0.006137 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006849 ;
       fall_capacitance : 0.006892 ;
       capacitance : 0.006892 ;
@@ -6556,6 +6699,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((!(A_N) & B) & C))" ;
       timing () {
         related_pin : A_N ;
@@ -6740,18 +6885,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A_N) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005039 ;
       fall_capacitance : 0.004573 ;
       capacitance : 0.005039 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005908 ;
       fall_capacitance : 0.005958 ;
       capacitance : 0.005958 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006850 ;
       fall_capacitance : 0.006894 ;
       capacitance : 0.006894 ;
@@ -6801,6 +6949,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((((A & B) & C) & D))" ;
       timing () {
         related_pin : A ;
@@ -7045,24 +7195,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005925 ;
       fall_capacitance : 0.005972 ;
       capacitance : 0.005972 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006058 ;
       fall_capacitance : 0.006137 ;
       capacitance : 0.006137 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006060 ;
       fall_capacitance : 0.006139 ;
       capacitance : 0.006139 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006849 ;
       fall_capacitance : 0.006892 ;
       capacitance : 0.006892 ;
@@ -7144,6 +7298,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((A | B))" ;
       timing () {
         related_pin : A ;
@@ -7268,12 +7424,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006648 ;
       fall_capacitance : 0.006265 ;
       capacitance : 0.006648 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006647 ;
       fall_capacitance : 0.005220 ;
       capacitance : 0.006647 ;
@@ -7307,6 +7465,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((A | B))" ;
       timing () {
         related_pin : A ;
@@ -7431,12 +7591,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013032 ;
       fall_capacitance : 0.012352 ;
       capacitance : 0.013032 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013029 ;
       fall_capacitance : 0.010169 ;
       capacitance : 0.013029 ;
@@ -7470,6 +7632,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((A | !(B_N)))" ;
       timing () {
         related_pin : A ;
@@ -7594,12 +7758,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.003848 ;
       fall_capacitance : 0.003864 ;
       capacitance : 0.003864 ;
     } /* end pin */
     pin (B_N) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005025 ;
       fall_capacitance : 0.004580 ;
       capacitance : 0.005025 ;
@@ -7633,6 +7799,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!((A | !(B_N)))" ;
       timing () {
         related_pin : A ;
@@ -7757,12 +7925,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.007256 ;
       fall_capacitance : 0.007343 ;
       capacitance : 0.007343 ;
     } /* end pin */
     pin (B_N) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005919 ;
       fall_capacitance : 0.005369 ;
       capacitance : 0.005919 ;
@@ -7796,6 +7966,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A | B) | C))" ;
       timing () {
         related_pin : A ;
@@ -7980,18 +8152,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006696 ;
       fall_capacitance : 0.006332 ;
       capacitance : 0.006696 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006689 ;
       fall_capacitance : 0.005390 ;
       capacitance : 0.006689 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006695 ;
       fall_capacitance : 0.005167 ;
       capacitance : 0.006695 ;
@@ -8041,6 +8216,8 @@ library (sg13g2_stdcell_hv){
     area : 47.9808 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!(((A | B) | C))" ;
       timing () {
         related_pin : A ;
@@ -8225,18 +8402,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013017 ;
       fall_capacitance : 0.012352 ;
       capacitance : 0.013017 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013029 ;
       fall_capacitance : 0.010398 ;
       capacitance : 0.013029 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013011 ;
       fall_capacitance : 0.009903 ;
       capacitance : 0.013011 ;
@@ -8286,6 +8466,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!((((A | B) | C) | D))" ;
       timing () {
         related_pin : A ;
@@ -8530,24 +8712,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006636 ;
       fall_capacitance : 0.006266 ;
       capacitance : 0.006636 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006599 ;
       fall_capacitance : 0.005326 ;
       capacitance : 0.006599 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006598 ;
       fall_capacitance : 0.005177 ;
       capacitance : 0.006598 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006635 ;
       fall_capacitance : 0.005088 ;
       capacitance : 0.006635 ;
@@ -8629,6 +8815,8 @@ library (sg13g2_stdcell_hv){
     area : 61.6896 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "!((((A | B) | C) | D))" ;
       timing () {
         related_pin : A ;
@@ -8873,24 +9061,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013014 ;
       fall_capacitance : 0.012353 ;
       capacitance : 0.013014 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012967 ;
       fall_capacitance : 0.010402 ;
       capacitance : 0.012967 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012961 ;
       fall_capacitance : 0.010064 ;
       capacitance : 0.012961 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.013006 ;
       fall_capacitance : 0.009871 ;
       capacitance : 0.013006 ;
@@ -8972,6 +9164,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A1 | A2) & B1))" ;
       timing () {
         related_pin : A1 ;
@@ -9156,18 +9350,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006842 ;
       fall_capacitance : 0.006731 ;
       capacitance : 0.006842 ;
     } /* end pin */
     pin (A2) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.006841 ;
       fall_capacitance : 0.006720 ;
       capacitance : 0.006841 ;
     } /* end pin */
     pin (B1) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005985 ;
       fall_capacitance : 0.005998 ;
       capacitance : 0.005998 ;
@@ -9217,6 +9414,8 @@ library (sg13g2_stdcell_hv){
     area : 23.9904 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "(A | B)" ;
       timing () {
         related_pin : A ;
@@ -9341,12 +9540,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005009 ;
       fall_capacitance : 0.004700 ;
       capacitance : 0.005009 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004985 ;
       fall_capacitance : 0.003911 ;
       capacitance : 0.004985 ;
@@ -9380,6 +9581,8 @@ library (sg13g2_stdcell_hv){
     area : 30.8448 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "(A | B)" ;
       timing () {
         related_pin : A ;
@@ -9504,12 +9707,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005006 ;
       fall_capacitance : 0.004705 ;
       capacitance : 0.005006 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.004983 ;
       fall_capacitance : 0.003913 ;
       capacitance : 0.004983 ;
@@ -9543,6 +9748,8 @@ library (sg13g2_stdcell_hv){
     area : 37.6992 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((A | B) | C)" ;
       timing () {
         related_pin : A ;
@@ -9727,18 +9934,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005736 ;
       fall_capacitance : 0.005344 ;
       capacitance : 0.005736 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005705 ;
       fall_capacitance : 0.004503 ;
       capacitance : 0.005705 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005635 ;
       fall_capacitance : 0.004297 ;
       capacitance : 0.005635 ;
@@ -9788,6 +9998,8 @@ library (sg13g2_stdcell_hv){
     area : 44.5536 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "((A | B) | C)" ;
       timing () {
         related_pin : A ;
@@ -9972,18 +10184,21 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005733 ;
       fall_capacitance : 0.005350 ;
       capacitance : 0.005733 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005708 ;
       fall_capacitance : 0.004508 ;
       capacitance : 0.005708 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005667 ;
       fall_capacitance : 0.004299 ;
       capacitance : 0.005667 ;
@@ -10033,6 +10248,8 @@ library (sg13g2_stdcell_hv){
     area : 41.1264 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "(((A | B) | C) | D)" ;
       timing () {
         related_pin : A ;
@@ -10277,24 +10494,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005738 ;
       fall_capacitance : 0.005345 ;
       capacitance : 0.005738 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005700 ;
       fall_capacitance : 0.004505 ;
       capacitance : 0.005700 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005658 ;
       fall_capacitance : 0.004371 ;
       capacitance : 0.005658 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005620 ;
       fall_capacitance : 0.004285 ;
       capacitance : 0.005620 ;
@@ -10376,6 +10597,8 @@ library (sg13g2_stdcell_hv){
     area : 47.9808 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 6.66968 ;
       function : "(((A | B) | C) | D)" ;
       timing () {
         related_pin : A ;
@@ -10620,24 +10843,28 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005734 ;
       fall_capacitance : 0.005351 ;
       capacitance : 0.005734 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005697 ;
       fall_capacitance : 0.004510 ;
       capacitance : 0.005697 ;
     } /* end pin */
     pin (C) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005666 ;
       fall_capacitance : 0.004377 ;
       capacitance : 0.005666 ;
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.005655 ;
       fall_capacitance : 0.004288 ;
       capacitance : 0.005655 ;
@@ -10745,6 +10972,8 @@ library (sg13g2_stdcell_hv){
     area : 54.8352 ;
     pin (Y) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "!(((A & !(B)) | (!(A) & B)))" ;
       timing () {
         related_pin : A ;
@@ -10869,12 +11098,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012183 ;
       fall_capacitance : 0.011515 ;
       capacitance : 0.012183 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.011384 ;
       fall_capacitance : 0.009654 ;
       capacitance : 0.011384 ;
@@ -10908,6 +11139,8 @@ library (sg13g2_stdcell_hv){
     area : 54.8352 ;
     pin (X) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 6.66968 ;
       function : "((A & !(B)) | (!(A) & B))" ;
       timing () {
         related_pin : A ;
@@ -11032,12 +11265,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (A) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012574 ;
       fall_capacitance : 0.012116 ;
       capacitance : 0.012574 ;
     } /* end pin */
     pin (B) {
       direction : input ;
+      max_transition : 6.66968 ;
       rise_capacitance : 0.012539 ;
       fall_capacitance : 0.010294 ;
       capacitance : 0.012539 ;
@@ -11081,6 +11316,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -11141,6 +11378,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : CLK ;
@@ -11201,6 +11440,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007630 ;
       fall_capacitance : 0.007643 ;
@@ -11208,6 +11448,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.002436 ;
       fall_capacitance : 0.002512 ;
       capacitance : 0.002512 ;
@@ -11254,6 +11495,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
@@ -11282,6 +11524,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -11342,6 +11586,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : CLK ;
@@ -11402,6 +11648,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007630 ;
       fall_capacitance : 0.007643 ;
@@ -11409,6 +11656,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.002436 ;
       fall_capacitance : 0.002512 ;
       capacitance : 0.002512 ;
@@ -11455,6 +11703,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
@@ -11482,6 +11731,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -11542,6 +11793,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007631 ;
       fall_capacitance : 0.007643 ;
@@ -11549,6 +11801,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.002436 ;
       fall_capacitance : 0.002512 ;
       capacitance : 0.002512 ;
@@ -11595,6 +11848,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
@@ -11622,6 +11876,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -11682,6 +11938,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007631 ;
       fall_capacitance : 0.007643 ;
@@ -11689,6 +11946,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.002436 ;
       fall_capacitance : 0.002512 ;
       capacitance : 0.002512 ;
@@ -11735,6 +11993,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
@@ -11761,6 +12020,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : GATE ;
@@ -11821,6 +12082,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005749 ;
       fall_capacitance : 0.006024 ;
       capacitance : 0.006024 ;
@@ -11867,6 +12129,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (GATE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006246 ;
       fall_capacitance : 0.006241 ;
       capacitance : 0.006246 ;
@@ -11895,6 +12158,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : GATE ;
@@ -11955,6 +12220,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : GATE ;
@@ -12015,6 +12282,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005752 ;
       fall_capacitance : 0.005758 ;
       capacitance : 0.005758 ;
@@ -12061,12 +12329,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (GATE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006246 ;
       fall_capacitance : 0.006242 ;
       capacitance : 0.006246 ;
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006985 ;
       fall_capacitance : 0.007013 ;
       capacitance : 0.007013 ;
@@ -12094,6 +12364,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : GATE ;
@@ -12154,6 +12426,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005752 ;
       fall_capacitance : 0.005758 ;
       capacitance : 0.005758 ;
@@ -12200,12 +12473,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (GATE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006246 ;
       fall_capacitance : 0.006242 ;
       capacitance : 0.006246 ;
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006426 ;
       fall_capacitance : 0.006449 ;
       capacitance : 0.006449 ;
@@ -12234,6 +12509,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : GATE_N ;
@@ -12294,6 +12571,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : GATE_N ;
@@ -12354,6 +12633,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005758 ;
       fall_capacitance : 0.005762 ;
       capacitance : 0.005762 ;
@@ -12400,12 +12680,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (GATE_N) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006254 ;
       fall_capacitance : 0.006237 ;
       capacitance : 0.006254 ;
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006985 ;
       fall_capacitance : 0.007013 ;
       capacitance : 0.007013 ;
@@ -12433,6 +12715,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : GATE_N ;
@@ -12493,6 +12777,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005758 ;
       fall_capacitance : 0.005762 ;
       capacitance : 0.005762 ;
@@ -12539,12 +12824,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (GATE_N) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006254 ;
       fall_capacitance : 0.006237 ;
       capacitance : 0.006254 ;
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.006426 ;
       fall_capacitance : 0.006449 ;
       capacitance : 0.006449 ;
@@ -12576,6 +12863,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -12636,6 +12925,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : CLK ;
@@ -12696,6 +12987,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007627 ;
       fall_capacitance : 0.007726 ;
@@ -12703,6 +12995,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.004380 ;
       fall_capacitance : 0.004326 ;
       capacitance : 0.004380 ;
@@ -12749,12 +13042,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.004403 ;
       fall_capacitance : 0.004217 ;
       capacitance : 0.004403 ;
     } /* end pin */
     pin (SCD) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.004026 ;
       fall_capacitance : 0.004043 ;
       capacitance : 0.004043 ;
@@ -12801,6 +13096,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SCE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.007891 ;
       fall_capacitance : 0.008213 ;
       capacitance : 0.008213 ;
@@ -12847,6 +13143,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.012666 ;
       fall_capacitance : 0.012675 ;
       capacitance : 0.012675 ;
@@ -12875,6 +13172,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -12935,6 +13234,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : CLK ;
@@ -12995,6 +13296,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007630 ;
       fall_capacitance : 0.007643 ;
@@ -13002,6 +13304,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.007006 ;
       fall_capacitance : 0.006968 ;
       capacitance : 0.007006 ;
@@ -13048,12 +13351,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
     } /* end pin */
     pin (SCD) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005326 ;
       fall_capacitance : 0.005364 ;
       capacitance : 0.005364 ;
@@ -13100,6 +13405,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SCE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.012183 ;
       fall_capacitance : 0.012183 ;
       capacitance : 0.012183 ;
@@ -13168,6 +13474,8 @@ library (sg13g2_stdcell_hv){
     
     pin (Q) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -13228,6 +13536,8 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (Q_N) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQN" ;
       timing () {
         related_pin : CLK ;
@@ -13288,6 +13598,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007630 ;
       fall_capacitance : 0.007643 ;
@@ -13295,6 +13606,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.007006 ;
       fall_capacitance : 0.006968 ;
       capacitance : 0.007006 ;
@@ -13341,12 +13653,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
     } /* end pin */
     pin (SCD) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005326 ;
       fall_capacitance : 0.005364 ;
       capacitance : 0.005364 ;
@@ -13393,6 +13707,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SCE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.012183 ;
       fall_capacitance : 0.012183 ;
       capacitance : 0.012183 ;
@@ -13460,6 +13775,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 0.66 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -13520,6 +13837,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007631 ;
       fall_capacitance : 0.007645 ;
@@ -13527,6 +13845,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.007006 ;
       fall_capacitance : 0.006968 ;
       capacitance : 0.007006 ;
@@ -13573,12 +13892,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
     } /* end pin */
     pin (SCD) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005326 ;
       fall_capacitance : 0.005364 ;
       capacitance : 0.005364 ;
@@ -13625,6 +13946,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SCE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.012183 ;
       fall_capacitance : 0.012440 ;
       capacitance : 0.012440 ;
@@ -13692,6 +14014,8 @@ library (sg13g2_stdcell_hv){
     }
     pin (Q) {
       direction : output ;
+      max_capacitance : 1.32 ;
+      max_transition : 3.35958 ;
       function : "IQ" ;
       timing () {
         related_pin : CLK ;
@@ -13752,6 +14076,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (CLK) {
       direction : input ;
+      max_transition : 3.35958 ;
       clock : true ;
       rise_capacitance : 0.007631 ;
       fall_capacitance : 0.007645 ;
@@ -13759,6 +14084,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (D) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.007006 ;
       fall_capacitance : 0.006968 ;
       capacitance : 0.007006 ;
@@ -13805,12 +14131,14 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (RESET_B) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.009089 ;
       fall_capacitance : 0.009107 ;
       capacitance : 0.009107 ;
     } /* end pin */
     pin (SCD) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.005326 ;
       fall_capacitance : 0.005364 ;
       capacitance : 0.005364 ;
@@ -13857,6 +14185,7 @@ library (sg13g2_stdcell_hv){
     } /* end pin */
     pin (SCE) {
       direction : input ;
+      max_transition : 3.35958 ;
       rise_capacitance : 0.012183 ;
       fall_capacitance : 0.012440 ;
       capacitance : 0.012440 ;
@@ -13911,4 +14240,63 @@ library (sg13g2_stdcell_hv){
     } /* end pg_pin */
   } /* end cell */
 
+  cell (sg13g2_hv_fill_1) {
+    area : 3.4272 ;
+    cell_footprint : "fill" ;
+    cell_leakage_power : 0 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_filler_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_fill_2) {
+    area : 6.8544 ;
+    cell_footprint : "fill" ;
+    cell_leakage_power : 0 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_filler_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_fill_4) {
+    area : 13.7088 ;
+    cell_footprint : "fill" ;
+    cell_leakage_power : 0 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_filler_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_fill_8) {
+    area : 27.4176 ;
+    cell_footprint : "fill" ;
+    cell_leakage_power : 0 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_filler_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_decap_4) {
+    area : 13.7088 ;
+    cell_footprint : "decap" ;
+    cell_leakage_power : 1.32835e-08 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_decap_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_decap_8) {
+    area : 23.9904 ;
+    cell_footprint : "decap" ;
+    cell_leakage_power : 7.24063e-10 ;
+    dont_touch : true ;
+    dont_use : true ;
+    is_decap_cell : true ;
+  } /* end cell */
+  cell (sg13g2_hv_antennanp) {
+    area : 10.2816 ;
+    cell_footprint : "antennanp" ;
+    cell_leakage_power : 0.21561 ;
+    dont_touch : true ;
+    dont_use : true ;
+    pin (A) {
+      direction : input ;
+      capacitance : 0.00160112 ;
+    } /* end pin */
+  } /* end cell */
 } /* end library */

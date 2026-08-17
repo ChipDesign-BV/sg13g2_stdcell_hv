@@ -163,6 +163,33 @@ and no timing arcs; `tiehi` / `tielo` have no timing tables in the thin-oxide
 library either; `lgcp_1` and `slgcp_1` are statetable-based integrated clock
 gates and CharLib has no input form for a statetable.
 
+`work/finalize_lib.py` post-processes the characterized file into the
+shipped one, all three steps idempotent and derived or measured rather
+than borrowed from the thin-oxide library:
+
+* **Drive limits.** CharLib emits no `max_capacitance` / `max_transition`
+  at all. OpenSTA then answers "no limit" everywhere — LibreLane's
+  max-cap/max-slew checks pass vacuously and OpenROAD's TritonCTS
+  dereferences the empty buffer-selection result and crashes. The limits
+  come from the characterization itself: per output pin, the top of its
+  load axis (0.66–10.56 pF by drive class); per pin, the top of the slew
+  axis it was characterized against (6.67 ns combinational, 3.36 ns
+  sequential); library defaults `default_max_capacitance : 0.66` /
+  `default_max_transition : 6.66968` follow the thin-oxide convention of
+  weakest-drive / slowest-edge. These bound the characterized range —
+  actual slew targets belong in the flow constraints.
+* **Physical-cell stubs.** Area-only entries for `fill_*`, `decap_*` and
+  `antennanp` (`is_filler_cell` / `is_decap_cell` / `dont_use`), so
+  filler, decap and antenna-diode insertion produce no cells STA has
+  never heard of. Decap and diode leakage are measured on the shipped
+  netlists like the tie cells (thick oxide: the decaps leak ~nothing,
+  unlike their 396 nW thin-oxide counterparts); the diode's 1.6 fF pin
+  capacitance is a 1 MHz small-signal measurement averaged over bias —
+  the charge-integration method is unusable here because the antenna
+  diodes' breakdown model forces picosecond transient steps.
+* **Corner-suffixed library name** (`sg13g2_stdcell_hv_typ_3p30V_25C`),
+  matching the upstream per-corner naming.
+
 Historically, **20 cells were configured but produced nothing** — all 14
 flip-flops and latches (`dfrbp_*`, `dfrbpq_*`, `dlh*`, `dll*`, `sdf*`) and all 6
 tri-state cells (`ebufn_*`, `einvn_*`). CharLib emits an empty library for
@@ -503,13 +530,13 @@ Two details there are load-bearing, and both were learned by breaking them:
 
 ### Verified
 
-* **DRC clean and LVS clean, all 66 cells** — see
-  [DRC result](#drc-result) and [LVS result](#lvs-result).
+* **DRC clean and LVS clean, all 68 drawn cells** (66 retargeted + the 2
+  tie cells) — see [DRC result](#drc-result) and [LVS result](#lvs-result).
 * Uniform row height, **7.140 µm = 17 horizontal routing tracks**
-  (0.42 µm pitch), across all 66 cells; every cell width is a multiple of
+  (0.42 µm pitch), across all 68 cells; every cell width is a multiple of
   the 0.48 µm `CoreSiteHV` site, so the cells place on the same grids as
   the thin-oxide 9-track library. `lef/sg13g2_stdcell_hv.lef` carries the
-  site and the 66 macros, generated from the GDS by `work/gen_lef.py` with
+  site and the 68 macros, generated from the GDS by `work/gen_lef.py` with
   pin sets verified against the CDL and antenna values recomputed from the
   netlist.
 * Every gate length and width matches the scaled thin-oxide layout to within
@@ -526,10 +553,26 @@ Two details there are load-bearing, and both were learned by breaking them:
 
 ### Not done
 
-* **18 cells have no layout.** They run a PMOS Activ up into the VDD rail, or
+* **16 cells have no layout.** They run a PMOS Activ up into the VDD rail, or
   bring an NMOS Activ up to the library channel cut; either way the band
   cannot be scaled without moving the rail off the cell boundary and breaking
-  abutment. They are listed by `layout_retarget.py`.
+  abutment. `layout_retarget.py` prints 18 skips, but two of those — tiehi
+  and tielo — were later drawn from scratch by `gen_tie_cells.py` (see
+  [Tie cells](#tie-cells)). The remaining 16 are the 8 dfrbp/sdfrbp flops,
+  4 of the 5 latches, 2 of the 3 ebufn drives, `lgcp_1` and `sighold`.
+* **Magic DRC flags NW.c1 on every cell.** Magic's SG13G2 tech has no
+  DigiBnd concept, so it applies the strict analog N-well rules (0.62 µm
+  enclosure of HV P-diff) unconditionally; these cells carry the DigiBnd
+  marker and are built to the relaxed digital rules (NW.c1.dig, 0.31 µm),
+  which the KLayout maximal deck verifies clean. Measured against the
+  strict rule, 65 of 68 cells miss by exactly 25 nm (mux4_1 by 210 nm,
+  slgcp_1 by 215 nm), and a well-bottom-only fix — moving the N-well
+  bottom edge 2625 → 2570 nm globally, deepening the existing jogs in
+  mux4_1/slgcp_1 — satisfies the strict rules without touching a single
+  device (no re-characterization; the wells are not device terminals and
+  the HV PSP models carry no well-proximity parameters). Planned as a
+  follow-up; the isolated-cell NW.e1 flags are a block-boundary artifact
+  that vanishes once rows abut.
 * Not silicon-proven, and not reviewed by anyone who was not also its author.
   DRC/LVS-clean means the checks pass, not that the cells are known good in
   fabrication.
@@ -737,7 +780,41 @@ PSP103 models — in batch and interactive mode, not in server mode (`ngspice
 -s`). Tools driving ngspice through PySpice hit this; see
 `work/ngspice-osdi-shim/ngspice` for the workaround.
 
-## Regenerating
+### librelane
+
+`librelane/` is a complete LibreLane SCL — the files `work/make_pdk_pr.py`
+installs as `libs.tech/librelane/sg13g2_stdcell_hv/` in a PDK checkout:
+the SCL `config.tcl` (site `CoreSiteHV`, 0.48 × 7.14; HV driving, tie,
+fill, decap, diode and CTS cells), `tracks.info`, the latch and mux
+techmaps, both exclude lists, and `sdfbbp_map.v`. The installer also
+patches the PDK-level `libs.tech/librelane/config.tcl` with the HV corner
+block (the LIB dict there hardcodes the thin-oxide liberty filenames and
+LibreLane validates every LIB path eagerly) and copies the thin-oxide
+`sg13g2_tech.lef` into `libs.ref/sg13g2_stdcell_hv/lef/` (the PDK config
+globs it per-SCL). A design then needs only:
+
+```yaml
+STD_CELL_LIBRARY: sg13g2_stdcell_hv
+SYNTH_EXTRA_MAPPING_FILE: pdk_dir::libs.tech/librelane/sg13g2_stdcell_hv/sdfbbp_map.v
+```
+
+The second line is the flip-flop mapping and it cannot live in the PDK
+config: `SYNTH_EXTRA_MAPPING_FILE` is not a PDK-scoped variable in
+LibreLane. It maps every posedge Yosys flop onto the scan cell
+`sg13g2_hv_sdfbbp_1` — the only flop with both liberty and layout views
+today — with the scan pins tied off (or, for enable flops, the scan mux
+recycled as the enable mux). All clocked mappings are proven against the
+Yosys cell semantics with `equiv_induct`; the header of `sdfbbp_map.v`
+documents the scheme. The costs, until the dfrbp/dfrbpq layouts are drawn:
+each flop is a full scan cell (~2× the area a dfrbpq_1 would take, plus
+tie cells for the unused pins), negedge-clock flops are deliberately
+unmapped (a silent `CLK(~C)` would distort the clock tree), and there are
+no tri-state or clock-gate mappings (those cells are not characterized).
+
+The shipped liberty is stripped at install time to the 63 cells that have
+a LEF macro (`finalize_lib.strip_layoutless`), so the PDK never advertises
+timing for a cell that cannot be placed; the characterization data for the
+12 undrawn flops and latches stays in this repository's `lib/`.
 
 ```sh
 cd work
@@ -759,6 +836,9 @@ python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib seq.lib
 python3 seq_leakage.py          # single-state leakage for the 14 cells
 python3 tie_leakage.py          # measured tie-cell leakage into the Liberty
 python3 update_lib_area.py      # Liberty area from the LEF (reports drift)
+python3 finalize_lib.py         # drive limits from the table axes, physical-
+                                # cell stubs (measured leakage/cap), corner
+                                # suffix on the library name
 python3 verify_lib.py           # gates the shipped Liberty as data
 python3 lctime_compare.py       # independent characterizer cross-check
 python3 view_matrix.py          # per-cell view coverage matrix
@@ -767,7 +847,7 @@ python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
 python3 fix_rail_contacts.py    # rail taps onto the site-centred 0.48 um grid
 python3 grid_align_pins.py --apply  # widen off-track pins that have room
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
-python3 gen_lef.py              # lef/ (site + 66 macros)
+python3 gen_lef.py              # lef/ (site + 68 macros)
 python3 make_drc_top.py         # abutted 2-row DRC context (padded pitch)
 python3 make_shared_rail_rows.py  # shared-rail mixed-row DRC context
 ./run_lvs.sh                    # per-cell LVS

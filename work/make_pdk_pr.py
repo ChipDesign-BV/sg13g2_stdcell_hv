@@ -8,8 +8,28 @@ libs.ref/sg13g2_stdcell/{sym,sch}/xschem, which is exactly this
 repository's layout -- so the library drops in unchanged:
 
   libs.ref/sg13g2_stdcell_hv/{cdl,doc,gds,lef,lib,spice,verilog,sym,sch}
+  libs.tech/librelane/sg13g2_stdcell_hv/                 (LibreLane SCL)
   libs.tech/klayout/tech/pymacros/sg13g2_stdcell_hv.lym
   libs.tech/xschem/xschemrc                              (2-line patch)
+  libs.tech/librelane/config.tcl                         (HV corner block)
+
+LibreLane support (added for PR #1103 rev. 2 after Simon Dorrer's smoke
+test) is four pieces:
+  * the SCL directory (site CoreSiteHV 0.48 x 7.14, HV cell maps, tracks,
+    exclude lists, and sdfbbp_map.v -- the flip-flop techmap designs must
+    reference via SYNTH_EXTRA_MAPPING_FILE, which LibreLane does not let
+    a PDK set);
+  * a conditional block in the PDK-level librelane/config.tcl -- the LIB
+    dict, corner list and core voltage there hardcode the thin-oxide
+    1.2 V liberty filenames, and LibreLane validates the LIB paths
+    eagerly, so an HV run needs them overridden at the source;
+  * a copy of the thin-oxide tech LEF into the HV lib's lef/ dir (the
+    PDK config globs libs.ref/$STD_CELL_LIBRARY/lef/sg13g2_tech.lef and
+    a missing file is a hard Tcl error);
+  * the installed liberty is stripped to the cells that have a LEF macro
+    (finalize_lib.strip_layoutless): the characterization data for the
+    not-yet-drawn flops stays in this repo, but the PDK must not
+    advertise timing for cells that cannot be placed.
 
 The symbols keep their schematic="tcleval($::SG13G2_HV_SCH/...)" pointer.
 Upstream's own stdcell symbols resolve schematics through the
@@ -44,10 +64,30 @@ import subprocess
 import sys
 import tempfile
 
+import finalize_lib
 import verify_sch
 
 HV = pathlib.Path(__file__).resolve().parent.parent
 XSCHEM = "/foss/tools/bin/xschem"
+LIB_NAME = "sg13g2_stdcell_hv_typ_3p30V_25C.lib"
+
+ANCHOR_LL = 'set ::env(DEFAULT_CORNER) "nom_typ_1p20V_25C"'
+PATCH_LL = '''
+
+# Thick-oxide (3.3 V) standard-cell library: one characterized corner so
+# far. Overrides the thin-oxide LIB dict / corner list / core voltage
+# above (LibreLane validates every LIB path eagerly, so the thin-oxide
+# entries must not survive into an HV run).
+if { $::env(STD_CELL_LIBRARY) eq "sg13g2_stdcell_hv" } {
+    set ::env(VDD_PIN_VOLTAGE) "3.30"
+    set ::env(LIB) [dict create]
+    dict set ::env(LIB) "*_typ_3p30V_25C" "\\
+        $::env(PDK_ROOT)/$::env(PDK)/libs.ref/sg13g2_stdcell_hv/lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib\\
+        $::env(PDK_ROOT)/$::env(PDK)/libs.ref/sg13g2_io/lib/sg13g2_io_typ_1p5V_3p3V_25C.lib\\
+    "
+    set ::env(STA_CORNERS) "nom_typ_3p30V_25C"
+    set ::env(DEFAULT_CORNER) "nom_typ_3p30V_25C"
+}'''
 
 ANCHOR = ("append XSCHEM_LIBRARY_PATH "
           ":${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell/sym/xschem")
@@ -74,6 +114,38 @@ def copy_libs_ref(pdk):
     n = sum(1 for p in ref.rglob("*") if p.is_file())
     print(f"libs.ref/sg13g2_stdcell_hv: {n} files")
     return ref
+
+
+def copy_tech_lef(pdk, ref):
+    """The PDK-level librelane config globs
+    libs.ref/$STD_CELL_LIBRARY/lef/sg13g2_tech.lef; Tcl glob errors on no
+    match. Copy the checkout's own thin-oxide tech LEF so the two SCLs
+    can never diverge in layer definitions."""
+    src = (pdk / "ihp-sg13g2" / "libs.ref" / "sg13g2_stdcell" / "lef" /
+           "sg13g2_tech.lef")
+    shutil.copy2(src, ref / "lef" / "sg13g2_tech.lef")
+    print("lef/sg13g2_tech.lef: copied from sg13g2_stdcell")
+
+
+def copy_librelane(pdk):
+    dst = (pdk / "ihp-sg13g2" / "libs.tech" / "librelane" /
+           "sg13g2_stdcell_hv")
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(HV / "librelane", dst)
+    n = sum(1 for p in dst.iterdir())
+    print(f"libs.tech/librelane/sg13g2_stdcell_hv: {n} files")
+
+
+def patch_librelane_config(pdk):
+    cfg = pdk / "ihp-sg13g2" / "libs.tech" / "librelane" / "config.tcl"
+    text = cfg.read_text()
+    if "sg13g2_stdcell_hv" in text:
+        print("librelane config.tcl: already patched")
+        return
+    assert ANCHOR_LL in text, "DEFAULT_CORNER line not found in config.tcl"
+    cfg.write_text(text.replace(ANCHOR_LL, ANCHOR_LL + PATCH_LL, 1))
+    print("librelane config.tcl: HV corner block added after DEFAULT_CORNER")
 
 
 def patch_xschemrc(pdk):
@@ -151,7 +223,12 @@ def main():
     assert (pdk / "ihp-sg13g2" / "libs.ref").is_dir(), \
         f"{pdk} is not an IHP-Open-PDK checkout"
 
-    copy_libs_ref(pdk)
+    ref = copy_libs_ref(pdk)
+    copy_tech_lef(pdk, ref)
+    finalize_lib.strip_layoutless(ref / "lib" / LIB_NAME,
+                                  ref / "lef" / "sg13g2_stdcell_hv.lef")
+    copy_librelane(pdk)
+    patch_librelane_config(pdk)
     patch_xschemrc(pdk)
     copy_klayout(pdk)
     ok = verify_install(pdk)
@@ -162,9 +239,15 @@ Developer Certificate of Origin sign-off, i.e. git commit -s):
   re-run signoff with the checkout's decks: run_drc.py on the two
     work/drc arrays, per-cell LVS, OpenSTA read of the .lib, iverilog
     against the checkout's sg13g2_udp.v;
+  smoke-test LibreLane: STD_CELL_LIBRARY: sg13g2_stdcell_hv plus, at
+    design level, SYNTH_EXTRA_MAPPING_FILE:
+    pdk_dir::libs.tech/librelane/sg13g2_stdcell_hv/sdfbbp_map.v
+    (flip-flops; the variable is not PDK-scoped in LibreLane);
   branch from dev, commit, push to a fork, open the PR as a draft;
   flag as maintainer questions: cell set (view_matrix.py), the KLayout
-    macro, hierarchy_config unification, missing qucs-s views.
+    macro, hierarchy_config unification, missing qucs-s views, and the
+    IO liberty paired with the HV corner (sg13g2_io_typ_1p5V_3p3V_25C is
+    the closest existing file; none is characterized for a 3.3 V core).
 """)
     return 0 if ok else 1
 

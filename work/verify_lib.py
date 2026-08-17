@@ -218,5 +218,28 @@ if seq_cells:
             n_ok += 1
     print(f"sequential cells checked: {len(seq_cells)}, clean: {n_ok}")
 
+# --- 7. drive limits ---------------------------------------------------------
+# finalize_lib.py derives max_capacitance / max_transition from the table
+# axes; without them OpenSTA reports no limit violations at all (vacuous
+# pass) and OpenROAD's TritonCTS crashes on buffer selection. Every output
+# pin that carries timing tables must have both, and the library header
+# must carry the defaults.
+for attr in ("default_max_capacitance", "default_max_transition"):
+    if not re.search(rf"^  {attr} : [0-9.]+ ;", txt, re.M):
+        err(f"library header: no {attr}")
+n_lim = 0
+for name, body in cells.items():
+    for pm in re.finditer(r"^    pin \((\S+)\) \{.*?^    \}", body,
+                          re.S | re.M):
+        if "direction : output" not in pm.group(0):
+            continue
+        if not re.search(r"(cell_rise|cell_fall) \(", pm.group(0)):
+            continue                    # tie cells: constant, no tables
+        n_lim += 1
+        for attr in ("max_capacitance", "max_transition"):
+            if f"{attr} :" not in pm.group(0):
+                err(f"{name}/{pm.group(1)}: no {attr}")
+print(f"output pins with drive limits checked: {n_lim}")
+
 print(f"\nRESULT: {'PASS' if not errors else f'FAIL ({len(errors)} errors)'}")
 sys.exit(1 if errors else 0)
