@@ -25,7 +25,7 @@ so both libraries coexist in one netlist.
 | xschem symbols / schematics | 84 + gallery sheet | netlist-equivalence proven |
 | GDS layout (`gds/`) | **84 cells** (66 retargeted + 18 per-cell generated) | **DRC clean, LVS clean** |
 | LEF abstracts (`lef/`) | **84 macros** + `CoreSiteHV` site | generated from the GDS, pin sets verified against CDL |
-| Liberty NLDM (`lib/`) | 76 cells, 600 timing tables | combinational + sequential + special classes; areas all measured |
+| Liberty NLDM (`lib/`) | 82 cells, 660 timing tables | combinational + sequential + tri-state; areas all measured |
 | LibreLane SCL (`librelane/`) | site, cell maps, tracks, excludes | flops map natively through `dfflibmap` |
 
 Physical sign-off, one fixed invocation of the PDK's own klayout decks — on
@@ -400,22 +400,38 @@ recorded separately rather than folded in. The same reasoning explains the
 thin-oxide cell's 2.8× rise/fall capacitance asymmetry as an artifact of
 its measurement, so the HV cell ships equal rise and fall values.
 
-**The six tri-states and the two clock gates** are measured by
-`work/char_tristate.py` and `work/char_clockgate.py`. The tri-states need
-three arc classes rather than one — the `combinational` data arc plus
-`three_state_enable` and `three_state_disable`, the latter two measured
-into and out of a floating node defined by a 1 GΩ mid-rail keeper (the
-same construct the functional suite uses for its 12 Hi-Z checks). The
-clock gates need a `CLK`→`GCLK` propagation arc, `setup_rising`/
-`hold_rising` on the enable pins — the form the sequential bisection
-procedure already emits — and a `min_pulse_width` constraint on the clock
-pin, bisected until the gated output loses its pulse. Both carry the
-statetable, internal state pin and `state_function` metadata that make an
-integrated clock gate usable. *This work is in progress at the time of
-writing; the arc definitions and the verification gate are settled, the
-measured tables are not yet merged.* Until they are, the affected cells
-remain excluded from the flow exactly as the thin-oxide SCL excludes its
-own clock gates, so nothing downstream can pick a cell it cannot time.
+**The six tri-states** are characterized by `work/char_tristate.py` and
+are in the shipped Liberty. Each carries three arc classes rather than
+one: the `combinational` data arc, plus `three_state_enable` and
+`three_state_disable` measured into and out of a floating node defined by
+a 1 GΩ mid-rail keeper — the construct the functional suite already uses
+for its 12 Hi-Z checks. The harness is calibrated by re-measuring a
+shipped cell's pin capacitance through the same code path (0.46 % against
+the shipped value), and the combinational arcs land inside the library's
+2.66× delay band.
+
+The disable arc required a change of measured quantity, not just of
+threshold. Waiting for a released output to cross a voltage threshold is
+not physically measurable: once the driver lets go, only the keeper moves
+the node, so the answer is $0.2\,RC \approx 0.5$ ms and scales with the
+load. The thin-oxide library cannot have measured it that way either —
+its disable tables are exactly load-independent, differing by a 1 fs
+monotonicity epsilon. What is measured here is the drive current going
+away: from `TE_B` at 50 % to $|I_Z|$ falling through half its on-state
+value, which is load-independent by construction and needs no synthetic
+epsilon. Section 7 of the companion characterization report gives the
+derivation and the ratio tables.
+
+**The two clock gates** are measured by `work/char_clockgate.py`: a
+`CLK`→`GCLK` propagation arc, `setup_rising`/`hold_rising` on the enable
+pins — the form the sequential bisection procedure already emits — and a
+`min_pulse_width` constraint on the clock pin, bisected until the gated
+output loses its pulse, alongside the statetable, internal state pin and
+`state_function` metadata that make an integrated clock gate usable.
+*That work is still in progress at the time of writing.* Until it lands
+the two cells stay excluded from the flow, exactly as the thin-oxide SCL
+excludes its own clock gates, so nothing downstream can pick a cell it
+cannot time.
 
 ## One deliberate omission: switching power
 
@@ -487,12 +503,23 @@ installed file and fails the run if any would be invisible; the check
 reproduces the defect against the unpatched `.gitignore` and passes 191
 files against the fixed one.
 
+**Tri-states are wired too**, now that they carry timing:
+`SYNTH_TRISTATE_MAP` maps Yosys' `$_TBUF_` onto `sg13g2_hv_ebufn_2` and
+`TRISTATE_CELLS` lists both footprints, mirroring the thin-oxide SCL.
+
 **Block validation.** The reference 8-bit counter from the IIC-JKU
 SG13G2 AMS chip template hardens end to end on the shipped library with
 no design-level liberty or corner overrides: flops mapped natively, zero
 unmapped cells, CTS clean, max-cap/max-slew checks non-vacuous and
 passing, LVS clean through the auto-derived `CELL_SPICE_MODELS`, and
 **both** KLayout and Magic DRC at zero.
+
+A second design exercises the tri-states specifically — two registered
+sources driving one shared internal bus, so synthesis must infer
+`$_TBUF_` and STA must time the enable arcs. It hardens equally clean:
+16 `sg13g2_hv_ebufn_2` instances, zero unmapped cells, Magic DRC 0,
+KLayout DRC 0, LVS 0, routing DRC 0, antenna 0, and zero max-slew and
+max-cap violations against real limits.
 
 ---
 
@@ -525,6 +552,7 @@ passing, LVS clean through the auto-derived `CELL_SPICE_MODELS`, and
 | Liberty drive limits | `verify_lib.py` 7 | 73 output pins | present on every pin; TritonCTS crash resolved |
 | Liberty special classes | `verify_lib.py` 8 | tri-state / ICG / bus-hold constructs | complete-construct check |
 | LibreLane block run | reference counter, no design-level overrides | RTL→GDS | flops native, DRC **0/0**, LVS clean |
+| LibreLane tri-state run | shared-bus design inferring `$_TBUF_` | RTL→GDS | 16 `ebufn_2`, DRC **0/0**, LVS 0, slew/cap 0 |
 | Git visibility of views | `git check-ignore --no-index` in `make_pdk_pr.py` | 191 installed files | all trackable |
 
 The library is submitted upstream as

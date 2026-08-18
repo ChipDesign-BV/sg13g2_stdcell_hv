@@ -644,20 +644,98 @@ holding high and 0.0224 nW holding low, roughly $10^4$ below the
 thin-oxide cell, the same ratio the tie cells show and for the same reason
 — 0.45–0.70 µm channels under a thick oxide.
 
-## Arc definitions for the remaining classes
+## Tri-states: three arcs, and one that cannot be measured as specified
 
-The tri-states need three arc classes rather than one: the `combinational`
-data arc (which either tool could produce), plus `three_state_enable` and
-`three_state_disable`, distinguished from ordinary delays by measuring
-*into* and *out of* a floating state. The enable arc drives the output
-from Hi-Z, so the deck must define the floating node — the 1 GΩ mid-rail
-keeper the functional suite already uses for its 12 Hi-Z checks — and
-measure 50 %-to-50 % into the specified load. The disable arc measures the
-driver turning off, which is why the thin-oxide disable tables are
-essentially load-independent while the enable tables are not: a useful
-built-in check on whether the measurement means what it should.
-`ebufn` carries all four tables per enable arc; `einvn` uses the `_rise`
-variants and carries two.
+A tri-state cell needs three arc classes rather than one: the
+`combinational` data arc — which either tool could produce, and which is
+measured here exactly as for any other gate — plus `three_state_enable`
+and `three_state_disable`, which are distinguished from ordinary delays by
+measuring *into* and *out of* a floating state. `ebufn` carries four
+tables per enable arc; `einvn` uses the `_rise` variants and carries two.
+All six cells are characterized by `work/char_tristate.py`; the harness is
+calibrated by re-measuring a shipped cell's pin capacitance
+(`sg13g2_hv_buf_4` pin A) through the same code path and requiring
+agreement with the shipped library — it lands at **0.46 %**.
+
+The **enable** arc is straightforward once the floating node is defined:
+the output starts in Hi-Z held by the 1 GΩ mid-rail keeper the functional
+suite already uses for its 12 Hi-Z checks, `TE_B` switches, and the
+measurement is the usual 50 %-to-50 % delay and 20/80 transition into the
+specified load.
+
+The **disable** arc is where the specification breaks down. The obvious
+recipe — wait for the output to leave its driven level through the slew
+threshold — is not physically measurable on a capacitively loaded Hi-Z
+node. Once the driver releases, nothing but the keeper moves the node, so
+the answer is $0.2\,RC \approx 0.5$ ms and is *exactly proportional to the
+load*. No keeper value repairs this: to make the decay comparable with the
+turn-off time it would have to approach the cell's on-resistance (~1 kΩ),
+at which point the keeper fights the enabled driver and the cell can no
+longer hold its own output.
+
+The thin-oxide library cannot have measured it that way either, and its
+own tables say so: its disable entries are *exactly* load-independent,
+the seven values along the load axis differing only by a 1 fs increment —
+a monotonicity epsilon, not a measurement.
+
+What is measured instead is the quantity that actually goes away: the
+drive current. `Z` is held by an ideal source at the slew threshold it
+would cross on leaving the driven level (0.66 V driving low, 2.64 V
+driving high), the on-state drive current $I_{on}$ is recorded (0.56 /
+0.60 mA for `ebufn_4`), and the arc is the time from `TE_B` crossing 50 %
+to $|I_Z|$ falling through $I_{on}/2$ — the same 50 % convention used
+everywhere else in this library, applied to current rather than voltage.
+This is load-independent by construction, so the seven rows are identical
+with **no synthetic epsilon**, and the transition tables repeat the delay
+because nothing traverses a slew after release (as the thin-oxide library
+also does).
+
+### What the ratios say
+
+| cell | comb. c~r~/c~f~ | enable c~r~/c~f~ | disable c~r~/c~f~ |
+|---|---|---|---|
+| `ebufn_2` | 2.22 / 3.01 | 2.02 / 1.92 | 1.48 / 2.10 |
+| `ebufn_4` | 2.21 / 2.93 | 2.01 / 1.87 | 1.46 / 2.03 |
+| `ebufn_8` | 2.20 / 2.93 | 2.00 / 1.80 | 1.52 / 1.87 |
+| `einvn_2` | 2.11 / 2.74 | 2.00 / – | 1.47 / – |
+| `einvn_4` | 2.11 / 2.74 | 2.00 / – | 1.49 / – |
+| `einvn_8` | 2.09 / 2.73 | 1.98 / – | 1.53 / – |
+
+Median over load points 2–7 against the thin-oxide library; the expected
+band is the library's 2.66× delay ratio ±20 %. Load point 1 is excluded
+because the thin-oxide tri-states offset their load axis by the `Z` pin
+capacitance (0.0098 pF rather than 0.001), so at that point the HV cell
+carries a 10× lighter load than its reference.
+
+The **combinational** arcs are in band. The **enable** delays sit at
+1.8–2.0, just under it — but the denominator is the problem, not the
+measurement: the thin-oxide enable tables are *clamped* at their fast end
+(`ebufn_4` repeats 0.074755, 0.074756, 0.074757, 0.074758 — a 1 fs floor
+rather than four measurements). The enable *transitions*, which are the
+same physical quantity as the combinational transitions that do agree,
+come out at 2.25–2.28, in band.
+
+The **disable** ratios (1.46–1.53) are out of band **by construction**,
+because the criterion differs from whatever produced the thin-oxide
+numbers. They are reported rather than tuned. Their tight clustering
+across two footprints and three drive strengths is what a consistent
+criterion offset looks like; noise would not cluster.
+
+### Two infrastructure defects found on the way
+
+Worth recording because both would have produced plausible numbers:
+
+* The mid-rail keeper used to define the floating node was left attached
+  during **leakage** measurement, where it sourced its own 1.65 nA into
+  the supply reading — a fictitious 5.48 nW on `ebufn_2` in the
+  `A & !TE_B` state, **150× the true value**. The keeper now exists only
+  where the node actually floats. A leakage number that is 150× wrong is
+  still a perfectly plausible-looking leakage number.
+* ngspice must run with `OMP_NUM_THREADS=1` here. Its spinning OpenMP
+  barriers burned 130+ CPU-seconds without completing on a contended
+  machine, against ~4 CPU-seconds to completion single-threaded.
+
+## Clock gates
 
 The clock gates need a `CLK`→`GCLK` propagation arc (which the thin-oxide
 library writes with *no* `timing_type` at all, i.e. combinational),
