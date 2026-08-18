@@ -1,0 +1,12 @@
+{
+  "sg13g2_hv_dlhq_1": {
+    "pass": true,
+    "width_sites": 30,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  }
+}

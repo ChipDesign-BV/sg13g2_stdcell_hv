@@ -21,4 +21,11 @@ doc/report/render.err
 __pycache__/
 *.pyc
 work/drc_run_*/
-work/flop_pilot/
+work/flop_pilot/*
+!work/flop_pilot/*.py
+!work/flop_pilot/*.json
+!work/flop_pilot/*.md
+work/cell_dev/*/*
+!work/cell_dev/*/*.py
+!work/cell_dev/*/*.json
+!work/cell_dev/*/*.md

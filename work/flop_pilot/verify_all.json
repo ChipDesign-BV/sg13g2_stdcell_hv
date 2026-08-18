@@ -1,0 +1,90 @@
+PASS sg13g2_hv_dfrbpq_1  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_dfrbp_1  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_dfrbpq_2  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_dfrbp_2  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_sdfrbpq_1  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_sdfrbp_1  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_sdfrbpq_2  (logs: /tmp/cellverify_6afyl3t7)
+PASS sg13g2_hv_sdfrbp_2  (logs: /tmp/cellverify_6afyl3t7)
+{
+  "sg13g2_hv_dfrbpq_1": {
+    "pass": true,
+    "width_sites": 43,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_dfrbp_1": {
+    "pass": true,
+    "width_sites": 46,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_dfrbpq_2": {
+    "pass": true,
+    "width_sites": 48,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_dfrbp_2": {
+    "pass": true,
+    "width_sites": 54,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_sdfrbpq_1": {
+    "pass": true,
+    "width_sites": 59,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_sdfrbp_1": {
+    "pass": true,
+    "width_sites": 64,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_sdfrbpq_2": {
+    "pass": true,
+    "width_sites": 61,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_sdfrbp_2": {
+    "pass": true,
+    "width_sites": 70,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  }
+}

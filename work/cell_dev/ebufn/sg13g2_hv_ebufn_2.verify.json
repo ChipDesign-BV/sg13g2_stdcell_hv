@@ -1,0 +1,12 @@
+{
+  "sg13g2_hv_ebufn_2": {
+    "pass": true,
+    "width_sites": 18,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  }
+}

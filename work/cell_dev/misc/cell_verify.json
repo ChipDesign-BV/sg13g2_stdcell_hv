@@ -1,0 +1,22 @@
+{
+  "sg13g2_hv_lgcp_1": {
+    "pass": true,
+    "width_sites": 31,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  },
+  "sg13g2_hv_sighold": {
+    "pass": true,
+    "width_sites": 6,
+    "structure": "ok",
+    "pins_off_track": [],
+    "lvs": "match",
+    "klayout_drc": "clean",
+    "magic": {},
+    "magic_fatal": "none"
+  }
+}

@@ -300,13 +300,10 @@ around. None is caused by the library.
    `work/fix_lib.py` corrects all three; `run_charlib.sh` applies it
    automatically.
 
-> **`area` in the Liberty file is measured for the 56 drawn cells and an
-> estimate for the 12 undrawn ones.** For every Liberty cell that has a LEF
-> macro the value is the real footprint, LEF width × the 7.14 µm row height
-> (`work/update_lib_area.py` keeps the two views in step and reports any
-> drift). The 12 characterized flip-flops and latches without GDS keep the
-> pre-layout estimate — thin-oxide poly pitch count at 0.80 µm contacted
-> pitch — and only those should be treated as order-of-magnitude figures.
+> **`area` in the Liberty file is the measured footprint for every cell.**
+> All 84 cells are drawn, so each value is the real LEF width × the
+> 7.14 µm row height (`work/update_lib_area.py` keeps the two views in
+> step and reports any drift); no pre-layout estimates remain.
 
 ## Layout
 
@@ -530,13 +527,23 @@ Two details there are load-bearing, and both were learned by breaking them:
 
 ### Verified
 
-* **DRC clean and LVS clean, all 68 drawn cells** (66 retargeted + the 2
-  tie cells) — see [DRC result](#drc-result) and [LVS result](#lvs-result).
+* **DRC clean and LVS clean, all 84 cells** — 66 retargeted, the 2 tie
+  cells, and 16 cells the 1-D retarget could not produce (flops, latches,
+  tri-state drives, clock gate, sighold) that were later generated with
+  per-cell recipes (`work/flop_pilot/gen_seq.py`,
+  `work/cell_dev/*/gen_*.py`): the common blocker was a p+ source finger
+  butting into the VDD rail tap, removed before the y-map and redrawn
+  after it at the slgcp_1 butted-junction convention, plus per-cell
+  y-map insert splits that land every template band on the shipped
+  positions. Each generated cell passed `work/cell_verify.py` (LVS,
+  KLayout modular+maximal DRC in abutted context, Magic, structure and
+  pin checks) before joining the library — see [DRC result](#drc-result)
+  and [LVS result](#lvs-result).
 * Uniform row height, **7.140 µm = 17 horizontal routing tracks**
-  (0.42 µm pitch), across all 68 cells; every cell width is a multiple of
+  (0.42 µm pitch), across all 84 cells; every cell width is a multiple of
   the 0.48 µm `CoreSiteHV` site, so the cells place on the same grids as
   the thin-oxide 9-track library. `lef/sg13g2_stdcell_hv.lef` carries the
-  site and the 68 macros, generated from the GDS by `work/gen_lef.py` with
+  site and the 84 macros, generated from the GDS by `work/gen_lef.py` with
   pin sets verified against the CDL and antenna values recomputed from the
   netlist.
 * Every gate length and width matches the scaled thin-oxide layout to within
@@ -571,13 +578,11 @@ Two details there are load-bearing, and both were learned by breaking them:
 
 ### Not done
 
-* **16 cells have no layout.** They run a PMOS Activ up into the VDD rail, or
-  bring an NMOS Activ up to the library channel cut; either way the band
-  cannot be scaled without moving the rail off the cell boundary and breaking
-  abutment. `layout_retarget.py` prints 18 skips, but two of those — tiehi
-  and tielo — were later drawn from scratch by `gen_tie_cells.py` (see
-  [Tie cells](#tie-cells)). The remaining 16 are the 8 dfrbp/sdfrbp flops,
-  4 of the 5 latches, 2 of the 3 ebufn drives, `lgcp_1` and `sighold`.
+* `layout_retarget.py` still prints 18 skips: tiehi/tielo were drawn from
+  scratch by `gen_tie_cells.py` (see [Tie cells](#tie-cells)) and the
+  other 16 by the per-cell generators listed under
+  [Verified](#verified) — the library-wide 1-D map itself remains unable
+  to scale a band that butts the rail.
 * Not silicon-proven, and not reviewed by anyone who was not also its author.
   DRC/LVS-clean means the checks pass, not that the cells are known good in
   fabrication.
@@ -689,9 +694,9 @@ The UDP primitives are not shipped here (see the note under
 
 ## What this library is not
 
-- **Layout is partial.** 68 cells have GDS (see [Layout](#layout)); 16 of the
-  84 do not. The 68 are DRC clean and LVS clean and carry LEF abstracts on a
-  17-track site.
+- **All 84 cells have GDS** (see [Layout](#layout)), DRC clean and LVS
+  clean, with LEF abstracts on a 17-track site. 66 came from the library
+  retarget, 18 from per-cell generators.
 - **Not silicon proven.** Everything here is simulation against the PDK models.
 - **Delay cells behave differently.** `dlygate4sd2_1` and `o21ai_1` used gate
   lengths below the thick-oxide minimum, so their delay ratios have shifted.
@@ -709,7 +714,7 @@ sg13g2_stdcell_hv/
 ├── sch/xschem/*.sch                  84 schematics
 │   └── sg13g2_hv_stdcells.sch        all 84 cells on one sheet (the gallery)
 ├── sym/xschem/*.sym                  84 symbols (copies of the thin-oxide ones)
-├── lef/sg13g2_stdcell_hv.lef         68 macros + CoreSiteHV (0.48 x 7.14)
+├── lef/sg13g2_stdcell_hv.lef         84 macros + CoreSiteHV (0.48 x 7.14)
 ├── lib/                              Liberty, 3.3 V typical
 ├── gds/sg13g2_stdcell_hv.gds         68 cells: 66 retargeted + 2 tie (see Layout)
 ├── doc/sg13g2_stdcell_hv.celllist
@@ -753,7 +758,7 @@ directory and has no thick-oxide view.
 ### klayout
 
 `klayout/pymacros/sg13g2_stdcell_hv.lym` registers the GDS as a KLayout
-**cell library**: all 68 drawn cells appear in the Instance dialog under
+**cell library**: all 84 cells appear in the Instance dialog under
 the library name `sg13g2_stdcell_hv`, next to the PDK's own libraries, and
 place like any library cell. Enable it by adding the repository's
 `klayout/` directory to the KLayout search path,
@@ -800,26 +805,21 @@ globs it per-SCL). A design then needs only:
 
 ```yaml
 STD_CELL_LIBRARY: sg13g2_stdcell_hv
-SYNTH_EXTRA_MAPPING_FILE: pdk_dir::libs.tech/librelane/sg13g2_stdcell_hv/sdfbbp_map.v
 ```
 
-The second line is the flip-flop mapping and it cannot live in the PDK
-config: `SYNTH_EXTRA_MAPPING_FILE` is not a PDK-scoped variable in
-LibreLane. It maps every posedge Yosys flop onto the scan cell
-`sg13g2_hv_sdfbbp_1` — the only flop with both liberty and layout views
-today — with the scan pins tied off (or, for enable flops, the scan mux
-recycled as the enable mux). All clocked mappings are proven against the
-Yosys cell semantics with `equiv_induct`; the header of `sdfbbp_map.v`
-documents the scheme. The costs, until the dfrbp/dfrbpq layouts are drawn:
-each flop is a full scan cell (~2× the area a dfrbpq_1 would take, plus
-tie cells for the unused pins), negedge-clock flops are deliberately
-unmapped (a silent `CLK(~C)` would distort the clock tree), and there are
-no tri-state or clock-gate mappings (those cells are not characterized).
+Flip-flops and latches map through Yosys `dfflibmap` / the latch techmap
+exactly as in the thin-oxide flow: all 9 flops and 5 latches carry
+liberty **and** layout views. The exclude lists mirror the thin-oxide
+ones (`sdfbbp_1`, `dfrbp_2`). `sdfbbp_map.v` remains available as an
+opt-in for designs that want every flop on the scan cell — its header
+explains how (it needs `sdfbbp_1` removed from `synth_exclude.cells` and
+a design-level `SYNTH_EXTRA_MAPPING_FILE`, which is not PDK-scoped); all
+of its clocked mappings are proven against the Yosys cell semantics with
+`equiv_induct`. There are still no tri-state or clock-gate mappings:
+those cells are drawn but not characterized.
 
-The shipped liberty is stripped at install time to the 63 cells that have
-a LEF macro (`finalize_lib.strip_layoutless`), so the PDK never advertises
-timing for a cell that cannot be placed; the characterization data for the
-12 undrawn flops and latches stays in this repository's `lib/`.
+At install time `finalize_lib.strip_layoutless` still guards the
+liberty ⊆ LEF invariant; with all 84 cells drawn it strips nothing.
 
 ```sh
 cd work
@@ -852,8 +852,11 @@ python3 layout_retarget.py      # gds/ (66 cells, prints the 18 skips)
 python3 fix_rail_contacts.py    # rail taps onto the site-centred 0.48 um grid
 python3 grid_align_pins.py --apply  # widen off-track pins that have room
 python3 sync_netlist_widths.py  # SPICE + CDL follow the drawn geometry
+python3 flop_pilot/gen_seq.py   # the 8 flops (per-cell y-map recipe)
+# latches, ebufn drives, lgcp_1, sighold: work/cell_dev/*/gen_*.py,
+# each gated by work/cell_verify.py before merging into gds/
 python3 fix_well_nwc1.py        # wells to the strict analog HV rules
-python3 gen_lef.py              # lef/ (site + 68 macros)
+python3 gen_lef.py              # lef/ (site + 84 macros)
 python3 make_drc_top.py         # abutted 2-row DRC context (padded pitch)
 python3 make_shared_rail_rows.py  # shared-rail mixed-row DRC context
 ./run_lvs.sh                    # per-cell LVS

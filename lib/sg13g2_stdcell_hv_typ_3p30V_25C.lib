@@ -11303,7 +11303,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
     } /* end leakage_power */
   } /* end cell */
   cell (sg13g2_hv_dfrbp_1) {
-    area : 125.16 ;
+    area : 157.6512 ;
     cell_leakage_power : 0.294153 ;
     leakage_power () {
       value : 0.294153 ;
@@ -11511,7 +11511,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dfrbp_2) {
-    area : 129.48 ;
+    area : 185.0688 ;
     cell_leakage_power : 0.296763 ;
     leakage_power () {
       value : 0.296763 ;
@@ -11719,7 +11719,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dfrbpq_1) {
-    area : 116.53 ;
+    area : 147.3696 ;
     cell_leakage_power : 0.283157 ;
     leakage_power () {
       value : 0.283157 ;
@@ -11864,7 +11864,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dfrbpq_2) {
-    area : 120.85 ;
+    area : 164.5056 ;
     cell_leakage_power : 0.286075 ;
     leakage_power () {
       value : 0.286075 ;
@@ -12009,7 +12009,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dlhq_1) {
-    area : 73.37 ;
+    area : 102.816 ;
     cell_leakage_power : 0.097906 ;
     leakage_power () {
       value : 0.097906 ;
@@ -12145,7 +12145,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dlhr_1) {
-    area : 77.69 ;
+    area : 106.2432 ;
     cell_leakage_power : 0.225646 ;
     leakage_power () {
       value : 0.225646 ;
@@ -12496,7 +12496,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dllr_1) {
-    area : 82.00 ;
+    area : 113.0976 ;
     cell_leakage_power : 0.225079 ;
     leakage_power () {
       value : 0.225079 ;
@@ -12703,7 +12703,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_dllrq_1) {
-    area : 69.06 ;
+    area : 99.3888 ;
     cell_leakage_power : 0.188647 ;
     leakage_power () {
       value : 0.188647 ;
@@ -13159,7 +13159,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_sdfrbp_1) {
-    area : 164.01 ;
+    area : 219.3408 ;
     cell_leakage_power : 0.325929 ;
     leakage_power () {
       value : 0.325929 ;
@@ -13461,7 +13461,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_sdfrbp_2) {
-    area : 172.64 ;
+    area : 239.904 ;
     cell_leakage_power : 0.328607 ;
     leakage_power () {
       value : 0.328607 ;
@@ -13763,7 +13763,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_sdfrbpq_1) {
-    area : 151.06 ;
+    area : 202.2048 ;
     cell_leakage_power : 0.302310 ;
     leakage_power () {
       value : 0.302310 ;
@@ -14002,7 +14002,7 @@ library (sg13g2_stdcell_hv_typ_3p30V_25C){
   } /* end cell */
 
   cell (sg13g2_hv_sdfrbpq_2) {
-    area : 172.64 ;
+    area : 209.0592 ;
     cell_leakage_power : 0.307002 ;
     leakage_power () {
       value : 0.307002 ;
