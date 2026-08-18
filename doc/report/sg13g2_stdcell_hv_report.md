@@ -5,7 +5,7 @@ author:
   - "Koen Van Caekenberghe, Ph.D."
   - "ChipDesign B.V."
   - "[info@chipdesign.be](mailto:info@chipdesign.be)"
-date: "2026-08-17 (rev. 4: tie-cell schematics + measured leakage, pin widening, PDK dev-branch signoff, upstream PR)"
+date: "2026-08-18 (rev. 5: all 84 cells drawn, strict-rule N-wells, LibreLane SCL, drive limits, special-cell characterization)"
 logo: "ChipDesign_logo.png"
 ---
 
@@ -20,24 +20,27 @@ so both libraries coexist in one netlist.
 | Deliverable | Coverage | Status |
 |---|---|---|
 | SPICE netlist (`spice/`) | 84 cells, 920 devices | verified against 3 independent views |
-| CDL netlist (`cdl/`) | 84 cells + 2 tie cells | LVS reference, all 68 drawn cells match |
+| CDL netlist (`cdl/`) | 84 cells + 2 tie cells | LVS reference, all 84 cells match |
 | Verilog (`verilog/`) | 84 modules | shared `ihp_*` UDPs, deliberately not duplicated |
 | xschem symbols / schematics | 84 + gallery sheet | netlist-equivalence proven |
-| GDS layout (`gds/`) | 68 cells (66 retargeted + 2 tie cells built here) | **DRC clean, LVS clean** |
-| LEF abstracts (`lef/`) | 68 macros + `CoreSiteHV` site | generated from the GDS, pin sets verified against CDL |
-| Liberty NLDM (`lib/`) | 66 cells, 600 timing tables | combinational + sequential; areas from layout |
+| GDS layout (`gds/`) | **84 cells** (66 retargeted + 18 per-cell generated) | **DRC clean, LVS clean** |
+| LEF abstracts (`lef/`) | **84 macros** + `CoreSiteHV` site | generated from the GDS, pin sets verified against CDL |
+| Liberty NLDM (`lib/`) | 76 cells, 600 timing tables | combinational + sequential + special classes; areas all measured |
+| LibreLane SCL (`librelane/`) | site, cell maps, tracks, excludes | flops map natively through `dfflibmap` |
 
 Physical sign-off, one fixed invocation of the PDK's own klayout decks — on
 the abutted two-row array and on the stricter **shared-rail array** (rows at
 the true 7.14 µm pitch, mixed and mirrored vertical neighbours — what a
-placed block actually produces):
+placed block actually produces) — and, since rev. 5, under Magic's *strict
+analog* N-well rules as well:
 
 | Check | This library | IHP thin-oxide control (same harness) |
 |---|---|---|
 | DRC, cell rules | **0** | 0 |
 | DRC, cell rules, shared-rail mixed array | **0** | — |
+| DRC, Magic (strict analog N-well rules) | **0 `NW.*`** | — |
 | DRC, chip-level metal density | 7 | 6 |
-| LVS | **68 / 68 match** | fill cells fail identically without the documented relaxation |
+| LVS | **84 / 84 match** | fill cells fail identically without the documented relaxation |
 
 The density items are harness properties, not cell defects: metal density is
 a check on a *filled* die, and the one differing count (`M1.j`, min 35 %
@@ -100,19 +103,22 @@ All netlist views are re-emitted from one internal model by
   netlist prefix, `$::SG13G2_HV_SCH` resolution) and 84 schematics plus a
   generated gallery sheet; three-view consistency proven on all 920
   devices.
-* **`gds/`** — 68 cells: 66 by 1-D retarget (section 4), tie cells built
-  by `work/gen_tie_cells.py`. Uniform 7.140 µm row height (17 tracks),
-  every width a 0.48 µm site multiple, all 5 758 contact/via cuts exactly
-  0.16 × 0.16 µm, every rail tap on the site-centred 0.48 µm grid
+* **`gds/`** — **all 84 cells**: 66 by 1-D retarget (section 4), 18 by
+  per-cell generators (section 4.1). Uniform 7.140 µm row height (17
+  tracks), every width a 0.48 µm site multiple, all contact/via cuts
+  exactly 0.16 × 0.16 µm, every rail tap on the site-centred 0.48 µm grid
   (`work/fix_rail_contacts.py`, section 6).
-* **`lef/`** — 68 macros + `CoreSiteHV`, generated from the GDS: pins from
+* **`lef/`** — 84 macros + `CoreSiteHV`, generated from the GDS: pins from
   the pin datatypes labelled by contained text, OBS = drawn metal minus pin
   geometry, antenna values recomputed from the netlist (the thin-oxide
   numbers are wrong for 3.5× longer gates). Parsed back with klayout and
   pin sets verified against the CDL.
 * **`lib/`** — Liberty NLDM at 3.3 V / 25 °C typical (section 7).
+* **`librelane/`** — a complete LibreLane standard-cell-library
+  configuration (section 8), installed as
+  `libs.tech/librelane/sg13g2_stdcell_hv/`.
 * **`klayout/`** — a cell-library registration macro: with the repository's
-  `klayout/` directory on `KLAYOUT_PATH`, all 68 drawn cells appear in
+  `klayout/` directory on `KLAYOUT_PATH`, all 84 cells appear in
   KLayout's Instance dialog as library `sg13g2_stdcell_hv`.
 
 ---
@@ -153,6 +159,51 @@ exceptions:
   exactly 17 horizontal 0.42 µm tracks; `pad_to_site` pads each width to
   the 0.48 µm site (13.75 µm total across the library). Mean cell area is
   **2.87×** the thin-oxide library (median 2.83, range 1.89–4.21).
+
+## The 18 cells the library-wide map could not produce
+
+`layout_retarget.py` skips 18 cells, and for a long time they were the
+library's headline limitation. They are not a single hard case: the skips
+have **one shared root cause**. A p+ source finger butts into the VDD rail
+tap, so the library-wide y-map cannot scale that band without moving the
+rail off the cell boundary and breaking abutment. Several flip-flops add a
+second obstruction, an NMOS Activ band that reaches the library channel
+cut.
+
+Once that was understood the fix is mechanical, and is applied per cell
+rather than library-wide:
+
+1. **Cut the butting finger before the map** — the neck joining the p+
+   source to the rail tap is removed, asserted exactly, so the band is free
+   to scale.
+2. **Split the y-insert per cell** — instead of the library's single
+   0.975 µm insert, each cell distributes the same total across a rail
+   insert, a channel-cut insert and a pSD insert, chosen so that every
+   template band (rails, taps, pSD, N-well, ThickGateOx) lands exactly on
+   its shipped position and the high NMOS band tops out 0.62 µm below the
+   strict N-well bottom.
+3. **Restore the finger after the map** at y = 6.99 µm, the butted-junction
+   convention the drawn `slgcp_1` already uses and which the LVS deck
+   connects through `psd_ntap_abutt`.
+4. **Rebuild the N-well** with the strict-rule construction of section 6,
+   and re-tile rail contacts onto the site-centred grid.
+
+`work/flop_pilot/gen_seq.py` drives the eight flip-flops from a per-cell
+insert table; `work/cell_dev/{latches,ebufn,misc}/gen_*.py` cover the four
+latches, the two tri-state drives, `lgcp_1` and `sighold`. Two cells are
+not retargets at all: `lgcp_1` is derived from the drawn `slgcp_1` by
+deleting the scan leg (which also required splitting a shared series
+node — the scan cell joins the PMOS and NMOS chains in Metal1 where the
+plain gate does not), and `sighold` is built from scratch on the tie-cell
+frame. **No device width, length or connectivity deviates from the CDL in
+any of the 18 cells**, so the existing characterization stays valid; only
+`area` changes, and it changes from an estimate to a measurement.
+
+Every generated cell had to pass `work/cell_verify.py` before it was
+merged into the library: LVS against the CDL, both KLayout decks in an
+abutted mirrored context, Magic, the structural conventions (row height,
+site-multiple width, N-well rules) and the pin/track report. The gate was
+itself validated by running it against an already-shipped cell.
 
 ---
 
@@ -200,7 +251,41 @@ companion report *The Shared-Rail Contact Clash in sg13g2_stdcell_hv*
 (`shared_rail_contact_fix.pdf`, distributed alongside the library rather
 than inside it).
 
-**LVS.** All 68 drawn cells match, re-run in full after the re-tiling. The
+**N-wells: two rule sets, one layout.** The retarget placed the N-well for
+the *digital* rule set — `NW.c1.dig`, 0.31 µm enclosure of HV p-active,
+which the IHP rulebook grants inside a `DigiBnd` marker and which the
+KLayout maximal deck verifies clean. Magic's SG13G2 tech has no DigiBnd
+concept at all and applies the *analog* rules unconditionally, so it
+flagged every cell: 1 128 `NW.c1` plus 9 `NW.e1` on a placed counter.
+Measured against the strict rule the library was short by exactly **25 nm
+in 65 of 68 cells** (210 nm in `mux4_1`, 215 nm in `slgcp_1`, both of
+which reach further down).
+
+That margin is recoverable in the well layer alone, so rather than wait on
+the tool, `work/fix_well_nwc1.py` rebuilds only the N-well: bottom edge
+2.625 → 2.570 µm library-wide, a halo around each cell's PMOS active that
+forces the two deeper jogs automatically, minus halos around NMOS active
+and p-taps for `NW.d1`/`NW.f1`, and the lateral overhang widened
+0.24 → 0.62 µm so the outermost cell of a row is enclosure-clean without
+a neighbour's merged well (that last point also removed the block-edge
+`NW.e1` flags). Every rule is asserted per cell in the generator with
+corner-inclusive square sizing, the worst case of the euclidian deck
+rules.
+
+**Nothing about the devices changes.** The well is not a device terminal,
+characterization runs on the schematic netlist, and the HV PSP model cards
+carry no well-proximity parameters — so no re-characterization was needed,
+and only the GDS differs. The result: Magic reports **0 `NW.*`** on the
+abutted array and both KLayout decks stay clean, i.e. the layout now
+satisfies the strict and the relaxed interpretation simultaneously. The
+residual Magic flags (`Cnt.c` contact-overlap, wide-metal `M1.e`) are
+tool-interpretation differences on geometry both KLayout decks accept.
+The tool gap itself was reported upstream as IHP-Open-PDK issues #1106
+(the modular KLayout deck implements neither `NW.c1` nor `NW.c1.dig`, so
+its "0 errors" was silent on this rule) and #1107 (Magic lacks the DigiBnd
+relaxation).
+
+**LVS.** All 84 cells match, re-run in full after the re-tiling. The
 four device-less `fill_*` cells need the runner's own
 `--ignore_top_ports_mismatch` relaxation — IHP's own fill cells fail the
 identical flow the same way. LVS caught five defect classes dimensional
@@ -256,13 +341,158 @@ and a direct measurement sides with the shipped table (+0.15 % vs −19 %
 at the probe point). lctime's input capacitance (+52 %) also corroborates
 validating Cin against a direct measurement, not a characteriser.
 
-Excluded from characterization, by configuration and with stated reasons:
-the device-less cells, the statetable clock gates, and the 6 tri-state
-cells (CharLib cannot express high-impedance outputs). `tiehi`/`tielo`
-are present in the Liberty without timing arcs (a constant output has
-none) and with directly measured leakage — `work/tie_leakage.py` applies
-the sequential cells' settled-tail average to the tie netlists
-(0.011 / 0.013 nW), so no number is borrowed from `inv_1`.
+`tiehi`/`tielo` are present in the Liberty without timing arcs (a constant
+output has none) and with directly measured leakage —
+`work/tie_leakage.py` applies the sequential cells' settled-tail average
+to the tie netlists (0.011 / 0.013 nW), so no number is borrowed from
+`inv_1`.
+
+## Drive limits, and why their absence is not benign
+
+CharLib emits no `max_capacitance` or `max_transition` at all, and the
+first three revisions of this library shipped without them. That is worse
+than a missing convenience. OpenSTA answers "no limit" for every pin, so a
+flow's max-cap and max-slew checks pass **vacuously** — reporting zero
+violations because there is nothing to violate — and OpenROAD's TritonCTS
+dereferences an empty buffer-selection result and **segfaults** during
+clock-tree synthesis, which is how the gap surfaced.
+
+`work/finalize_lib.py` derives the limits from the characterization
+itself rather than copying the thin-oxide numbers: a pin may not be asked
+to drive more load than its tables cover, nor to accept a slower edge than
+was characterized. Per output pin `max_capacitance` is the top of its load
+axis (0.66–10.56 pF by drive class), per pin `max_transition` the top of
+the slew axis it was characterized against (6.67 ns combinational,
+3.36 ns sequential), with library defaults following the thin-oxide
+convention of weakest-drive / slowest-edge. The crash is reproducible on
+demand and was reported upstream with a minimal two-flop test case
+(OpenROAD issue #11165): a liberty without limits should produce a
+diagnosable error, not a signal 11.
+
+## The cells CharLib cannot reach
+
+Nine cells are drawn but were never characterized, and the reason is a
+tool limitation in each case rather than a property of the cell:
+`gen_charlib_config.py` skips the two statetable clock gates (CharLib has
+no statetable input form) and the device-less/no-output cells, while the
+six tri-states are *configured* but silently produce nothing — CharLib has
+no high-impedance concept anywhere in its schema or code, so it emits an
+empty result without an error. lctime is no substitute: it can carry a
+`three_state` attribute but deliberately pins the enable and skips exactly
+the enable arcs one needs.
+
+They are therefore measured directly against the shipped netlists, the
+same way the tie and sequential cells already are.
+
+**`sighold`** (bus holder) is the simplest and is complete: it has no
+timing arcs at all — the thin-oxide model is `driver_type : bus_hold`
+plus capacitance and per-state leakage — so it needs leakage
+(0.0118 nW / 0.0224 nW, ~10⁴ below the thin-oxide cell, the same
+thick-oxide ratio the tie cells show) and a pin capacitance. The
+capacitance is the interesting part: charge integration, the library's
+method for ordinary gate pins, is **invalid here**. On a bus holder the
+integral is dominated by the keeper fighting the driver, so it grows
+monotonically with the driving edge rate — measured 30.5 fC at a 0.2 ns
+edge to 86.4 fC at 5 ns, a 2.8× spread — and is a property of the driver,
+not the cell. A 1 MHz small-signal measurement near the rails gives
+0.00367 pF with a 7 % spread across bias; the keeper fight-back charge is
+recorded separately rather than folded in. The same reasoning explains the
+thin-oxide cell's 2.8× rise/fall capacitance asymmetry as an artifact of
+its measurement, so the HV cell ships equal rise and fall values.
+
+**The six tri-states and the two clock gates** are measured by
+`work/char_tristate.py` and `work/char_clockgate.py`. The tri-states need
+three arc classes rather than one — the `combinational` data arc plus
+`three_state_enable` and `three_state_disable`, the latter two measured
+into and out of a floating node defined by a 1 GΩ mid-rail keeper (the
+same construct the functional suite uses for its 12 Hi-Z checks). The
+clock gates need a `CLK`→`GCLK` propagation arc, `setup_rising`/
+`hold_rising` on the enable pins — the form the sequential bisection
+procedure already emits — and a `min_pulse_width` constraint on the clock
+pin, bisected until the gated output loses its pulse. Both carry the
+statetable, internal state pin and `state_function` metadata that make an
+integrated clock gate usable. *This work is in progress at the time of
+writing; the arc definitions and the verification gate are settled, the
+measured tables are not yet merged.* Until they are, the affected cells
+remain excluded from the flow exactly as the thin-oxide SCL excludes its
+own clock gates, so nothing downstream can pick a cell it cannot time.
+
+## One deliberate omission: switching power
+
+This library ships **no `internal_power` tables for any cell** — the
+characterization was scoped to timing and leakage. The special-cell work
+above kept that scope rather than adding power for nine cells alone: a
+library where only the tri-states and clock gates carry switching power,
+and every other cell reports zero, produces power analysis that is worse
+than uniformly absent because it looks complete. It is recorded as a
+library-level limitation instead.
+
+---
+
+# LibreLane integration
+
+A library that a digital flow cannot load is not usable, and until rev. 5
+this one could not be loaded: LibreLane rejects any `STD_CELL_LIBRARY`
+without a `libs.tech/librelane/<name>/` directory, and the PDK-level
+`config.tcl` hardcodes the thin-oxide liberty **filenames** in its `LIB`
+dict while validating every path eagerly. The library now ships the
+missing pieces.
+
+**The SCL** (`librelane/`, installed as
+`libs.tech/librelane/sg13g2_stdcell_hv/`): `config.tcl` with the
+`CoreSiteHV` site (0.48 × 7.14) and the HV driving, tie, fill, decap,
+diode and CTS cells; `tracks.info`; latch, mux and tri-state techmaps;
+and both exclude lists, which mirror the thin-oxide ones. `PDN_RAIL_WIDTH`
+stays 0.44 µm — the VSS rail is 0.44 µm symmetric about the row edge and
+the VDD pin shape, though taller, fully covers a 0.44 µm strap.
+
+**The PDK config** gets a conditional block for
+`STD_CELL_LIBRARY == sg13g2_stdcell_hv` (single `*_typ_3p30V_25C` corner,
+`VDD_PIN_VOLTAGE` 3.30), and the library ships a copy of the shared
+`sg13g2_tech.lef` because that config globs it per-SCL and a Tcl `glob`
+errors rather than returning empty. Both patches are idempotent.
+
+**Flip-flops now map natively.** Before all 84 cells were drawn, the only
+flop with both a liberty and a layout view was the scan cell
+`sdfbbp_1` — which `dfflibmap` cannot target, because its `next_state`,
+`(SCE & SCD) | (!SCE & D)`, is not a plain D function. The interim
+solution was `sdfbbp_map.v`, a techmap covering every posedge Yosys
+flip-flop type on the scan cell, with the scan mux recycled as the enable
+mux for `$_DFFE_*` and sync resets folded into the D leg; all 23 clocked
+mappings were proven equivalent to the Yosys cell semantics with
+`equiv_induct`. With the `dfrbp`/`dfrbpq`/`sdfrbp`/`sdfrbpq` layouts drawn
+it is no longer needed — `dfflibmap` maps directly, as in the thin-oxide
+flow — and it remains only as a documented opt-in for all-scan designs.
+Removing it cut sequential area on the reference counter by **31 %**
+(1 699.89 → 1 178.96 µm²), the tie-off overhead the workaround carried.
+
+One lesson worth recording, because it cost two debugging rounds: a
+techmap applied *after* the synthesis pass's own lowering must write its
+glue as fine-grained gates (`$_NOT_`, `$_AND_`, `$_OR_`). Inline
+expressions such as `~E` create coarse cells at a point where no later
+pass will lower them, and they reach the netlist unmapped. The
+thin-oxide latch map has the same latent issue; both HV maps avoid it.
+
+**A view can be present and still be missing.** The spice view was absent
+from the first three revisions of the upstream PR even though the
+generator wrote it and the install script copied it every time: the PDK
+repo's root `.gitignore` carries `*.spice`, and its `libs.ref/.gitignore`
+re-includes only the `spice/` *directory*, not the file inside it, so
+`git add` skipped it silently. The thin-oxide library's own spice view
+predates that rule and is already tracked, so nothing complained — and
+the failure reproduced only for someone cloning the branch, never for
+anyone testing an installed tree, which is why every local gate passed.
+`make_pdk_pr.py` now asks `git check-ignore --no-index` about every
+installed file and fails the run if any would be invisible; the check
+reproduces the defect against the unpatched `.gitignore` and passes 191
+files against the fixed one.
+
+**Block validation.** The reference 8-bit counter from the IIC-JKU
+SG13G2 AMS chip template hardens end to end on the shipped library with
+no design-level liberty or corner overrides: flops mapped natively, zero
+unmapped cells, CTS clean, max-cap/max-slew checks non-vacuous and
+passing, LVS clean through the auto-derived `CELL_SPICE_MODELS`, and
+**both** KLayout and Magic DRC at zero.
 
 ---
 
@@ -274,22 +504,28 @@ the sequential cells' settled-tail average to the tie netlists
 | Combinational logic | ngspice vs thin-oxide golden | 60 cells, 452 vectors, 12 high-Z states | **PASS** |
 | Sequential logic | ngspice, clocked walk from reset | 16 stateful cells, 400 samples | **PASS** |
 | Three-view consistency | symbols vs SPICE vs CDL | 84 cells, 920 devices | **PASS** |
-| DRC, padded array | PDK deck, fixed invocation | 68 drawn cells | **0 cell rules**; 7 density items |
-| DRC, shared-rail array | same deck, true-pitch mixed/mirrored rows | 68 cells × 4 rows | **0 cell rules**; density only |
+| DRC, padded array | PDK deck, fixed invocation | **84 cells** | **0 cell rules**; 7 density items |
+| DRC, shared-rail array | same deck, true-pitch mixed/mirrored rows | **84 cells** × 4 rows | **0 cell rules**; density only |
 | DRC control | identical harness on IHP `sg13g2_stdcell` | 84 cells | 0 cell rules, 6 density |
-| LVS | PDK deck, per cell, after the rail re-tiling | 68 cells vs CDL | **68/68** |
-| LEF | klayout parse-back + pin sets vs CDL | 68 macros | PASS, on-grid |
+| DRC, Magic strict analog rules | `drc(full)`, euclidean, abutted array | **84 cells** | **0 `NW.*`**; `Cnt.c`/`M1.e` tool-interpretation only |
+| LVS | PDK deck, per cell, after the well rebuild | **84 cells** vs CDL | **84/84** |
+| LEF | klayout parse-back + pin sets vs CDL | **84 macros** | PASS, on-grid |
 | P&R block validation | LibreLane `spi_slave` ×2 + full signoff deck | ~354 × 400 µm, 100 MHz | all clean; signoff **0 geometry violations**, 8 density markers |
-| Liberty structure/views/areas | `verify_lib.py` 1–3 | 66 cells | PASS, areas exact to 1 nm² |
+| Liberty structure/views/areas | `verify_lib.py` 1–3 | 76 cells | PASS, **all areas measured**, exact to 1 nm² |
 | Liberty monotonicity | `verify_lib.py` 4 | 1 932 delay series | 1 931 + 1 documented waiver |
 | Liberty Cin | vs both-rails reference | `inv_1` | 6.44 vs 5.87 fF (9.7 %) |
 | Liberty delay point-check | hand-written transient | table corner | 0.3 % |
 | Independent characteriser | lctime, 8 cells, 3 132 points | STA region | median 2.9 % / 0.0 % |
 | Sequential arcs | `verify_lib.py` 6 | 14 flip-flops/latches | **14/14 clean** |
-| Site geometry | boundary scan | all 68 cells | 7.140 µm, widths on 0.48 µm site |
+| Site geometry | boundary scan | all **84 cells** | 7.140 µm, widths on 0.48 µm site |
 | Tie-cell leakage | `tie_leakage.py` settled-tail average | `tiehi`/`tielo` | 0.011 / 0.013 nW, in the Liberty |
 | Pin track alignment | `grid_align_pins.py --apply` + full re-signoff | 12 of 25 off-track pins widened | DRC 0 cell rules ×2, LVS 68/68 |
-| PDK dev-branch re-run | IHP-Open-PDK `dev` decks (KLayout 0.30.9) | both DRC arrays, 68-cell LVS | main tables **clean**, LVS **68/68** |
+| PDK dev-branch re-run | IHP-Open-PDK `dev` decks (KLayout 0.30.9) | both DRC arrays, 84-cell LVS | main tables **clean**, LVS **84/84** |
+| New-cell signoff gate | `cell_verify.py` per candidate before merge | 18 generated cells | **18/18 PASS** (LVS + both decks + Magic + structure + pins) |
+| Liberty drive limits | `verify_lib.py` 7 | 73 output pins | present on every pin; TritonCTS crash resolved |
+| Liberty special classes | `verify_lib.py` 8 | tri-state / ICG / bus-hold constructs | complete-construct check |
+| LibreLane block run | reference counter, no design-level overrides | RTL→GDS | flops native, DRC **0/0**, LVS clean |
+| Git visibility of views | `git check-ignore --no-index` in `make_pdk_pr.py` | 191 installed files | all trackable |
 
 The library is submitted upstream as
 [IHP-Open-PDK PR #1103](https://github.com/IHP-GmbH/IHP-Open-PDK/pull/1103)
@@ -303,20 +539,23 @@ assembles and verifies the contribution against a checkout.
 
 # Known limitations
 
-* **16 cells have no layout** — eight D-flip-flop variants run NMOS Activ
-  to the channel cut, eight others run PMOS Activ into the VDD rail;
-  neither scales at a shared row height. All have full netlist, schematic,
-  symbol and Verilog views. (`tiehi`/`tielo`, once on this list, were
-  rebuilt by `work/gen_tie_cells.py`.)
-* **P&R needs non-standard flow settings** — flip-flop mapping onto
-  `sdfbbp_1`, an excluded-cell list, Metal1 routing for the off-grid pins,
-  rails-only fillers (see the `spi-slave-ihp` flow configuration).
-* **The 6 tri-state cells carry no Liberty timing**; they are
-  simulation-verified.
+* **No switching power.** The library ships `leakage_power` but no
+  `internal_power` for any cell (section 7.5). Dynamic power analysis will
+  see only leakage.
 * **One corner** (typical, 3.3 V, 25 °C); sequential leakage is a
   single-settled-state number; the delay cells' ratios shift with the
   450 nm minimum; the decaps store less per unit area.
-* **Not silicon-proven, and not independently reviewed.**
+* **Timing is schematic-characterized.** Device sizes match the drawn
+  layout exactly (LVS-proven per cell), but no parasitic extraction is
+  folded back into the tables; a PEX-based re-characterization is the
+  natural next step.
+* **11 signal pins remain off the vertical Metal1 track grid** and cannot
+  be widened within `M1.b` (12 others were). Route with `RT_MIN_LAYER`
+  Metal1, or expect the router to jog.
+* **Not silicon-proven.** Everything here is simulation against the PDK
+  models. The library has now been independently re-tested by a third
+  party — RTL-to-GDS on the upstream PR, reproducing the DRC, LVS, STA and
+  mapping results — but it has not been fabricated.
 
 ---
 
@@ -327,24 +566,36 @@ cd /foss/designs/sg13g2_stdcell_hv/work
 
 python3 gen_hv_lib.py            # netlists, schematics, symbols, Verilog
 python3 gen_gallery.py           # gallery sheet
-python3 layout_retarget.py       # gds/ (66 cells; prints the 16 skips)
+python3 layout_retarget.py       # gds/ (66 cells; prints the 18 skips)
 python3 gen_tie_cells.py         # + tiehi / tielo
+python3 flop_pilot/gen_seq.py    # the 8 flip-flops (per-cell y-map recipe)
+# latches, ebufn drives, lgcp_1, sighold: cell_dev/*/gen_*.py
+python3 cell_verify.py <cell>.gds  # gate every generated cell before merge
 python3 fix_rail_contacts.py     # rail taps onto the site-centred grid
 python3 sync_netlist_widths.py   # SPICE + CDL follow the drawn geometry
-python3 gen_lef.py               # lef/ (CoreSiteHV + 68 macros)
+python3 fix_well_nwc1.py         # N-wells to the strict analog HV rules
+python3 gen_lef.py               # lef/ (CoreSiteHV + 84 macros)
 python3 make_drc_top.py          # padded two-row DRC context
 python3 make_shared_rail_rows.py # shared-rail mixed-row DRC context
 
 python3 verify_logic.py; python3 verify_seq.py; python3 verify_sch.py
-./run_lvs.sh                     # per-cell LVS, 68/68
+./run_lvs.sh                     # per-cell LVS, 84/84
 # DRC: PDK run_drc.py on drc/drc_top.gds and drc/shared_rail.gds
+#      plus magic drc(full) on drc_top.gds for the strict N-well rules
 
 ./run_charlib.sh ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib
 # sequential cells via charlib_patched.py, then:
 python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib <seq.lib>
-python3 seq_leakage.py
+python3 seq_leakage.py; python3 tie_leakage.py
+python3 char_sighold.py          # bus holder: leakage + small-signal Cin
+python3 char_tristate.py         # tri-states: data + enable/disable arcs
+python3 char_clockgate.py        # ICGs: CLK->GCLK, setup/hold, min pulse
+python3 finalize_lib.py          # drive limits, physical stubs, corner name
+python3 update_lib_area.py       # areas from the LEF
 python3 verify_lib.py            # gates the shipped Liberty as data
 python3 lctime_compare.py        # independent characteriser cross-check
+
+python3 make_pdk_pr.py --pdk <IHP-Open-PDK checkout>   # assemble the PR
 ```
 
 Every number in this report is reproducible from these scripts; the

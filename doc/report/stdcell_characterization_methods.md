@@ -1,11 +1,11 @@
 ---
 title: "Standard-Cell Characterization Methods for sg13g2_stdcell_hv"
-subtitle: "fo4.py (reference) · CharLib 2.1.0 · lctime 0.0.26 — the measurement physics behind the Liberty file"
+subtitle: "fo4.py (reference) · CharLib 2.1.0 · lctime 0.0.26 — the measurement physics behind the Liberty file, and the cells no characterizer reaches"
 author:
   - "Koen Van Caekenberghe, Ph.D."
   - "ChipDesign B.V."
   - "[info@chipdesign.be](mailto:info@chipdesign.be)"
-date: "2026-08-17"
+date: "2026-08-18 (rev. 2: special-cell classes, bus-holder capacitance, drive limits)"
 logo: "ChipDesign_logo.png"
 ---
 
@@ -557,6 +557,149 @@ separation is the correct engineering outcome, not an accident of history.
 A text search of the shipped file confirms it carries no lctime or
 LibreCell traces.
 
+# Cells outside every characterizer's model
+
+Nine of the 84 cells are drawn but were not characterized by either tool,
+and in every case the obstacle is the characterizer's data model rather
+than anything about the cell. The three mechanisms are worth separating,
+because only one of them announces itself.
+
+**No high-impedance state (the 6 tri-states).** CharLib's cell schema
+(`charlib/config/syntax.py:30-120`) has keys for `inputs`, `outputs`,
+`functions`, `clock`, `enable`, `set`, `reset`, `state` — and nothing for
+`three_state` or a Hi-Z output value. A search of the entire installed
+package for `high.?impedance|high-?z|hiz|three.?state` returns exactly one
+hit, a comment on `Port.Role.ENABLE`. So a tri-state cell cannot be
+expressed. What makes this the dangerous case is that
+`gen_charlib_config.py` does *not* skip these cells: `Z` has a `function`
+(`A` or `!(A)`), `TE_B` is collected as an ordinary input, and the cell is
+configured as a two-input combinational gate whose output ignores one
+input. CharLib then emits an empty result, `omit_on_failure` swallows it,
+and **the run log never mentions the cell**. This is the same silent-failure
+class that once hid all 14 sequential cells.
+
+**No statetable (the 2 clock gates).** `lgcp_1` and `slgcp_1` hold state in
+a `statetable` with an `internal` pin, not in an `ff`/`latch` group.
+CharLib has no input form for that, so `gen_charlib_config.py:136-142`
+skips them explicitly, with a stated reason — the honest failure mode.
+
+**No output pin (`sighold`).** The bus holder's only signal pin is an
+`inout`, so the configurator's "no output pin" branch drops it, together
+with the genuinely arc-less fill/decap/antenna cells.
+
+**lctime does not rescue any of them.** It *is* tri-state aware — it reads
+`three_state` into `CombinationalOutput(high_impedance=...)` and writes the
+attribute back out — but its characterization deliberately pins the enable
+to its active value (`constant_input_pins`, "Skip measuring the tri-state
+enable input") and characterizes only the data arc. The enable arcs, which
+are most of what a tri-state Liberty group contains, are exactly what it
+omits. For clock gates it has nothing: no `clock_gating_integrated_cell`,
+no statetable, and its sequential recogniser bails on tri-state outputs
+outright.
+
+The answer is the one the tie cells and the sequential constraints already
+use: measure directly against the shipped netlist with ngspice, and emit
+the Liberty groups from the measurements.
+
+## A fourth answer to the capacitance question: the bus holder
+
+Section 3 compared three ways of averaging $C_{in}(v)$. `sighold` adds a
+case where one of them is not merely different but **invalid**.
+
+Charge integration — the production method for gate pins, and the
+defensible one there because it measures the charge a driver actually
+delivers — assumes the integrated current is the charge that ends up on
+the pin capacitance. On a bus holder it is not: the keeper actively fights
+the driver until the internal inverter flips, and that crowbar charge
+lands in the same integral. It is therefore not a property of the cell.
+Measured on the shipped netlist, integrating the driven edge:
+
+| driving edge | 0.2 ns | 0.5 ns | 1 ns | 2 ns | 5 ns |
+|---|---|---|---|---|---|
+| rise charge | 30.5 fC | 38.1 fC | 46.3 fC | 58.4 fC | 86.4 fC |
+
+A monotone 2.8× spread across a plausible range of driver strengths. Any
+single point reported as `capacitance` would silently encode an arbitrary
+assumption about whatever drives the net.
+
+The rail-biased AC method of section 3.2 has no such coupling, because it
+never asks the keeper to lose: at a fixed bias the keeper is in a defined
+state and the small signal sees only the physical capacitance.
+Four bias points near the rails give 0.00377 / 0.00378 / 0.00353 /
+0.00361 pF — a 7 % spread, and consistent with the ~2.1 fF of gate area
+plus junction contributions. Mid-rail is excluded on purpose: the
+cross-coupled pair has gain there and the small-signal result is
+meaningless.
+
+This also explains the thin-oxide library's `sighold`, which reports
+0.0268 pF rising against 0.0096 pF falling — a 2.8× asymmetry with no
+structural cause, since the physical capacitance of a node has no
+direction. It is a fight-charge artifact of whatever transient method
+produced it. The thick-oxide cell therefore ships equal rise and fall
+values, with the keeper fight-back charge documented separately as the
+driver-dependent quantity it is.
+
+The leakage numbers land where the rest of the library's do: 0.0118 nW
+holding high and 0.0224 nW holding low, roughly $10^4$ below the
+thin-oxide cell, the same ratio the tie cells show and for the same reason
+— 0.45–0.70 µm channels under a thick oxide.
+
+## Arc definitions for the remaining classes
+
+The tri-states need three arc classes rather than one: the `combinational`
+data arc (which either tool could produce), plus `three_state_enable` and
+`three_state_disable`, distinguished from ordinary delays by measuring
+*into* and *out of* a floating state. The enable arc drives the output
+from Hi-Z, so the deck must define the floating node — the 1 GΩ mid-rail
+keeper the functional suite already uses for its 12 Hi-Z checks — and
+measure 50 %-to-50 % into the specified load. The disable arc measures the
+driver turning off, which is why the thin-oxide disable tables are
+essentially load-independent while the enable tables are not: a useful
+built-in check on whether the measurement means what it should.
+`ebufn` carries all four tables per enable arc; `einvn` uses the `_rise`
+variants and carries two.
+
+The clock gates need a `CLK`→`GCLK` propagation arc (which the thin-oxide
+library writes with *no* `timing_type` at all, i.e. combinational),
+`setup_rising`/`hold_rising` on the enable pins against the clock — the
+form the local bisection procedure of section 7.2 already emits — and a
+`min_pulse_width` constraint on the clock pin, obtained by bisecting the
+clock pulse until the gated output fails to produce a full-swing pulse.
+CharLib has a config slot for `min_pulse_width_constraint_procedure` but
+never calls it; its dispatch is a `# TODO`.
+
+# Drive limits: the attribute whose absence fails twice
+
+CharLib emits no `max_capacitance` and no `max_transition`, on any pin, in
+any cell — and no library-level `default_max_*` either. The shipped
+library inherited that gap for three revisions, and it fails in two very
+different ways.
+
+**Silently.** OpenSTA answers "no limit" for every pin, so a flow's
+max-capacitance and max-transition checks report zero violations. They are
+not passing; there is nothing for them to compare against. A green
+signoff report is the worst possible presentation of an absent constraint.
+
+**Loudly, and much later.** OpenROAD's TritonCTS consults the same data
+when it sizes the clock tree, gets an empty buffer selection back, and
+dereferences it: `clock_tree_synthesis` terminates with SIGSEGV inside
+`cts::TritonCTS::getBufferFanoutLimit`. The failure surfaces in a
+different tool, several flow stages after the actual defect, with a stack
+trace that says nothing about liberty. Reduced to a two-flip-flop test
+case it reproduces deterministically, and it disappears the moment the
+limits are present — reported upstream as OpenROAD issue #11165, on the
+argument that a liberty without limits deserves a diagnosable error rather
+than a signal 11.
+
+The limits are derived from the characterization rather than borrowed:
+a pin may not be asked to drive more load than its tables cover, nor to
+accept a slower edge than was characterized. So per output pin
+`max_capacitance` is the top of that pin's load axis, per pin
+`max_transition` the top of the slew axis it was characterized against,
+and the library defaults follow the thin-oxide convention of
+weakest-drive / slowest-edge. These bound the characterized range; real
+slew targets belong in the flow constraints, not here.
+
 # Conclusions
 
 1. **All three input-capacitance methods are averages of the same
@@ -587,6 +730,27 @@ LibreCell traces.
    three-part, single-function patch** — the branch-current infrastructure
    it needs is already exercised by its own power measurement. Until then,
    its pin capacitances should not be used for anything load-sensitive.
+6. **Neither characterizer models tri-states, clock gates or bus holders**,
+   and the tri-state case fails *silently* — the cell is configured, no
+   simulation runs, an empty result is swallowed, and the log says nothing.
+   Any characterization flow needs a coverage check that compares the
+   emitted cell list against the intended one; a clean run log does not
+   mean the run was complete. These nine cells are measured directly
+   against the shipped netlists instead.
+7. **A method can be correct for one cell class and invalid for another.**
+   Charge integration is the right production choice for gate pins and the
+   wrong one for a bus holder, where the integral is dominated by keeper
+   fight-back and varies 2.8× with the driver's edge rate. The bias-swept
+   AC method, which is only the *anchor* for gate pins, is the *production*
+   method there. The thin-oxide library's unexplained 2.8× rise/fall
+   asymmetry on the same cell is the same artifact, visible in shipped
+   data.
+8. **`max_capacitance` and `max_transition` are not optional.** Absent,
+   they make STA limit checks pass vacuously and crash OpenROAD's CTS in a
+   different tool several stages downstream. Deriving them from the
+   characterized table axes costs nothing and is self-consistent by
+   construction: a cell is never asked to operate outside the range it was
+   measured over.
 
 ---
 
@@ -602,6 +766,9 @@ LibreCell traces.
 | shipped library | `lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib`, thresholds 20/80/50, 7×7 NLDM grids |
 | cross-check | `work/lctime_compare.py`: 8 cells, 3 132 aligned points |
 | local CharLib adaptations | `charlib_patched.py` (case-insensitive branch lookup, procedure registration), `seq_delay_procedure.py` (clk→Q, setup/hold bisection), `seq_leakage.py`, `gen_charlib_config.py` (grids ×2.66/×2.20, charge integration selected), `fix_lib.py` / `fix_lib_seq.py` (header and sequential emission repairs) |
+| direct measurement, outside both characterizers | `tie_leakage.py` (tie cells), `char_sighold.py` (bus holder: settled-tail leakage, bias-swept AC capacitance, fight-charge sweep), `char_tristate.py` (data + enable/disable arcs), `char_clockgate.py` (CLK→GCLK, setup/hold, min pulse width) |
+| Liberty post-processing | `finalize_lib.py` (drive limits from the table axes, physical-cell stubs with measured leakage, corner-suffixed library name) |
+| Liberty gate | `verify_lib.py`: structure, cross-view, areas vs layout, load-axis monotonicity, C~in~ vs reference, sequential arcs, drive limits, and complete-construct checks for the tri-state / clock-gate / bus-hold classes |
 
 Key source locations cited: CharLib `procedures/combinational/delay.py`
 (stimulus 75–83, measurements 101–112, worst-case 188–190),
