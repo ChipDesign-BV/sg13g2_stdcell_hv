@@ -178,6 +178,45 @@ def copy_klayout(pdk):
     print(f"klayout: {dst.name} (PDK-relative GDS path prepended)")
 
 
+def verify_tracked(pdk):
+    """Fail if anything just installed would be invisible to git.
+
+    A view that git silently ignores is copied onto the filesystem, passes
+    every local check that reads it, and then simply does not exist for
+    anyone who clones the branch. That is exactly how the spice view was
+    lost from the first three revisions of the PR: the PDK's root
+    .gitignore carries `*.spice`, libs.ref/.gitignore re-includes only the
+    `spice/` *directory*, and sg13g2_stdcell's own spice view predates the
+    rule and is already tracked -- so nothing complained until a reviewer
+    cloned the branch and LibreLane died on the missing
+    CELL_SPICE_MODELS path. Check it here, where it is cheap.
+    """
+    if not (pdk / ".git").exists():
+        print("git visibility: not a checkout, skipped")
+        return True
+    roots = [pdk / "ihp-sg13g2" / "libs.ref" / "sg13g2_stdcell_hv",
+             pdk / "ihp-sg13g2" / "libs.tech" / "librelane" / "sg13g2_stdcell_hv",
+             pdk / "ihp-sg13g2" / "libs.tech" / "klayout" / "tech" / "pymacros"]
+    files = [p for r in roots for p in r.rglob("*") if p.is_file()]
+    rel = [str(p.relative_to(pdk)) for p in files]
+    # --no-index is essential: without it check-ignore stays silent about a
+    # path that is already staged, so the check would pass the moment
+    # someone force-added the file and would never flag the rule that
+    # dropped it in the first place.
+    r = subprocess.run(["git", "-C", str(pdk), "check-ignore", "--stdin",
+                        "--no-index"],
+                       input="\n".join(rel), capture_output=True, text=True)
+    ignored = [ln for ln in r.stdout.splitlines() if ln.strip()]
+    if ignored:
+        print(f"  FAIL git visibility: {len(ignored)} installed file(s) are "
+              f"ignored and would never reach the PR:")
+        for f in ignored[:20]:
+            print(f"    {f}")
+        return False
+    print(f"git visibility: all {len(rel)} installed files are trackable")
+    return True
+
+
 def verify_install(pdk):
     """Netlist all schematics through the installed symbols, with the
     checkout's own xschemrc, and compare devices against SPICE."""
@@ -232,6 +271,7 @@ def main():
     patch_xschemrc(pdk)
     copy_klayout(pdk)
     ok = verify_install(pdk)
+    ok = verify_tracked(pdk) and ok
 
     print("""
 Next steps in the checkout (PRs target the dev branch; commits need a
