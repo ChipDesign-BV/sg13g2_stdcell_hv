@@ -102,6 +102,12 @@ cdl_pins = {m.group(1): m.group(2).split()
             for m in re.finditer(r"\.SUBCKT (\S+) ([^\n]*)", CDL.read_text())}
 for name, body in cells.items():
     pins = set(re.findall(r"pin \((\S+)\) \{", body))
+    # internal nodes (the clock gates' statetable variable) exist only in
+    # the Liberty model -- they are not ports and cannot be in the CDL
+    internal = {m.group(1) for m in
+                re.finditer(r"pin \((\S+)\) \{[^{}]*?direction : internal ;",
+                            body, re.S)}
+    pins -= internal
     ref = set(cdl_pins.get(name, []))
     # lib omits pins with no arcs and the supplies on some styles; require
     # lib pins to be a subset and every lib *output* to exist in the CDL
@@ -240,6 +246,74 @@ for name, body in cells.items():
             if f"{attr} :" not in pm.group(0):
                 err(f"{name}/{pm.group(1)}: no {attr}")
 print(f"output pins with drive limits checked: {n_lim}")
+
+# --- 8. special cell classes -------------------------------------------------
+# The tri-states, the integrated clock gates and the bus holder are modelled
+# with Liberty constructs no other cell in this library uses, and each one is
+# only useful to a tool if its whole construct is present: a `three_state`
+# output that lacks its enable/disable arcs is untimeable, and an ICG missing
+# its statetable or its constraints is unusable for clock gating. Check the
+# constructs as wholes rather than trusting that whoever added the cell got
+# every piece in.
+n_tri = n_icg = n_hold = 0
+for name, body in cells.items():
+    pin_bodies = {m.group(1): m.group(0) for m in
+                  re.finditer(r"pin \((\S+)\) \{.*?\n    \}", body, re.S)}
+
+    for pin, pb in pin_bodies.items():
+        if "three_state" not in pb:
+            continue
+        n_tri += 1
+        if not re.search(r"function : ", pb):
+            err(f"{name}/{pin}: three_state output without a function")
+        for kind in ("enable", "disable"):
+            if not re.search(rf"timing_type : three_state_{kind}", pb):
+                err(f"{name}/{pin}: no three_state_{kind} arc")
+        if not re.search(r"related_pin : \S+ ;\s*\n\s*timing_type : combinational",
+                         pb) and "timing_type : combinational" not in pb:
+            err(f"{name}/{pin}: no combinational data arc")
+
+    if "clock_gating_integrated_cell" in body:
+        n_icg += 1
+        if "statetable" not in body:
+            err(f"{name}: ICG without a statetable")
+        if not re.search(r"direction : internal ;", body):
+            err(f"{name}: ICG without an internal state pin")
+        if not re.search(r"internal_node : ", body):
+            err(f"{name}: ICG internal pin without internal_node")
+        if "dont_use : true" not in body:
+            err(f"{name}: ICG not marked dont_use")
+        out = [p for p, pb in pin_bodies.items() if "clock_gate_out_pin" in pb]
+        if not out:
+            err(f"{name}: ICG without a clock_gate_out_pin")
+        for p in out:
+            if "state_function" not in pin_bodies[p]:
+                err(f"{name}/{p}: clock gate output without state_function")
+        clk = [p for p, pb in pin_bodies.items() if "clock_gate_clock_pin" in pb]
+        if not clk:
+            err(f"{name}: ICG without a clock_gate_clock_pin")
+        for p in clk:
+            if "timing_type : min_pulse_width" not in pin_bodies[p]:
+                err(f"{name}/{p}: clock pin without a min_pulse_width constraint")
+        enables = [p for p, pb in pin_bodies.items()
+                   if "clock_gate_enable_pin" in pb or "clock_gate_test_pin" in pb]
+        if not enables:
+            err(f"{name}: ICG without an enable pin")
+        for p in enables:
+            for kind in ("setup", "hold"):
+                if not re.search(rf"timing_type : {kind}_rising", pin_bodies[p]):
+                    err(f"{name}/{p}: clock-gate enable without a {kind} constraint")
+
+    for pin, pb in pin_bodies.items():
+        if "bus_hold" not in pb:
+            continue
+        n_hold += 1
+        if "direction : inout" not in pb:
+            err(f"{name}/{pin}: bus_hold pin is not inout")
+        if not re.search(r"\bcapacitance : ", pb):
+            err(f"{name}/{pin}: bus_hold pin without a capacitance")
+print(f"special classes checked: {n_tri} tri-state outputs, {n_icg} clock "
+      f"gates, {n_hold} bus-hold pins")
 
 print(f"\nRESULT: {'PASS' if not errors else f'FAIL ({len(errors)} errors)'}")
 sys.exit(1 if errors else 0)

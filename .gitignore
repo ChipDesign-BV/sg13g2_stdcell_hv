@@ -29,3 +29,14 @@ work/cell_dev/*/*
 !work/cell_dev/*/*.py
 !work/cell_dev/*/*.json
 !work/cell_dev/*/*.md
+work/char_tristate/*
+!work/char_tristate/*.py
+!work/char_tristate/*.lib
+!work/char_tristate/*.md
+work/char_clockgate/*
+!work/char_clockgate/*.py
+!work/char_clockgate/*.lib
+!work/char_clockgate/*.md
+work/char_sighold/*
+!work/char_sighold/*.lib
+!work/char_sighold/*.md
