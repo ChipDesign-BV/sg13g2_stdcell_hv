@@ -8,14 +8,14 @@ all pads, fillers and a corner, and nothing you can synthesise and place.
 
 This library fills that gap: all 84 cells of `sg13g2_stdcell`, rebuilt on the
 thick-oxide devices, with the same topology, the same pin names and the same
-pin order, plus two tie cells built here (see [Tie cells](#tie-cells)). Layout
-covers 68 cells, and those 68 are **DRC clean and
-LVS clean** against the PDK's own klayout decks (the remaining DRC report
-lines are chip-level metal-density rules that only apply to a filled die —
-see the DRC result section) — placed on a 17-track site with LEF
-abstracts. See [Layout](#layout) and
-[What this library is not](#what-this-library-is-not) for what is still
-missing: 16 cells have no GDS.
+pin order, plus two tie cells built here (see [Tie cells](#tie-cells)). All 84
+cells are drawn and are **DRC clean and LVS clean** against the PDK's own
+klayout decks, and clean under Magic's strict analog N-well rules as well (the
+remaining DRC report lines are chip-level metal-density rules that only apply
+to a filled die — see the DRC result section) — placed on a 17-track site with
+LEF abstracts. 82 of the 84 are in the Liberty file; see [Liberty](#liberty)
+and [What this library is not](#what-this-library-is-not) for what is still
+missing.
 
 The cells are named `sg13g2_hv_*` and coexist with the thin-oxide library, so
 1.2 V and 3.3 V logic can appear in one netlist.
@@ -140,12 +140,14 @@ cell's logic. The slew and load index grids are the thin-oxide grids rescaled
 by the measured 2.66× delay and 2.20× capacitance ratios, so the tables cover
 the same electrical territory as the original rather than an arbitrary range.
 
-> **66 of the 84 cells are characterized, sequential cells included.**
-> The 9 flip-flops (scan variants included) carry clk→Q delay tables,
-> setup/hold constraints and leakage; the 5 latches carry en→Q delays and
-> closing-edge setup/hold. The 6 tri-state cells are not characterized
-> (CharLib has no three-state output form), nor are the 12 no-arc /
-> statetable cells listed below.
+> **82 of the 84 cells are in the Liberty file, 72 of them with timing
+> arcs.** The 9 flip-flops (scan variants included) carry clk→Q delay
+> tables, setup/hold constraints and leakage; the 5 latches carry en→Q
+> delays and closing-edge setup/hold; the 6 tri-states carry the data arc
+> plus `three_state_enable` / `three_state_disable`. `sighold` ships
+> `driver_type : bus_hold` with measured capacitance and leakage, the tie
+> cells and the 7 physical cells area and leakage only. The 2 statetable
+> clock gates are the only cells with no Liberty entry at all.
 >
 > Stock CharLib 2.1.0 cannot do this: its sequential delay procedure is an
 > unimplemented stub and its setup/hold contour procedure builds transients
@@ -157,11 +159,18 @@ the same electrical territory as the original rather than an arbitrary range.
 > (work/seq_leakage.py), unlike the all-states enumeration of the
 > combinational cells.
 
-Twelve cells are excluded by the configuration, each for a stated reason: the
-seven `fill_*` / `decap_*` / `antennanp` / `sighold` cells have no output pin
-and no timing arcs; `tiehi` / `tielo` have no timing tables in the thin-oxide
-library either; `lgcp_1` and `slgcp_1` are statetable-based integrated clock
-gates and CharLib has no input form for a statetable.
+Twelve cells are excluded by the configuration, each for a stated reason, and
+all but two are measured directly against the shipped netlists instead: the 4
+`fill_*`, 2 `decap_*` and `antennanp` cells have no output pin and no timing
+arcs (area-only stubs, measured leakage, measured diode pin capacitance);
+`tiehi` / `tielo` have no timing tables in the thin-oxide library either
+(measured leakage); `sighold` is a bus holder whose only signal pin is an
+`inout` (measured `bus_hold` capacitance and leakage — see
+`work/char_sighold/`). `lgcp_1` and `slgcp_1` are statetable-based integrated
+clock gates and CharLib has no input form for a statetable; their direct
+characterization is still in progress, so they ship with layout but no
+Liberty, and the SCL excludes them exactly as the thin-oxide SCL excludes its
+own clock gates.
 
 `work/finalize_lib.py` post-processes the characterized file into the
 shipped one, all three steps idempotent and derived or measured rather
@@ -195,9 +204,12 @@ flip-flops and latches (`dfrbp_*`, `dfrbpq_*`, `dlh*`, `dll*`, `sdf*`) and all 6
 tri-state cells (`ebufn_*`, `einvn_*`). CharLib emits an empty library for
 them without running a single simulation and without reporting an error, so
 with `omit_on_failure` they vanish silently; the run log does not mention them
-at all. The custom procedures above recovered the 14 flip-flops and latches;
-the 6 tri-state cells still need work on CharLib itself, or a different
-characterizer.
+at all. The custom procedures above recovered the 14 flip-flops and latches.
+The 6 tri-states are not recoverable that way — CharLib has no high-impedance
+concept anywhere in its schema, and lctime pins the enable and skips exactly
+the enable arcs — so they are measured directly against the shipped netlists
+by `work/char_tristate/char_tristate.py`, which is where their
+`three_state_enable` / `three_state_disable` tables come from.
 
 ### What CharLib gets wrong in the emitted Liberty
 
@@ -307,8 +319,9 @@ around. None is caused by the library.
 
 ## Layout
 
-`gds/sg13g2_stdcell_hv.gds` holds **68 cells** -- 66 of the 84 produced by
-`work/layout_retarget.py`.
+`gds/sg13g2_stdcell_hv.gds` holds all **84 cells**: 66 produced by
+`work/layout_retarget.py`, the other 18 by the per-cell generators described
+under [Verified](#verified).
 
 The thin-oxide GDS is hand-drawn 2-D layout, not a regular template, so a
 placement-based generator would have to rebuild every cell — and would not be
@@ -448,7 +461,7 @@ each row the full cell list in a rotated order so vertical neighbours
 differ, cells advanced by LEF width so the drawn margins overlap exactly as
 placed. After the fix it reports **zero cell-rule violations** — only the
 chip-level density markers discussed above — and the per-cell LVS was re-run
-afterwards: all 68 cells still match.
+afterwards, as it was again once every cell was drawn: 84/84 match.
 
 Getting to zero in the original harness took three fixes beyond the retarget
 itself, each reached by replicating the failing rule flat with the
@@ -496,7 +509,7 @@ wrong with them):
 
 ### LVS result
 
-**All 66 cells match.** The 62 cells that contain devices pass with the
+**All 84 cells match.** The 80 cells that contain devices pass with the
 strict flags. The four `fill_*` cells contain no devices at all — klayout
 then extracts a port-less empty circuit, the CDL subckt declares VDD/VSS, and
 the comparer reports that port-list difference as a mismatch; IHP's own
@@ -605,8 +618,8 @@ and nothing puts it back on the 0.48 µm Metal1 track grid. The result, from
 | | signal pins with no vertical track through them |
 |---|---|
 | `sg13g2_stdcell` (thin oxide) | 2 (both scan pins of `sdfbbp_1`, unused by the reference flow) |
-| `sg13g2_stdcell_hv` before widening | 25 |
-| `sg13g2_stdcell_hv` shipped | **11** (`grid_align_pins.py --apply` widened the 12 that had room) |
+| `sg13g2_stdcell_hv` before widening | 25 (of the 68 cells drawn at that point) |
+| `sg13g2_stdcell_hv` shipped, all 84 cells | **11** of 282 signal pins (`grid_align_pins.py --apply` widened the 12 that had room) |
 
 Metal1 sits below the usual `RT_MIN_LAYER` of Metal2, so such a pin can only
 be reached by dropping a via from Metal2 — and a via wants a track. The
@@ -697,6 +710,9 @@ The UDP primitives are not shipped here (see the note under
 - **All 84 cells have GDS** (see [Layout](#layout)), DRC clean and LVS
   clean, with LEF abstracts on a 17-track site. 66 came from the library
   retarget, 18 from per-cell generators.
+- **Two cells have no Liberty entry.** The statetable clock gates
+  `lgcp_1` / `slgcp_1` are drawn but not yet characterized, so a digital
+  flow cannot pick them.
 - **Not silicon proven.** Everything here is simulation against the PDK models.
 - **Delay cells behave differently.** `dlygate4sd2_1` and `o21ai_1` used gate
   lengths below the thick-oxide minimum, so their delay ratios have shifted.
@@ -716,7 +732,7 @@ sg13g2_stdcell_hv/
 ├── sym/xschem/*.sym                  84 symbols (copies of the thin-oxide ones)
 ├── lef/sg13g2_stdcell_hv.lef         84 macros + CoreSiteHV (0.48 x 7.14)
 ├── lib/                              Liberty, 3.3 V typical
-├── gds/sg13g2_stdcell_hv.gds         68 cells: 66 retargeted + 2 tie (see Layout)
+├── gds/sg13g2_stdcell_hv.gds         84 cells: 66 retargeted + 18 generated
 ├── doc/sg13g2_stdcell_hv.celllist
 ├── klayout/pymacros/*.lym            KLayout cell-library registration
 ├── xschem_lib_sg13g2_stdcell_hv.tcl  xschem registration
@@ -811,12 +827,15 @@ Flip-flops and latches map through Yosys `dfflibmap` / the latch techmap
 exactly as in the thin-oxide flow: all 9 flops and 5 latches carry
 liberty **and** layout views. The exclude lists mirror the thin-oxide
 ones (`sdfbbp_1`, `dfrbp_2`). `sdfbbp_map.v` remains available as an
-opt-in for designs that want every flop on the scan cell — its header
+opt-in for DFT flows that want every flop on the scan cell — its header
 explains how (it needs `sdfbbp_1` removed from `synth_exclude.cells` and
 a design-level `SYNTH_EXTRA_MAPPING_FILE`, which is not PDK-scoped); all
 of its clocked mappings are proven against the Yosys cell semantics with
-`equiv_induct`. There are still no tri-state or clock-gate mappings:
-those cells are drawn but not characterized.
+`equiv_induct`. Tri-states map through `SYNTH_TRISTATE_MAP`
+(`tribuff_map.v`, Yosys' `$_TBUF_` onto `sg13g2_hv_ebufn_2`) with
+`TRISTATE_CELLS` listing both footprints, mirroring the thin-oxide SCL.
+The 2 clock gates have no mapping — they are drawn but not yet
+characterized, and the thin-oxide SCL excludes its own clock gates too.
 
 At install time `finalize_lib.strip_layoutless` still guards the
 liberty ⊆ LEF invariant; with all 84 cells drawn it strips nothing.

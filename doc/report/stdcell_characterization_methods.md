@@ -559,10 +559,13 @@ LibreCell traces.
 
 # Cells outside every characterizer's model
 
-Nine of the 84 cells are drawn but were not characterized by either tool,
-and in every case the obstacle is the characterizer's data model rather
-than anything about the cell. The three mechanisms are worth separating,
-because only one of them announces itself.
+Nine of the 84 cells are drawn but could not be characterized by either
+tool, and in every case the obstacle is the characterizer's data model
+rather than anything about the cell. Seven of the nine — `sighold` and the
+6 tri-states — are measured directly instead and do ship Liberty data
+(sections 10.1 and 10.2); the 2 clock gates are still in progress
+(section 10.3). The three mechanisms are worth separating, because only one of them
+announces itself.
 
 **No high-impedance state (the 6 tri-states).** CharLib's cell schema
 (`charlib/config/syntax.py:30-120`) has keys for `inputs`, `outputs`,
@@ -652,7 +655,8 @@ measured here exactly as for any other gate — plus `three_state_enable`
 and `three_state_disable`, which are distinguished from ordinary delays by
 measuring *into* and *out of* a floating state. `ebufn` carries four
 tables per enable arc; `einvn` uses the `_rise` variants and carries two.
-All six cells are characterized by `work/char_tristate.py`; the harness is
+All six cells are characterized by `work/char_tristate/char_tristate.py`;
+the harness is
 calibrated by re-measuring a shipped cell's pin capacitance
 (`sg13g2_hv_buf_4` pin A) through the same code path and requiring
 agreement with the shipped library — it lands at **0.46 %**.
@@ -740,7 +744,7 @@ Worth recording because both would have produced plausible numbers:
 The clock gates need a `CLK`→`GCLK` propagation arc (which the thin-oxide
 library writes with *no* `timing_type` at all, i.e. combinational),
 `setup_rising`/`hold_rising` on the enable pins against the clock — the
-form the local bisection procedure of section 7.2 already emits — and a
+form the local bisection procedure of section 6.2 already emits — and a
 `min_pulse_width` constraint on the clock pin, obtained by bisecting the
 clock pulse until the gated output fails to produce a full-swing pulse.
 CharLib has a config slot for `min_pulse_width_constraint_procedure` but
@@ -844,7 +848,7 @@ slew targets belong in the flow constraints, not here.
 | shipped library | `lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib`, thresholds 20/80/50, 7×7 NLDM grids |
 | cross-check | `work/lctime_compare.py`: 8 cells, 3 132 aligned points |
 | local CharLib adaptations | `charlib_patched.py` (case-insensitive branch lookup, procedure registration), `seq_delay_procedure.py` (clk→Q, setup/hold bisection), `seq_leakage.py`, `gen_charlib_config.py` (grids ×2.66/×2.20, charge integration selected), `fix_lib.py` / `fix_lib_seq.py` (header and sequential emission repairs) |
-| direct measurement, outside both characterizers | `tie_leakage.py` (tie cells), `char_sighold.py` (bus holder: settled-tail leakage, bias-swept AC capacitance, fight-charge sweep), `char_tristate.py` (data + enable/disable arcs), `char_clockgate.py` (CLK→GCLK, setup/hold, min pulse width) |
+| direct measurement, outside both characterizers | `tie_leakage.py` (tie cells), `char_sighold.py` (bus holder: settled-tail leakage, bias-swept AC capacitance, fight-charge sweep), `char_tristate/char_tristate.py` (data + enable/disable arcs). The clock gates would add CLK→GCLK, setup/hold and min-pulse-width by the same route; that work is in progress and no clock-gate data is in the shipped file |
 | Liberty post-processing | `finalize_lib.py` (drive limits from the table axes, physical-cell stubs with measured leakage, corner-suffixed library name) |
 | Liberty gate | `verify_lib.py`: structure, cross-view, areas vs layout, load-axis monotonicity, C~in~ vs reference, sequential arcs, drive limits, and complete-construct checks for the tri-state / clock-gate / bus-hold classes |
 
