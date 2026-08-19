@@ -130,10 +130,14 @@ pre {
    this is the backstop for the ones that slip through. */
 @media print {
   pre {
+    /* Wrap rather than clip. No hanging indent: CSS text-indent applies to
+       the first line of the block, not to each wrapped line, so using it
+       here shifted every line after the first and destroyed the alignment
+       of code that is flush left in the source. Since build.sh keeps source
+       lines inside the column, wrapping is a backstop that should not
+       normally trigger. */
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    padding-left: 2.2em;
-    text-indent: -1.4em;
   }
   /* Long unbreakable tokens -- paths, library names -- must not push a
      table or a paragraph past the margin either. */
