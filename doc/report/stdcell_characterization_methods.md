@@ -5,7 +5,7 @@ author:
   - "Koen Van Caekenberghe, Ph.D."
   - "ChipDesign B.V."
   - "[info@chipdesign.be](mailto:info@chipdesign.be)"
-date: "2026-08-18 (rev. 2: special-cell classes, bus-holder capacitance, drive limits)"
+date: "2026-08-19 (rev. 3: clock gates characterized, step-by-step howto, corner flow)"
 logo: "ChipDesign_logo.png"
 ---
 
@@ -750,6 +750,27 @@ clock pulse until the gated output fails to produce a full-swing pulse.
 CharLib has a config slot for `min_pulse_width_constraint_procedure` but
 never calls it; its dispatch is a `# TODO`.
 
+Both cells are now measured, by `char_clockgate/char_clockgate.py`.
+`sg13g2_hv_lgcp_1` ships as `latch_posedge` with 4 timing groups and 3
+leakage states; `sg13g2_hv_slgcp_1` as `latch_posedge_precontrol` with 6 of
+each, the extra pair being setup/hold on `SCE`. Two results are worth
+recording because neither is an artifact of the method:
+
+* **The two cells are indistinguishable on the clock path.** Their
+  `min_pulse_width` vectors are identical point for point (0.462561,
+  0.625607, 0.792817, 0.974794 ns) and their CLK→GCLK delays differ only in
+  the 4th–6th digit (0.152337 vs 0.152298 ns at the first grid point). This
+  is physically right — the scan leg loads the *enable* path, not the clock
+  path — and the difference is far below the 0.01 ns bisection tolerance,
+  so both land on the same value. It is documented rather than hidden,
+  because a user comparing the two cells in an STA report will see it.
+* **The min-pulse-width search must be forced to bracket.** An early run
+  emitted the bisection's own 48 ns upper bound as if it were measured
+  data: the search never bracketed, and returning the bound produced a
+  number that was plausible, wrong by two orders of magnitude, and silent.
+  The emit path now asserts that every point bracketed before it will write
+  anything.
+
 # Drive limits: the attribute whose absence fails twice
 
 CharLib emits no `max_capacitance` and no `max_transition`, on any pin, in
@@ -781,6 +802,265 @@ accept a slower edge than was characterized. So per output pin
 and the library defaults follow the thin-oxide convention of
 weakest-drive / slowest-edge. These bound the characterized range; real
 slew targets belong in the flow constraints, not here.
+
+# How to characterize this library, step by step
+
+Everything above describes *what* is measured and why. This section is the
+operational counterpart: the exact commands that turn the shipped netlists
+into a signed-off Liberty file, in the order they must run, with the checks
+that tell you each step actually did something. It is written to be followed
+by someone who has never run the flow.
+
+## 0. Prerequisites
+
+| what | where | notes |
+|---|---|---|
+| IHP SG13G2 PDK | `$PDK_ROOT/$PDK`, default `/foss/pdks/ihp-sg13g2` | supplies `cornerMOShv.lib` and the PSP103 OSDI modules |
+| CharLib 2.1.0 | venv `/foss/tools/charlib` | driven through `charlib_patched.py`, never invoked directly |
+| ngspice ≥ 42 with OSDI | `libngspice.so` on the loader path | see the note on the shim below |
+| Python 3.12 | system | `merge_lib.py`, `finalize_lib.py`, `verify_lib.py` and the direct-measurement decks are stock Python |
+
+Two environment details are not optional and are the cause of most
+first-run failures:
+
+* **The OSDI shim.** The PSP103 models are Verilog-A compiled to `.osdi`
+  and must be `pre_osdi`-loaded before the netlist is read. `run_corner.sh`
+  prepends `work/ngspice-osdi-shim` to `PATH` for exactly this reason. Run
+  CharLib without it and every device falls back to an intrinsic model —
+  the run *succeeds* and the numbers are silently wrong.
+* **`.spiceinit` thread count.** `work/.spiceinit` sets `num_threads=1` and
+  is copied into the scratch directory at stage 3. This is deliberate:
+  ngspice's `.spiceinit` **overrides** `OMP_NUM_THREADS`, so setting the
+  environment variable alone does nothing. With per-simulation threading
+  left on, the outer job-level parallelism oversubscribes the machine and
+  the run slows down by more than an order of magnitude.
+
+## 1. The short version
+
+One corner, end to end:
+
+```sh
+cd work
+./run_corner.sh typ            # or fast, or slow
+```
+
+That is the whole flow. It takes hours — the combinational stage alone is
+~28 800 ngspice invocations — and it is resumable, so read the rest of this
+section before starting a long run.
+
+`run_corner.sh` takes an optional second argument naming the stage to start
+from, which is how you recover from a failure without repeating work:
+
+```sh
+./run_corner.sh fast direct    # skip straight to the direct measurements
+```
+
+Valid stages, in order: `config`, `charlib`, `seq`, `direct`, `finalize`,
+`verify`.
+
+## 2. The six stages
+
+### Stage 1 — configuration
+
+```sh
+python3 gen_charlib_config.py --corner fast
+```
+
+Writes `charlib_sg13g2_stdcell_hv_fast_3p60V_m40C.yml`: every cell, its
+pins, its logic, the slew and load grids, and the PVT triplet taken from
+`corners.py`. Nothing is hardcoded here — the corner supplies the model
+section (`mos_ff`), the supply (3.6 V) and the temperature (−40 °C)
+together.
+
+**Check it landed.** Three greps, because a corner that is only *partly*
+applied produces a plausible library rather than an error:
+
+```sh
+grep -E 'voltage: 3.6|temperature: -40|mos_ff' charlib_sg13g2_stdcell_hv_fast_3p60V_m40C.yml | head
+```
+
+### Stage 2 — CharLib, combinational
+
+```sh
+./run_charlib.sh fast
+```
+
+The production characterizer, run over everything it can express: the
+combinational cells, their NLDM delay and transition tables, input
+capacitance by charge integration, and all-state DC leakage. This is the
+long pole. Parallelism defaults to `nproc - 2`; override with
+`CHARLIB_JOBS`.
+
+**What "done" looks like:** a progress bar reaching `28801/28801` and a
+`.lib` appearing at `lib/sg13g2_stdcell_hv_fast_3p60V_m40C.lib`.
+
+**What a healthy log still contains:** thousands of lines of
+`ImportError: A module that was compiled using NumPy 1.x…` and a PySpice
+traceback ending in `_hspice_read`. Both are benign — PySpice probes for an
+HSpice backend, fails, and falls through to ngspice. Do not go hunting
+them. To count *real* problems, filter them out:
+
+```sh
+grep -hiE 'error|assert|fail' log | grep -viE 'numpy|hspice|pybind11|ImportError' | wc -l
+```
+
+**Where the simulations are.** They will not appear in `ps` as `ngspice`.
+CharLib drives ngspice through PySpice's *shared-library* interface: each
+worker `dlopen`s `libngspice.so` and calls into it in-process. The Python
+workers pinning the CPU **are** the simulations. Confirm with:
+
+```sh
+grep -o '.*libngspice.*' /proc/<worker-pid>/maps
+```
+
+### Stage 3 — CharLib, sequential
+
+```sh
+charlib_patched.py run charlib_<libname>.yml \
+    -f 'sg13g2_hv_(sdf|dfr|dlh|dll)' -o seq_fast.lib -j <jobs>
+python3 merge_lib.py <lib> seq_fast.lib
+```
+
+The flops and latches, re-run through the project's own procedures
+(`seq_delay_procedure.py`) because upstream CharLib's sequential delay is a
+stub. Produces clk→Q, setup and hold by the relative-1.5×-C2Q bisection
+described earlier in this report.
+
+Note this stage does **not** go through `run_charlib.sh`, even though that
+script accepts a filter. `run_charlib.sh` writes directly to the corner's
+Liberty; reusing it here would overwrite stage 2's combinational results
+rather than add to them. The sequential run therefore writes its own
+`seq_<corner>.lib` and is folded in with `merge_lib.py`.
+
+### Stage 4 — the cells no characterizer reaches
+
+```sh
+python3 seq_leakage.py  --corner fast
+python3 tie_leakage.py  --corner fast
+python3 char_sighold.py --corner fast
+python3 char_tristate/char_tristate.py --corner fast
+python3 merge_lib.py <lib> char_tristate/tristate_fast.lib
+python3 char_clockgate/char_clockgate.py --corner fast all
+python3 merge_lib.py <lib> char_clockgate/clockgate_fast.lib
+```
+
+Nine cells — six tri-states, two clock gates, one bus holder — plus the tie
+cells and sequential single-state leakage. Each is a direct ngspice
+measurement against the shipped netlist, for the reasons given in *Cells
+outside every characterizer's model*.
+
+`char_clockgate.py` accepts individual task names instead of `all`
+(`leakage`, `cap`, `delay`, `mpw`, `suh`, `emit`, `ratio`) and resumes from
+whatever it has already measured, which matters because the min-pulse-width
+bisection is the slowest single measurement in the flow. `CG_JOBS` and
+`TIMEOUT` tune it.
+
+### Stage 5 — drive limits, stubs, areas
+
+```sh
+python3 finalize_lib.py --corner fast
+python3 update_lib_area.py
+```
+
+`finalize_lib.py` derives `max_capacitance` and `max_transition` from the
+table axes of whatever is present, adds the physical-cell stubs with
+measured leakage, and stamps the corner-suffixed library name.
+`update_lib_area.py` replaces every `area` with the drawn LEF footprint.
+
+> **This step must run after every merge, not before.** It reads the
+> axes that exist at the moment it runs. Run it before stage 4 and the
+> tri-states and clock gates ship with no drive limits — which is the exact
+> gap that crashed OpenROAD's TritonCTS on the first revision of this
+> library. `run_corner.sh` enforces the order; if you are driving the
+> stages by hand, this is the one that bites.
+
+### Stage 6 — the gate
+
+```sh
+python3 verify_lib.py --corner fast
+```
+
+Refuses to pass on: missing leakage groups, empty timing tables, pin sets
+that disagree with the CDL, areas that disagree with the LEF,
+non-monotonic load axes, missing drive limits, and incomplete
+special-class constructs (a `three_state` output without both enable and
+disable arcs, an ICG without statetable + internal pin + GCLK propagation +
+enable setup/hold + `min_pulse_width`, a bus holder without
+`driver_type : bus_hold`). Expect:
+
+```
+cells in lib: 84
+timing tables: 668, empty: 0
+sequential cells checked: 14, clean: 14
+RESULT: PASS
+```
+
+## 3. Adding a corner
+
+Corners are data, not code. Add an entry to `CORNERS` in `work/corners.py`:
+
+```python
+"slow": Corner("slow", "mos_ss", 3.00, 125.0, 1.00),
+```
+
+…and run `./run_corner.sh slow`. The filename, the Liberty library name,
+the ngspice `.lib` section, the supply and the temperature all follow from
+that one line. The PDK-level LibreLane config registers whichever corners
+are actually present, so no downstream file needs editing.
+
+The slew and load grids are deliberately **not** corner-dependent: the
+tables must span the same electrical territory at every corner or an STA
+tool cannot interpolate across them.
+
+> **The failure mode to watch for when adding corners** is a constant
+> derived from `VDD` at module import time. Rebinding `VDD` from
+> `--corner` does not update anything computed from it, so a threshold
+> keeps the *previous* corner's volts while the run looks perfectly
+> healthy. This shape has produced five defects in this flow so far
+> (`.option temp`, the SPICE header, the ICG trip points, the keeper bias,
+> the tri-state hold tolerance). When you add a corner-dependent constant,
+> recompute it in the same block that rebinds `VDD`, and prefer deriving it
+> at the point of use.
+
+## 4. Installing into the PDK
+
+```sh
+python3 make_pdk_pr.py --pdk /path/to/IHP-Open-PDK
+```
+
+Copies the eight view directories, the tech LEF, the LibreLane SCL, and the
+reports; patches the PDK-level `librelane/config.tcl` corner block; then
+runs two checks that exist because both have failed silently before:
+
+* the installed netlist is cross-checked cell-for-cell against the SPICE
+  view (`84/84 cells match`);
+* **every installed file is confirmed `git`-trackable.** The `spice/` views
+  were once dropped entirely by a root `.gitignore` rule — `*.spice` with a
+  `!spice/` re-include only un-ignores the *directory*, not the files in
+  it. `git check-ignore --stdin --no-index` is what catches this; without
+  `--no-index` it is silent on already-staged paths and the guard is
+  vacuous.
+
+## 5. Traps, in descending order of time lost
+
+1. **A clean log does not mean a complete run.** CharLib has no Hi-Z
+   concept, so the tri-states were *configured*, produced nothing,
+   swallowed the empty result, and logged not one word. Always compare the
+   emitted cell list against the intended one.
+2. **Never ship an unbracketed bisection.** A search that hits its bounds
+   without bracketing must raise, not return the bound. The clock-gate
+   min-pulse-width search once emitted its 48 ns upper bound as measured
+   data; it now asserts.
+3. **HV table axes are reversed relative to the thin-oxide library.**
+   `variable_1 : total_output_net_capacitance`, so `index_1` is loads and
+   `index_2` is slews. Every structure ported from the LV Liberty must swap
+   axes.
+4. **`pkill -f <pattern>` matches your own command line.** It cost three
+   self-terminated shells here. Use the bracket trick: `pkill -f
+   '[c]har_clockgate'`.
+5. **`import` at the top of a one-line multi-import** can silently no-op a
+   scripted edit. Assert on every automated source replacement; the one
+   substitution not checked was the one that did nothing.
 
 # Conclusions
 
@@ -848,7 +1128,7 @@ slew targets belong in the flow constraints, not here.
 | shipped library | `lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib`, thresholds 20/80/50, 7×7 NLDM grids |
 | cross-check | `work/lctime_compare.py`: 8 cells, 3 132 aligned points |
 | local CharLib adaptations | `charlib_patched.py` (case-insensitive branch lookup, procedure registration), `seq_delay_procedure.py` (clk→Q, setup/hold bisection), `seq_leakage.py`, `gen_charlib_config.py` (grids ×2.66/×2.20, charge integration selected), `fix_lib.py` / `fix_lib_seq.py` (header and sequential emission repairs) |
-| direct measurement, outside both characterizers | `tie_leakage.py` (tie cells), `char_sighold.py` (bus holder: settled-tail leakage, bias-swept AC capacitance, fight-charge sweep), `char_tristate/char_tristate.py` (data + enable/disable arcs). The clock gates would add CLK→GCLK, setup/hold and min-pulse-width by the same route; that work is in progress and no clock-gate data is in the shipped file |
+| direct measurement, outside both characterizers | `tie_leakage.py` (tie cells), `char_sighold.py` (bus holder: settled-tail leakage, bias-swept AC capacitance, fight-charge sweep), `char_tristate/char_tristate.py` (data + enable/disable arcs), `char_clockgate/char_clockgate.py` (CLK→GCLK propagation, enable setup/hold, CLK min-pulse-width, per-state leakage for the two statetable ICGs) |
 | Liberty post-processing | `finalize_lib.py` (drive limits from the table axes, physical-cell stubs with measured leakage, corner-suffixed library name) |
 | Liberty gate | `verify_lib.py`: structure, cross-view, areas vs layout, load-axis monotonicity, C~in~ vs reference, sequential arcs, drive limits, and complete-construct checks for the tri-state / clock-gate / bus-hold classes |
 

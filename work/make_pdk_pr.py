@@ -44,8 +44,8 @@ The KLayout macro gets the PDK-relative GDS candidate prepended
 registers no stdcell GDS as a KLayout library today, so the macro is
 flagged as a maintainer question in the PR.
 
-doc/ ships the celllist, ReleaseNotes.txt and the two PDF reports -- not
-work/, the README or the repo licence files (the PDK's top-level
+doc/ ships the celllist, ReleaseNotes.txt and the two reports in both PDF
+and Markdown -- not work/, the README or the repo licence files (the PDK's top-level
 Apache-2.0 covers the contribution; attribution lives in ReleaseNotes.txt
 and per-file headers).
 
@@ -137,8 +137,16 @@ def copy_libs_ref(pdk):
     doc.mkdir(parents=True)
     shutil.copy2(HV / "doc" / "sg13g2_stdcell_hv.celllist", doc)
     shutil.copy2(HV / "doc" / "ReleaseNotes.txt", doc)
-    for pdf in (HV / "doc" / "report").glob("*.pdf"):
-        shutil.copy2(pdf, doc)
+    # Both renderings of each report ship: the PDF to read, the Markdown it
+    # was built from. A PDF alone cannot be diffed in review, quoted in an
+    # issue, or corrected by anyone but its author -- and these reports are
+    # the documentation of how the Liberty numbers were obtained, so the
+    # source belongs next to the artifact. doc/report/build.sh regenerates
+    # the PDFs from the Markdown.
+    for report in (HV / "doc" / "report").glob("*.pdf"):
+        shutil.copy2(report, doc)
+    for report in (HV / "doc" / "report").glob("*.md"):
+        shutil.copy2(report, doc)
     n = sum(1 for p in ref.rglob("*") if p.is_file())
     print(f"libs.ref/sg13g2_stdcell_hv: {n} files")
     return ref
