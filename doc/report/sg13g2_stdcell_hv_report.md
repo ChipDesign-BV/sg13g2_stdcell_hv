@@ -25,7 +25,7 @@ so both libraries coexist in one netlist.
 | xschem symbols / schematics | 84 + gallery sheet | netlist-equivalence proven |
 | GDS layout (`gds/`) | **84 cells** (66 retargeted + 18 per-cell generated) | **DRC clean, LVS clean** |
 | LEF abstracts (`lef/`) | **84 macros** + `CoreSiteHV` site | generated from the GDS, pin sets verified against CDL |
-| Liberty NLDM (`lib/`) | 82 cells, 660 timing tables | combinational + sequential + tri-state; areas all measured |
+| Liberty NLDM (`lib/`) | **all 84 cells**, 668 timing tables | combinational, sequential, tri-state and clock-gate; areas all measured |
 | LibreLane SCL (`librelane/`) | site, cell maps, tracks, excludes | flops map natively through `dfflibmap` |
 
 Physical sign-off, one fixed invocation of the PDK's own klayout decks — on
@@ -423,16 +423,37 @@ value, which is load-independent by construction and needs no synthetic
 epsilon. Section 10.2 of the companion characterization report gives the
 derivation and the ratio tables.
 
-**The two clock gates** need a
+**The two clock gates** are measured by `work/char_clockgate.py`: a
 `CLK`→`GCLK` propagation arc, `setup_rising`/`hold_rising` on the enable
 pins — the form the sequential bisection procedure already emits — and a
 `min_pulse_width` constraint on the clock pin, bisected until the gated
 output loses its pulse, alongside the statetable, internal state pin and
-`state_function` metadata that make an integrated clock gate usable.
-*That work is still in progress at the time of writing.* Until it lands
-the two cells stay excluded from the flow, exactly as the thin-oxide SCL
-excludes its own clock gates, so nothing downstream can pick a cell it
-cannot time.
+`state_function` metadata that make an integrated clock gate usable. With
+these the Liberty covers **all 84 cells**.
+
+The min-pulse-width measurement is worth one caution, because its first
+result was wrong in a way that looked right. Under machine load the
+trials time out; a timed-out trial returns no measurement, the bisection
+predicate reads that as "failed at every width", and the search then
+returns its own upper bound. The first fragment carried a 48 ns minimum
+pulse width — 50× the cell's own CLK→GCLK delay — which would have told
+STA that every realistic clock pulse is too narrow. The generator already
+recorded a `bracketed` flag for exactly this case but emitted the value
+anyway; it now refuses to, and names the offending points. All 16 points
+are bracketed in the shipped data, 0.46–1.11 ns and monotone in input
+slew.
+
+`lgcp_1` and `slgcp_1` come out with identical min-pulse-widths, which is
+expected rather than suspicious: their CLK→GCLK delays differ only in the
+4th–6th digit and their clock-pin capacitances in the 7th — the scan leg
+sits in the enable path, not the clock path — so the true difference is
+far below the 0.01 ns bisection tolerance and both converge to the same
+midpoint. That the two simulations are genuinely distinct is visible in
+the delay and capacitance data.
+
+Both cells nevertheless stay in the exclude lists, as the thin-oxide SCL
+keeps its own: an integrated clock gate is instantiated deliberately, not
+inferred.
 
 ## One deliberate omission: switching power
 
@@ -543,7 +564,7 @@ max-cap violations against real limits.
 | LVS | PDK deck, per cell, after the well rebuild | **84 cells** vs CDL | **84/84** |
 | LEF | klayout parse-back + pin sets vs CDL | **84 macros** | PASS, on-grid |
 | P&R block validation | LibreLane `spi_slave` ×2 + full signoff deck | ~354 × 400 µm, 100 MHz | all clean; signoff **0 geometry violations**, 8 density markers |
-| Liberty structure/views/areas | `verify_lib.py` 1–3 | 82 cells, 660 tables | PASS, **all areas measured**, exact to 1 nm² |
+| Liberty structure/views/areas | `verify_lib.py` 1–3 | **84 cells**, 668 tables | PASS, **all areas measured**, exact to 1 nm² |
 | Liberty monotonicity | `verify_lib.py` 4 | 2 142 delay series | 2 141 + 1 documented waiver |
 | Liberty Cin | vs both-rails reference | `inv_1` | 6.44 vs 5.87 fF (9.7 %) |
 | Liberty delay point-check | hand-written transient | table corner | 0.3 % |
@@ -575,10 +596,11 @@ assembles and verifies the contribution against a checkout.
 * **No switching power.** The library ships `leakage_power` but no
   `internal_power` for any cell (section 7.3). Dynamic power analysis will
   see only leakage.
-* **The 2 statetable clock gates have no Liberty entry.** `lgcp_1` and
-  `slgcp_1` are drawn and DRC/LVS clean but not characterized, so the SCL
-  excludes them — as the thin-oxide SCL excludes its own clock gates.
-  Their direct characterization is in progress (section 7.2).
+* **Clock gating is available but not automatic.** `lgcp_1` and
+  `slgcp_1` carry the full ICG model, but an integrated clock gate is
+  instantiated deliberately rather than inferred, so both remain in the
+  exclude lists exactly as the thin-oxide SCL keeps its own. Enabling it
+  needs two design-level variables, documented in the exclude list.
 * **One corner** (typical, 3.3 V, 25 °C); sequential leakage is a
   single-settled-state number; the delay cells' ratios shift with the
   450 nm minimum; the decaps store less per unit area.

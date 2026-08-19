@@ -13,9 +13,9 @@ cells are drawn and are **DRC clean and LVS clean** against the PDK's own
 klayout decks, and clean under Magic's strict analog N-well rules as well (the
 remaining DRC report lines are chip-level metal-density rules that only apply
 to a filled die — see the DRC result section) — placed on a 17-track site with
-LEF abstracts. 82 of the 84 are in the Liberty file; see [Liberty](#liberty)
-and [What this library is not](#what-this-library-is-not) for what is still
-missing.
+LEF abstracts, and **all 84 are in the Liberty file**; see
+[Liberty](#liberty) and [What this library is not](#what-this-library-is-not)
+for the limitations that remain.
 
 The cells are named `sg13g2_hv_*` and coexist with the thin-oxide library, so
 1.2 V and 3.3 V logic can appear in one netlist.
@@ -140,14 +140,16 @@ cell's logic. The slew and load index grids are the thin-oxide grids rescaled
 by the measured 2.66× delay and 2.20× capacitance ratios, so the tables cover
 the same electrical territory as the original rather than an arbitrary range.
 
-> **82 of the 84 cells are in the Liberty file, 72 of them with timing
+> **All 84 cells are in the Liberty file, 74 of them with timing
 > arcs.** The 9 flip-flops (scan variants included) carry clk→Q delay
 > tables, setup/hold constraints and leakage; the 5 latches carry en→Q
 > delays and closing-edge setup/hold; the 6 tri-states carry the data arc
 > plus `three_state_enable` / `three_state_disable`. `sighold` ships
 > `driver_type : bus_hold` with measured capacitance and leakage, the tie
 > cells and the 7 physical cells area and leakage only. The 2 statetable
-> clock gates are the only cells with no Liberty entry at all.
+> clock gates carry the full ICG model — statetable, internal state pin,
+> `state_function`, CLK→GCLK propagation, enable setup/hold and minimum
+> clock pulse width.
 >
 > Stock CharLib 2.1.0 cannot do this: its sequential delay procedure is an
 > unimplemented stub and its setup/hold contour procedure builds transients
@@ -710,9 +712,11 @@ The UDP primitives are not shipped here (see the note under
 - **All 84 cells have GDS** (see [Layout](#layout)), DRC clean and LVS
   clean, with LEF abstracts on a 17-track site. 66 came from the library
   retarget, 18 from per-cell generators.
-- **Two cells have no Liberty entry.** The statetable clock gates
-  `lgcp_1` / `slgcp_1` are drawn but not yet characterized, so a digital
-  flow cannot pick them.
+- **Clock gating is not automatic.** `lgcp_1` / `slgcp_1` are fully
+  characterized, but an integrated clock gate is instantiated
+  deliberately rather than inferred, so both sit in the exclude lists as
+  they do in the thin-oxide SCL. Enabling it is two design-level
+  variables — see `librelane/synth_exclude.cells`.
 - **Not silicon proven.** Everything here is simulation against the PDK models.
 - **Delay cells behave differently.** `dlygate4sd2_1` and `o21ai_1` used gate
   lengths below the thick-oxide minimum, so their delay ratios have shifted.
