@@ -39,7 +39,7 @@ it on the INSTALLED copy so the PDK ships only cells that can actually
 be placed (liberty as a subset of LEF), while the characterization data
 for the not-yet-drawn flops stays in this repository.
 
-Usage: python3 finalize_lib.py
+Usage: python3 finalize_lib.py [--corner typ|fast|slow]
 """
 import os
 import re
@@ -47,16 +47,22 @@ import subprocess
 import pathlib
 import sys
 
+import corners
+
 import klayout.db as db
 
 HV = pathlib.Path(__file__).resolve().parent.parent
-LIB = HV / "lib" / "sg13g2_stdcell_hv_typ_3p30V_25C.lib"
+# Corner-driven; rebound from --corner in __main__. rename_library()
+# takes the Liberty library name from LIB.stem, so the corner name
+# inside the file follows the filename automatically.
+CORNER = corners.CORNERS[corners.DEFAULT]
+LIB = corners.lib_path(CORNER)
 SPICE = HV / "spice" / "sg13g2_stdcell_hv.spice"
 GDS = HV / "gds" / "sg13g2_stdcell_hv.gds"
 SHIM = HV / "work" / "ngspice-osdi-shim"
 MODELS = "/foss/pdks/ihp-sg13g2/libs.tech/ngspice/models"
 
-VDD = 3.3
+VDD = CORNER.voltage
 STUBS = ["sg13g2_hv_fill_1", "sg13g2_hv_fill_2", "sg13g2_hv_fill_4",
          "sg13g2_hv_fill_8", "sg13g2_hv_decap_4", "sg13g2_hv_decap_8",
          "sg13g2_hv_antennanp"]
@@ -207,7 +213,8 @@ def ngspice(deck_text, name, meas):
 def measure_leakage(cell, ports):
     conns = {"VDD": "vdd", "VSS": "0"}
     lines = [f"* leakage {cell}",
-             f".lib {MODELS}/cornerMOShv.lib mos_tt",
+             f".lib {MODELS}/cornerMOShv.lib {CORNER.models}",
+             f".option temp={CORNER.temperature:g}",
              f".include {MODELS}/diodes.lib",
              f".include {SPICE}",
              f"Vdd vdd 0 {VDD}",
@@ -234,7 +241,8 @@ def measure_pin_cap(cell, pin, ports):
     caps = []
     for bias in (0.05, VDD / 2, VDD - 0.05):
         lines = [f"* cin {cell}/{pin} @ {bias}V",
-                 f".lib {MODELS}/cornerMOShv.lib mos_tt",
+                 f".lib {MODELS}/cornerMOShv.lib {CORNER.models}",
+                 f".option temp={CORNER.temperature:g}",
                  f".include {MODELS}/diodes.lib",
                  f".include {SPICE}",
                  f"Vdd vdd 0 {VDD}",
@@ -345,4 +353,15 @@ def main():
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = corners.add_argument(argparse.ArgumentParser(
+        description="Finalize one corner's Liberty: drive limits, physical-"
+                    "cell stubs, corner-suffixed library name."))
+    args = ap.parse_args()
+    CORNER = corners.CORNERS[args.corner]
+    LIB = corners.lib_path(CORNER)
+    VDD = CORNER.voltage
+    assert LIB.exists(), f"{LIB.name} does not exist yet -- characterize it first"
+    print(f"corner {CORNER.name}: {CORNER.models}, {VDD} V, "
+          f"{CORNER.temperature:g} C -> {LIB.name}")
     sys.exit(main())

@@ -19,9 +19,16 @@ import os
 import re
 import subprocess
 import pathlib
+import corners
+
 
 HV = pathlib.Path("/foss/designs/sg13g2_stdcell_hv")
-LIB = HV / "lib" / "sg13g2_stdcell_hv_typ_3p30V_25C.lib"
+LIB = None            # set from --corner in __main__
+# The operating point is a corner property; see corners.py. CORNER is
+# rebound from --corner in __main__, and LIB follows it, so a corner run
+# can never write its numbers into another corner's Liberty file.
+CORNER = corners.CORNERS[corners.DEFAULT]
+
 SPICE = HV / "spice" / "sg13g2_stdcell_hv.spice"
 SHIM = HV / "work" / "ngspice-osdi-shim"
 MODELS = "/foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib"
@@ -39,9 +46,10 @@ def measure(cell):
     ports = ports_of(cell)
     SCRATCH.mkdir(parents=True, exist_ok=True)
     lines = [f"* leakage {cell}",
-             f".lib {MODELS} mos_tt",
+             f".lib {MODELS} {CORNER.models}",
              f".include {SPICE}",
-             "Vdd vdd 0 3.3"]
+             f".option temp={CORNER.temperature:g}",
+             f"Vdd vdd 0 {CORNER.voltage}"]
     conns = []
     for p in ports:
         u = p.upper()
@@ -65,7 +73,7 @@ def measure(cell):
     if not m:
         raise RuntimeError(f"{cell}: no ivdd measure\n{r.stdout[-500:]}")
     i_a = abs(float(m.group(1)))
-    return i_a * 3.3 * 1e9          # nW
+    return i_a * CORNER.voltage * 1e9          # nW
 
 
 def main():
@@ -91,4 +99,13 @@ def main():
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = corners.add_argument(argparse.ArgumentParser(
+        description=__doc__.splitlines()[0]))
+    args = ap.parse_args()
+    CORNER = corners.CORNERS[args.corner]
+    LIB = corners.lib_path(CORNER)
+    assert LIB.exists(), f"{LIB.name} does not exist yet -- characterize it first"
+    print(f"corner {CORNER.name}: {CORNER.models}, {CORNER.voltage} V, "
+          f"{CORNER.temperature:g} C -> {LIB.name}")
     main()

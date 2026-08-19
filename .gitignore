@@ -12,7 +12,7 @@ work/dbg_dff.log
 work/lctime/
 work/*.log
 work/*.log.gz
-work/charlib_sg13g2_stdcell_hv.yml
+work/charlib_sg13g2_stdcell_hv*.yml
 
 # Report build cache (the built HTML/PDF are tracked as deliverables)
 doc/report/_mathcache/

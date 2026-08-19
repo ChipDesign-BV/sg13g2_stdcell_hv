@@ -60,6 +60,9 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+import corners
+
 HV = pathlib.Path("/foss/designs/sg13g2_stdcell_hv")
 WORK = HV / "work" / "char_tristate"
 DECKS = WORK / "decks"
@@ -71,7 +74,9 @@ LEF = HV / "lef" / "sg13g2_stdcell_hv.lef"
 SHIM = HV / "work" / "ngspice-osdi-shim"
 MODELS = "/foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib"
 
-VDD = 3.3
+# Operating point from corners.py; rebound from --corner in __main__.
+CORNER = corners.CORNERS[corners.DEFAULT]
+VDD = CORNER.voltage
 TH_LOW, TH_HIGH = 0.2, 0.8          # slew thresholds, from the library header
 TH_MID = 0.5                        # input/output propagation threshold
 ROW_H = 7.14                        # thick-oxide row height, um
@@ -118,8 +123,16 @@ LEAK_WHEN = {
 LEAK_WHEN_EINVN_2 = [("!A&!TE_B&Z", {"A": 0, "TE_B": 0}),
                      ("A&!TE_B&!Z", {"A": 1, "TE_B": 0})]
 
-HEADER = (f".lib {MODELS} mos_tt\n"
-          f".include {SPICE}\n")
+def header():
+    """Deck preamble for the active corner.
+
+    A function rather than a constant: the corner is chosen at runtime, and
+    a module-level string would freeze whichever corner was imported first
+    -- which is how a fast-corner run ends up with typical models.
+    """
+    return (f".lib {MODELS} {CORNER.models}\n"
+            f".option temp={CORNER.temperature:g}\n"
+            f".include {SPICE}\n")
 
 
 # --------------------------------------------------------------------------
@@ -234,9 +247,9 @@ def measure_leakage(cell, state):
     resistor is not a negligible load.
     """
     hiz = state.get("TE_B") == 1        # TE_B is active low
-    L = [f"* leakage {cell} {state}", HEADER.rstrip(), "Vdd vdd 0 3.3"]
+    L = [f"* leakage {cell} {state}", header().rstrip(), f"Vdd vdd 0 {VDD}"]
     if hiz:
-        L.append("Vmid vmid 0 1.65")
+        L.append(f"Vmid vmid 0 {VDD / 2}")
     conns = []
     for p in ports_of(cell):
         u = p.upper()
@@ -285,7 +298,7 @@ def measure_cap(cell, target, ties, tag):
     """
     ts = SLEWS[0]
     tw = 1000 * ts
-    L = [f"* cap {cell} {target} {tag}", HEADER.rstrip(), "Vdd vdd 0 3.3",
+    L = [f"* cap {cell} {target} {tag}", header().rstrip(), f"Vdd vdd 0 {VDD}",
          "Vstim vin 0 " + pwl([(0, 0), (tw, 0), (tw + ts, VDD),
                                (2 * tw + ts, VDD), (2 * tw + 2 * ts, 0)])]
     conns = []
@@ -335,7 +348,7 @@ def measure_comb(cell, kind, loads, slew):
     settle = max(8 * slew, 28.0)
     t2, t3 = t1 + T, t1 + T + settle
     t4, tend = t3 + T, t3 + T + settle
-    L = [f"* comb {cell} slew={slew}", HEADER.rstrip(), "Vdd vdd 0 3.3",
+    L = [f"* comb {cell} slew={slew}", header().rstrip(), f"Vdd vdd 0 {VDD}",
          "Vte te 0 0",
          "Va a 0 " + pwl([(0, 0), (t1, 0), (t2, VDD), (t3, VDD), (t4, 0)])]
     for i, c in enumerate(loads):
@@ -393,8 +406,8 @@ def measure_enable(cell, kind, loads, slew, direction):
     T = slew / (TH_HIGH - TH_LOW)
     t1 = max(3 * slew, 2.0)
     tend = t1 + T + max(8 * slew, 28.0)
-    L = [f"* enable {cell} slew={slew} {direction}", HEADER.rstrip(),
-         "Vdd vdd 0 3.3", f"Va a 0 {VDD if a_level else 0}",
+    L = [f"* enable {cell} slew={slew} {direction}", header().rstrip(),
+         f"Vdd vdd 0 {VDD}", f"Va a 0 {VDD if a_level else 0}",
          "Vte te 0 " + pwl([(0, VDD), (t1, VDD), (t1 + T, 0)])]
     for i, c in enumerate(loads):
         L.append(f"X{i} z{i} a te vdd 0 {cell}")
@@ -488,7 +501,7 @@ def measure_disable(cell, kind, slew):
     a_f, v_f = disable_states(kind, "fall")
     DATA.mkdir(parents=True, exist_ok=True)
     out_file = DATA / f"dis_{cell}_{slew}.txt"
-    L = [f"* disable {cell} slew={slew}", HEADER.rstrip(), "Vdd vdd 0 3.3",
+    L = [f"* disable {cell} slew={slew}", header().rstrip(), f"Vdd vdd 0 {VDD}",
          "Vte te 0 " + pwl([(0, 0), (t1, 0), (t1 + T, VDD)]),
          f"Var ar 0 {VDD if a_r else 0}", f"Vhr zr 0 {v_r:.6f}",
          f"Xr zr ar te vdd 0 {cell}",
@@ -834,7 +847,7 @@ def emit(data):
 
 # --------------------------------------------------------------------------
 def main():
-    js = WORK / "measured.json"
+    js = WORK / f"measured_{CORNER.name}.json"
     if "--reuse" in sys.argv and js.exists():
         data = json.loads(js.read_text())
         print(f"reusing {js}")
@@ -842,9 +855,20 @@ def main():
         data = measure_all()
         js.write_text(json.dumps(data, indent=1))
         print(f"\nwrote {js}")
-    (WORK / "tristate.lib").write_text(emit(data))
-    print(f"wrote {WORK / 'tristate.lib'}")
+    out = WORK / f"tristate_{CORNER.name}.lib"
+    out.write_text(emit(data))
+    print(f"wrote {out}")
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = corners.add_argument(argparse.ArgumentParser(
+        description="Characterize the 6 tri-state cells at one PVT corner."))
+    ap.add_argument("--reuse", action="store_true",
+                    help="re-emit from measured.json without re-simulating")
+    args = ap.parse_args()
+    CORNER = corners.CORNERS[args.corner]
+    VDD = CORNER.voltage
+    print(f"corner {CORNER.name}: {CORNER.models}, {VDD} V, "
+          f"{CORNER.temperature:g} C")
     main()

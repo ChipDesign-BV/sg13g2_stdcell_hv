@@ -40,12 +40,23 @@ hand-written ngspice transient of the same condition measures 2.061 ns --
 Exit code 0 and RESULT: PASS only if every check holds.
 """
 import re
+import argparse
 import sys
 import pathlib
 import klayout.db as db
 
+import corners
+
 HV = pathlib.Path("/foss/designs/sg13g2_stdcell_hv")
-LIB = HV / "lib" / "sg13g2_stdcell_hv_typ_3p30V_25C.lib"
+# Which corner to gate. The script body runs at import time, so the corner
+# is resolved here rather than in a main().
+_ap = corners.add_argument(argparse.ArgumentParser(
+    description="Verify one corner's shipped Liberty as data."))
+CORNER = corners.CORNERS[_ap.parse_args().corner]
+LIB = corners.lib_path(CORNER)
+assert LIB.exists(), f"{LIB.name} does not exist yet -- characterize it first"
+print(f"verifying {LIB.name} ({CORNER.models}, {CORNER.voltage} V, "
+      f"{CORNER.temperature:g} C)")
 CDL = HV / "cdl" / "sg13g2_stdcell_hv.cdl"
 GDS = HV / "gds" / "sg13g2_stdcell_hv.gds"
 
@@ -178,11 +189,20 @@ else:
     unit = re.search(r"capacitive_load_unit\s*\(([0-9.]+)\s*,\s*(\w+)\)", txt)
     scale = {"pf": 1e3, "ff": 1.0}[unit.group(2).lower()] * float(unit.group(1))
     cin_ff = sum(float(c) for c in caps) / len(caps) * scale
-    rel = abs(cin_ff - FO4_CIN_FF) / FO4_CIN_FF
-    print(f"inv_1 A capacitance: lib {cin_ff:.2f} fF vs measured "
-          f"{FO4_CIN_FF} fF ({rel * 100:.1f}% apart)")
-    if rel > CIN_TOL:
-        err(f"inv_1 Cin off by {rel * 100:.0f}% (limit {CIN_TOL * 100:.0f}%)")
+    if CORNER.name != "typ":
+        # FO4_CIN_FF is a typ-corner measurement (work/fo4.py at 3.3 V,
+        # 25 C). Comparing another corner's capacitance against it would
+        # fail for the right physical reason and the wrong methodological
+        # one; scaling it by a guessed factor would be worse than not
+        # checking. Re-anchor with fo4.py at this corner to restore it.
+        print(f"inv_1 A capacitance: {cin_ff:.2f} fF "
+              f"(cross-check skipped: reference is typ-only)")
+    else:
+        rel = abs(cin_ff - FO4_CIN_FF) / FO4_CIN_FF
+        print(f"inv_1 A capacitance: lib {cin_ff:.2f} fF vs measured "
+              f"{FO4_CIN_FF} fF ({rel * 100:.1f}% apart)")
+        if rel > CIN_TOL:
+            err(f"inv_1 Cin off by {rel * 100:.0f}% (limit {CIN_TOL * 100:.0f}%)")
 
 
 # --- 6. sequential arcs ------------------------------------------------------

@@ -43,7 +43,7 @@ make library-wide power analysis inconsistent.
 
 Idempotent: skips the patch if the cell is already in the Liberty.
 
-Usage: python3 char_sighold.py [--emit-only]
+Usage: python3 char_sighold.py [--corner typ|fast|slow] [--emit-only]
 """
 import os
 import pathlib
@@ -51,8 +51,14 @@ import re
 import subprocess
 import sys
 
+import corners
+
 HV = pathlib.Path(__file__).resolve().parent.parent
-LIB = HV / "lib" / "sg13g2_stdcell_hv_typ_3p30V_25C.lib"
+# Operating point comes from corners.py; CORNER/LIB/VDD are rebound from
+# --corner in __main__ so the measurement and the file it patches always
+# describe the same PVT point.
+CORNER = corners.CORNERS[corners.DEFAULT]
+LIB = corners.lib_path(CORNER)
 LEF = HV / "lef" / "sg13g2_stdcell_hv.lef"
 SPICE = HV / "spice" / "sg13g2_stdcell_hv.spice"
 SHIM = HV / "work" / "ngspice-osdi-shim"
@@ -60,7 +66,7 @@ MODELS = "/foss/pdks/ihp-sg13g2/libs.tech/ngspice/models/cornerMOShv.lib"
 SCRATCH = pathlib.Path("/tmp/claude-1000") / "sighold"
 
 CELL = "sg13g2_hv_sighold"
-VDD = 3.3
+VDD = CORNER.voltage
 ROW_H = 7.14
 
 
@@ -96,7 +102,8 @@ def leakage(level):
     """Static VDD current with SH held at a rail, in nW."""
     deck = "\n".join([
         f"* {CELL} leakage, SH={level}",
-        f".lib {MODELS} mos_tt",
+        f".lib {MODELS} {CORNER.models}",
+        f".option temp={CORNER.temperature:g}",
         f".include {SPICE}",
         f"Vdd vdd 0 {VDD}",
         f"Vsh sh 0 {level * VDD}",
@@ -114,7 +121,8 @@ def capacitance():
     for bias in (0.05, 0.30, VDD - 0.30, VDD - 0.05):
         deck = "\n".join([
             f"* {CELL} pin capacitance @ {bias} V",
-            f".lib {MODELS} mos_tt",
+            f".lib {MODELS} {CORNER.models}",
+            f".option temp={CORNER.temperature:g}",
             f".include {SPICE}",
             f"Vdd vdd 0 {VDD}",
             f"Vsh sh 0 dc {bias} ac 1",
@@ -134,7 +142,8 @@ def fight_charge():
     record; not folded into `capacitance` -- it scales with the driver)."""
     deck = "\n".join([
         f"* {CELL} keeper fight charge",
-        f".lib {MODELS} mos_tt",
+        f".lib {MODELS} {CORNER.models}",
+        f".option temp={CORNER.temperature:g}",
         f".include {SPICE}",
         f"Vdd vdd 0 {VDD}",
         f"Vsh sh 0 pulse(0 {VDD} 10n 1n 1n 30n 80n)",
@@ -219,4 +228,16 @@ def main():
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = corners.add_argument(argparse.ArgumentParser(
+        description="Characterize sg13g2_hv_sighold at one PVT corner."))
+    ap.add_argument("--emit-only", action="store_true",
+                    help="write the fragment but do not patch the Liberty")
+    args = ap.parse_args()
+    CORNER = corners.CORNERS[args.corner]
+    LIB = corners.lib_path(CORNER)
+    VDD = CORNER.voltage
+    assert LIB.exists(), f"{LIB.name} does not exist yet -- characterize it first"
+    print(f"corner {CORNER.name}: {CORNER.models}, {VDD} V, "
+          f"{CORNER.temperature:g} C -> {LIB.name}")
     sys.exit(main())

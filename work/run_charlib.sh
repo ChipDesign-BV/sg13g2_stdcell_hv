@@ -21,14 +21,26 @@
 #     lower-cased name, which PySpice 1.6 never produces. charlib_patched.py
 #     makes the lookup case-insensitive at runtime. See that script.
 #
-# Usage:  ./run_charlib.sh <output.lib> [charlib filter regex ...]
+# Usage:  ./run_charlib.sh <corner> [charlib filter regex ...]
+#         corner is typ | fast | slow (see corners.py)
+#
+# The corner picks BOTH the configuration and the output file, derived from
+# corners.py rather than passed separately. Taking an output path as an
+# argument invited the one mistake that matters here -- running the fast
+# configuration into the typ Liberty -- and the result would have looked
+# entirely normal.
 set -e
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-OUT=${1:?usage: run_charlib.sh <output.lib> [filter ...]}
-# resolve before the cd below, so a relative path lands where the caller meant
-case "$OUT" in /*) ;; *) OUT="$(pwd)/$OUT" ;; esac
+CORNER=${1:?usage: run_charlib.sh <corner: typ|fast|slow> [filter ...]}
 shift
+
+LIBNAME=$(python3 -c "import sys; sys.path.insert(0, '$HERE'); import corners; print(corners.lib_name('$CORNER'))") || {
+    echo "unknown corner '$CORNER' (expected typ, fast or slow)" >&2; exit 1; }
+CFG="$HERE/charlib_${LIBNAME}.yml"
+OUT="$HERE/../lib/${LIBNAME}.lib"
+[ -f "$CFG" ] || { echo "missing $CFG -- run: python3 gen_charlib_config.py --corner $CORNER" >&2; exit 1; }
+echo "corner $CORNER -> $(basename "$OUT")"
 
 FILTERS=""
 if [ $# -gt 0 ]; then
@@ -50,7 +62,7 @@ env -u PYTHONPATH \
     PATH="$HERE/ngspice-osdi-shim:/foss/tools/bin:$PATH" \
     PDK_ROOT="${PDK_ROOT:-/foss/pdks}" PDK="${PDK:-ihp-sg13g2}" \
     /foss/tools/charlib/bin/python "$HERE/charlib_patched.py" run \
-       "$HERE/charlib_sg13g2_stdcell_hv.yml" \
+       "$CFG" \
        -j "$JOBS" -o "$OUT" $FILTERS
 
 # CharLib writes the pin function with its left-hand side still attached and

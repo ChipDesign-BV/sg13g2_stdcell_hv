@@ -14,6 +14,8 @@ import re, pathlib, json, sys
 from boolexpr import convert, operands, truth_table, liberty_truth_table
 from libinfo import LVLIB, HV, MODELS, hvname
 
+import corners
+
 
 def _gds_areas():
     """{hv cell name: boundary area um^2} for every cell with layout."""
@@ -36,7 +38,14 @@ def _gds_areas():
 GDS_AREA = _gds_areas()
 
 WORK = pathlib.Path(__file__).parent
-VDD = 3.3
+
+# The operating point is a corner property, not a constant: see corners.py.
+# CORNER is rebound from --corner in __main__ before build()/yaml_dump() run,
+# so every emitted field (supply voltage, model section, temperature and the
+# output filename) moves together. They used to be three separate literals,
+# which is how a "fast" config ends up asking for typical models.
+CORNER = corners.CORNERS[corners.DEFAULT]
+VDD = CORNER.voltage
 
 # measured in work/fo4.py: HV inv_1 vs LV inv_1
 SLEW_SCALE = 2.66      # FO4 delay ratio
@@ -202,7 +211,7 @@ def build():
 
         entry = {
             "netlist": str(HV / "spice" / "sg13g2_stdcell_hv.spice"),
-            "models": [f"{MODELS}/cornerMOShv.lib mos_tt"],
+            "models": [f"{MODELS}/cornerMOShv.lib {CORNER.models}"],
             "inputs": ins,
             "outputs": [p for p, _ in outs],
             "functions": funcs,
@@ -339,7 +348,7 @@ def yaml_dump(cfg, seq_cells):
         "    high: 0.8",
         "    falling: 0.5",
         "    rising: 0.5",
-        "  temperature: 25",
+        f"  temperature: {CORNER.temperature:g}",
         "  cell_defaults:",
         "    # Setup/hold constraints come from a 2D contour sweep whose cost",
         "    # is this number squared, per constraint, per sequential cell. The",
@@ -370,12 +379,22 @@ def yaml_dump(cfg, seq_cells):
 
 
 if __name__ == "__main__":
+    import argparse
+    ap = corners.add_argument(argparse.ArgumentParser(
+        description="Generate the CharLib configuration for one PVT corner."))
+    args = ap.parse_args()
+    CORNER = corners.CORNERS[args.corner]
+    VDD = CORNER.voltage
+    print(f"corner {CORNER.name}: {CORNER.models}, {CORNER.voltage} V, "
+          f"{CORNER.temperature:g} C -> {corners.lib_name(CORNER)}.lib")
+
     cfg, skipped, seq_cells, row_hv = build()
-    (WORK / "charlib_sg13g2_stdcell_hv.yml").write_text(yaml_dump(cfg, seq_cells))
+    out = WORK / f"charlib_{corners.lib_name(CORNER)}.yml"
+    out.write_text(yaml_dump(cfg, seq_cells))
+    print(f"wrote {out.name}")
     print(f"\nconfigured {len(cfg)} cells "
           f"({len(seq_cells)} sequential, {len(cfg)-len(seq_cells)} combinational)")
     if skipped:
         print(f"\nnot characterized ({len(skipped)}):")
         for k, v in sorted(skipped.items()):
             print(f"  {k:24s} {v}")
-    print(f"\nwrote {WORK/'charlib_sg13g2_stdcell_hv.yml'}")
