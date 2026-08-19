@@ -868,7 +868,12 @@ if __name__ == "__main__":
                     help="re-emit from measured.json without re-simulating")
     args = ap.parse_args()
     CORNER = corners.CORNERS[args.corner]
+    # HOLD_TOL is derived from VDD at module level, so it has to be
+    # recomputed with it: rebinding VDD alone would leave the keeper
+    # tolerance holding the previous corner's volts -- a check that still
+    # runs, still passes or fails, and is quietly against the wrong rail.
     VDD = CORNER.voltage
+    HOLD_TOL = 0.05 * VDD
     print(f"corner {CORNER.name}: {CORNER.models}, {VDD} V, "
           f"{CORNER.temperature:g} C")
     main()
