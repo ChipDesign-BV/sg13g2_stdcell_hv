@@ -221,6 +221,13 @@ def main():
 
     if "--emit-only" in sys.argv:
         return 0
+    if re.search(r"^  cell \(sg13g2_hv_sighold\) \{", txt, re.M):
+        # Same reason as the guard in seq_leakage.py: a resumed stage-4 run
+        # would otherwise append a second sg13g2_hv_sighold cell, and a
+        # Liberty file with a duplicated cell is accepted by some readers
+        # and silently wrong in all of them.
+        print(f"  {LIB.name} already has sg13g2_hv_sighold, not re-inserting")
+        return 0
     i = txt.rfind("\n}")
     LIB.write_text(txt[:i] + "\n" + group + txt[i:], errors="surrogateescape")
     print(f"  patched into {LIB.name}")

@@ -20,6 +20,7 @@ import re
 import subprocess
 import pathlib
 import corners
+import update_lib_area
 
 
 HV = pathlib.Path("/foss/designs/sg13g2_stdcell_hv")
@@ -76,12 +77,51 @@ def measure(cell):
     return i_a * CORNER.voltage * 1e9          # nW
 
 
+def emit_cell(cell, p_nw):
+    """A complete Liberty entry for a tie cell that has none yet.
+
+    The typ Liberty inherited its two tie-cell entries from the initial
+    bulk import and nothing in the flow ever regenerated them, so this
+    script could assume they existed and only patch leakage in. That
+    assumption held for exactly one corner: a corner characterized from
+    scratch reaches this point with the CharLib output only -- which
+    excludes the tie cells, because they have no timing tables to
+    characterize -- and the patch had nothing to patch.
+
+    Area comes from the LEF, the same source update_lib_area.py uses, so
+    the entry is correct the moment it is written rather than relying on
+    a later stage to fix it up.
+    """
+    out = [q for q in ports_of(cell) if q.upper() not in ("VDD", "VSS")]
+    assert len(out) == 1, f"{cell}: expected one output port, got {out}"
+    area = update_lib_area.lef_areas()[cell]
+    func = "1" if cell.endswith("tiehi") else "0"
+    return "\n".join([
+        f"  cell ({cell}) {{",
+        f"    area : {area} ;",
+        f"    cell_leakage_power : {p_nw:.6f} ;",
+        "    leakage_power () {",
+        f"      value : {p_nw:.6f} ;",
+        "    } /* end leakage_power */",
+        f"    pin ({out[0]}) {{",
+        "      direction : output ;",
+        f'      function : "{func}" ;',
+        "    } /* end pin */",
+        "  } /* end cell */",
+    ])
+
+
 def main():
     txt = LIB.read_text(errors="surrogateescape")
     for cell in TIE:
         body = re.search(rf"^  cell \({re.escape(cell)}\) \{{.*?^  \}}",
                          txt, re.M | re.S)
-        assert body, cell
+        if not body:
+            p_nw = measure(cell)
+            print(f"{cell}: {p_nw:.4f} nW (cell created)")
+            i = txt.rfind("\n}")
+            txt = txt[:i] + "\n" + emit_cell(cell, p_nw) + txt[i:]
+            continue
         if "cell_leakage_power" in body.group(0):
             print(f"{cell}: already has leakage, skipped")
             continue

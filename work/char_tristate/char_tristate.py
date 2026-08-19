@@ -874,6 +874,16 @@ if __name__ == "__main__":
     # runs, still passes or fails, and is quietly against the wrong rail.
     VDD = CORNER.voltage
     HOLD_TOL = 0.05 * VDD
+    # The on-disk measurement cache is keyed by cell/slew/direction only, so
+    # it MUST be scoped by corner or a later corner silently replays the
+    # earlier one's numbers. That is not hypothetical: the fast run read the
+    # typ cache and was caught only because the keeper-hold check saw a node
+    # sitting at 3.3 V when the rail was 3.6 V. Without that check it would
+    # have emitted typical tri-state timing into the fast Liberty.
+    DECKS = WORK / "decks" / CORNER.name
+    LOGS = WORK / "logs" / CORNER.name
+    DATA = WORK / "data" / CORNER.name
+    CACHE = DATA / "cache"
     print(f"corner {CORNER.name}: {CORNER.models}, {VDD} V, "
           f"{CORNER.temperature:g} C")
     main()

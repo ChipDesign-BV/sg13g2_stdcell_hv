@@ -92,7 +92,20 @@ def measure(cell):
 
 def main():
     txt = LIB.read_text(errors="surrogateescape")
+    patched = skipped = 0
     for cell in SEQ:
+        # Re-running a stage must not double-patch. run_corner.sh documents
+        # resuming from `direct`, and without this guard a resumed run
+        # inserts a second cell_leakage_power and a second leakage_power
+        # group into every sequential cell -- silently, since nothing
+        # downstream rejects a duplicate attribute. tie_leakage.py has
+        # carried this guard from the start; this is the same one.
+        body = re.search(rf"^  cell \({re.escape(cell)}\) \{{.*?^  \}}",
+                         txt, re.M | re.S)
+        if body and "cell_leakage_power" in body.group(0):
+            print(f"{cell}: already has leakage, skipped")
+            skipped += 1
+            continue
         p_nw = measure(cell)
         print(f"{cell}: {p_nw:.4f} nW")
         block = (f"    cell_leakage_power : {p_nw:.6f} ;\n"
@@ -102,8 +115,9 @@ def main():
         pat = rf"(^  cell \({re.escape(cell)}\) \{{\n(?:    area : [0-9.]+ ;\n)?)"
         assert re.search(pat, txt, re.M), cell
         txt = re.sub(pat, rf"\g<1>{block}", txt, count=1, flags=re.M)
+        patched += 1
     LIB.write_text(txt, errors="surrogateescape")
-    print(f"patched {len(SEQ)} cells into {LIB.name}")
+    print(f"patched {patched} cells into {LIB.name} ({skipped} already done)")
 
 
 if __name__ == "__main__":
