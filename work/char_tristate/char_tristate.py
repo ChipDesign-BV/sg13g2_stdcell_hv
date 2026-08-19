@@ -554,7 +554,33 @@ def cross(xs, ys, level, sense, last=False):
 # --------------------------------------------------------------------------
 # calibration: reproduce a shipped capacitance
 # --------------------------------------------------------------------------
-CAL_REF = {"rise": 0.009166, "fall": 0.008236}    # shipped sg13g2_hv_buf_4 A
+def cal_ref():
+    """sg13g2_hv_buf_4 pin A capacitance from THIS corner's Liberty.
+
+    Was a hardcoded {"rise": 0.009166, "fall": 0.008236} -- the typ numbers.
+    The calibration then compared a fast-corner measurement against a typical
+    reference and failed at 6.8 %, reporting a broken harness when the
+    harness was right: against the fast Liberty's own 0.009744 / 0.008747 the
+    same measurement agrees to 0.43 %.
+
+    The point of this check is "does my charge-integration harness reproduce
+    what CharLib produced for the same cell?", and that question only means
+    anything when both sides are at the same corner.
+    """
+    lib = corners.lib_path(CORNER)
+    txt = lib.read_text(errors="surrogateescape")
+    cell = re.search(r"^  cell \(sg13g2_hv_buf_4\) \{.*?^  \}", txt, re.M | re.S)
+    assert cell, f"{lib.name}: no sg13g2_hv_buf_4 to calibrate against"
+    pin = re.search(r"pin \(A\) \{(.*?)\}", cell.group(0), re.S)
+    assert pin, f"{lib.name}: sg13g2_hv_buf_4 has no pin A"
+    out = {}
+    for edge in ("rise", "fall"):
+        m = re.search(rf"{edge}_capacitance : ([0-9.]+)", pin.group(1))
+        assert m, f"{lib.name}: buf_4 pin A has no {edge}_capacitance"
+        out[edge] = float(m.group(1))
+    return out
+
+
 
 
 def calibrate():
@@ -568,11 +594,12 @@ def calibrate():
     tri-state cells -- and running it first put one slow simulation in front of
     the other ~180.  The result is reported at the end of the run instead.
     """
+    ref = cal_ref()
     r, f = measure_cap("sg13g2_hv_buf_4", "A", {}, "cal")
-    err = max(abs(r - CAL_REF["rise"]) / CAL_REF["rise"],
-              abs(f - CAL_REF["fall"]) / CAL_REF["fall"])
-    return {"rise": r, "fall": f, "ref_rise": CAL_REF["rise"],
-            "ref_fall": CAL_REF["fall"], "err": err}
+    err = max(abs(r - ref["rise"]) / ref["rise"],
+              abs(f - ref["fall"]) / ref["fall"])
+    return {"rise": r, "fall": f, "ref_rise": ref["rise"],
+            "ref_fall": ref["fall"], "err": err}
 
 
 # --------------------------------------------------------------------------

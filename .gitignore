@@ -40,3 +40,7 @@ work/char_clockgate/*
 work/char_sighold/*
 !work/char_sighold/*.lib
 !work/char_sighold/*.md
+
+# Characterization run logs: tens of MB each, almost entirely the
+# benign PySpice/NumPy import chatter every ngspice invocation emits.
+work/logs/

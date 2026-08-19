@@ -3,13 +3,13 @@
     cell_footprint : "sighold" ;
     dont_touch : true ;
     dont_use : true ;
-    cell_leakage_power : 0.017118 ;
+    cell_leakage_power : 0.025144 ;
     pin (SH) {
       direction : inout ;
       driver_type : bus_hold ;
-      rise_capacitance : 0.003670 ;
-      fall_capacitance : 0.003670 ;
-      capacitance : 0.003670 ;
+      rise_capacitance : 0.003726 ;
+      fall_capacitance : 0.003726 ;
+      capacitance : 0.003726 ;
     } /* end pin */
     pg_pin (VDD) {
       voltage_name : VDD ;
@@ -21,10 +21,10 @@
     } /* end pg_pin */
     leakage_power () {
       when : "SH" ;
-      value : 0.011793 ;
+      value : 0.019802 ;
     } /* end leakage_power */
     leakage_power () {
       when : "!SH" ;
-      value : 0.022442 ;
+      value : 0.030486 ;
     } /* end leakage_power */
   } /* end cell */

@@ -1,0 +1,2840 @@
+library (sg13g2_stdcell_hv){
+  technology : cmos ;
+  delay_model : table_lookup ;
+  bus_naming_style : "%s-%d" ;
+  time_unit : "1ns" ;
+  voltage_unit : "1V" ;
+  leakage_power_unit : "1nW" ;
+  current_unit : "1uA" ;
+  pulling_resistance_unit : "1uA" ;
+  capacitive_load_unit (1, pF);
+  nom_process : 1.00 ;
+  nom_voltage : 3.60 ;
+  nom_temperature : -40 ;
+  slew_upper_threshold_pct_rise : 0.80 ;
+  slew_lower_threshold_pct_rise : 0.20 ;
+  slew_upper_threshold_pct_fall : 0.80 ;
+  slew_lower_threshold_pct_fall : 0.20 ;
+  input_threshold_pct_rise : 0.50 ;
+  input_threshold_pct_fall : 0.50 ;
+  output_threshold_pct_rise : 0.50 ;
+  output_threshold_pct_fall : 0.50 ;
+  operating_conditions (typical) {
+    process : 1.00 ;
+    voltage : 3.60 ;
+    temperature : -40 ;
+  } /* end operating_conditions */
+  lu_table_template (delay_template_7x3) {
+    variable_1 : total_output_net_capacitance ;
+    variable_2 : input_net_transition ;
+    index_1 ("1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0");
+    index_2 ("1.0, 2.0, 3.0");
+  } /* end lu_table_template */
+  lu_table_template (constraint_template_2x3) {
+    variable_1 : constrained_pin_transition ;
+    variable_2 : related_pin_transition ;
+    index_1 ("1.0, 2.0");
+    index_2 ("1.0, 2.0, 3.0");
+  } /* end lu_table_template */
+  cell (sg13g2_hv_dfrbp_1) {
+    area : 157.65 ;
+    ff (IQ, IQinv) {
+      next_state : D ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    ff (IQN, IQNinv) {
+      next_state : "!(D)" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.385300, 0.486453, 0.610995" \
+            "0.557037, 0.658256, 0.782547" \
+            "0.672943, 0.774149, 0.898469" \
+            "0.863905, 0.965082, 1.089380" \
+            "1.183030, 1.284190, 1.408510" \
+            "1.714500, 1.815660, 1.939970" \
+            "2.599980, 2.701130, 2.825460" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.026091, 0.026358, 0.025449" \
+            "0.235240, 0.235203, 0.235083" \
+            "0.385013, 0.384941, 0.385142" \
+            "0.633517, 0.633541, 0.633632" \
+            "1.050140, 1.050160, 1.050150" \
+            "1.744580, 1.744600, 1.744610" \
+            "2.902080, 2.902080, 2.902100" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.376122, 0.480917, 0.616621" \
+            "0.488278, 0.593255, 0.729691" \
+            "0.560541, 0.665615, 0.801980" \
+            "0.679942, 0.785125, 0.921364" \
+            "0.879734, 0.984923, 1.121180" \
+            "1.212640, 1.317840, 1.454110" \
+            "1.767400, 1.872600, 2.008880" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.026864, 0.027560, 0.029373" \
+            "0.164231, 0.163976, 0.164130" \
+            "0.265663, 0.265338, 0.265603" \
+            "0.434121, 0.434277, 0.434180" \
+            "0.717069, 0.717057, 0.717056" \
+            "1.188660, 1.188650, 1.188650" \
+            "1.974780, 1.974780, 1.974790" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(D)" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.318323, 0.422109, 0.555732" \
+            "0.516532, 0.620780, 0.756904" \
+            "0.633106, 0.737173, 0.873049" \
+            "0.823624, 0.927533, 1.063130" \
+            "1.142250, 1.246050, 1.381470" \
+            "1.673370, 1.777090, 1.912440" \
+            "2.558630, 2.662320, 2.797550" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.044012, 0.047174, 0.052834" \
+            "0.247899, 0.249140, 0.252202" \
+            "0.391440, 0.392058, 0.393825" \
+            "0.636114, 0.636474, 0.637250" \
+            "1.051350, 1.051370, 1.051970" \
+            "1.745600, 1.745600, 1.745930" \
+            "2.903100, 2.903110, 2.903230" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.316152, 0.418563, 0.543606" \
+            "0.466261, 0.567028, 0.690767" \
+            "0.543802, 0.644511, 0.768231" \
+            "0.665253, 0.765953, 0.889609" \
+            "0.865502, 0.966226, 1.089830" \
+            "1.198460, 1.299240, 1.422780" \
+            "1.753240, 1.854040, 1.977570" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.045170, 0.043208, 0.044522" \
+            "0.188716, 0.188185, 0.188103" \
+            "0.281991, 0.281850, 0.281845" \
+            "0.442728, 0.442507, 0.442585" \
+            "0.720756, 0.720797, 0.720570" \
+            "1.190820, 1.190840, 1.190670" \
+            "1.976730, 1.976750, 1.976680" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008061 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.002538 ;
+      fall_capacitance : 0.002622 ;
+      capacitance : 0.002622 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.285200, 0.246100, 0.187500" \
+            "0.460900, 0.412100, 0.353500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.285200, 0.197300, 0.080100" \
+            "0.480500, 0.392600, 0.285200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.242200, -0.115200, -0.007800" \
+            "-0.359400, -0.281200, -0.183600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.242200, -0.183600, -0.125000" \
+            "-0.378900, -0.339800, -0.291000" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dfrbp_2) {
+    area : 185.07 ;
+    ff (IQ, IQinv) {
+      next_state : D ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    ff (IQN, IQNinv) {
+      next_state : "!(D)" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.448889, 0.554437, 0.693345" \
+            "0.577314, 0.682632, 0.821225" \
+            "0.649619, 0.754942, 0.893509" \
+            "0.768834, 0.874238, 1.012850" \
+            "0.968536, 1.073920, 1.212530" \
+            "1.301420, 1.406730, 1.545400" \
+            "1.856140, 1.961480, 2.100120" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.032057, 0.032003, 0.033459" \
+            "0.168554, 0.168696, 0.168337" \
+            "0.267743, 0.267646, 0.267460" \
+            "0.435535, 0.435443, 0.435571" \
+            "0.718301, 0.718195, 0.718275" \
+            "1.189930, 1.189860, 1.189910" \
+            "1.976060, 1.976020, 1.976050" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.451202, 0.553619, 0.679106" \
+            "0.630536, 0.732699, 0.858793" \
+            "0.745939, 0.848165, 0.974262" \
+            "0.936661, 1.038860, 1.164950" \
+            "1.255670, 1.357860, 1.483950" \
+            "1.787080, 1.889280, 2.015360" \
+            "2.672530, 2.774730, 2.900810" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.026306, 0.025961, 0.026830" \
+            "0.234768, 0.234505, 0.234473" \
+            "0.384173, 0.384127, 0.384138" \
+            "0.632596, 0.632667, 0.632603" \
+            "1.049210, 1.049220, 1.049210" \
+            "1.743640, 1.743650, 1.743650" \
+            "2.901120, 2.901130, 2.901150" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(D)" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.329576, 0.431731, 0.559940" \
+            "0.494580, 0.596385, 0.721970" \
+            "0.575680, 0.677362, 0.802893" \
+            "0.699338, 0.801016, 0.926480" \
+            "0.900373, 1.002060, 1.127480" \
+            "1.233480, 1.335170, 1.460550" \
+            "1.788310, 1.890020, 2.015400" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.045233, 0.044565, 0.042571" \
+            "0.196862, 0.196982, 0.196035" \
+            "0.291493, 0.291422, 0.291220" \
+            "0.450701, 0.450581, 0.450507" \
+            "0.725531, 0.725534, 0.725405" \
+            "1.193740, 1.193750, 1.193610" \
+            "1.979180, 1.979190, 1.979110" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.334284, 0.439756, 0.574178" \
+            "0.547743, 0.652097, 0.789321" \
+            "0.665370, 0.769532, 0.906501" \
+            "0.855907, 0.959873, 1.096530" \
+            "1.174220, 1.278060, 1.414480" \
+            "1.705070, 1.808800, 1.945070" \
+            "2.590120, 2.693800, 2.829910" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.042769, 0.041263, 0.048524" \
+            "0.253298, 0.254519, 0.257197" \
+            "0.395355, 0.396049, 0.397595" \
+            "0.637739, 0.638016, 0.639017" \
+            "1.051450, 1.051530, 1.052110" \
+            "1.745330, 1.745350, 1.745650" \
+            "2.902810, 2.902810, 2.902910" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008061 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.002538 ;
+      fall_capacitance : 0.002622 ;
+      capacitance : 0.002622 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.285200, 0.246100, 0.187500" \
+            "0.460900, 0.412100, 0.353500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.285200, 0.197300, 0.080100" \
+            "0.480500, 0.402300, 0.285200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.232400, -0.105500, 0.002000" \
+            "-0.349600, -0.271500, -0.173800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.232400, -0.183600, -0.125000" \
+            "-0.369100, -0.330100, -0.291000" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dfrbpq_1) {
+    area : 147.37 ;
+    ff (IQ, IQinv) {
+      next_state : D ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.347053, 0.446628, 0.568659" \
+            "0.519186, 0.618849, 0.740713" \
+            "0.635025, 0.734684, 0.856506" \
+            "0.825929, 0.925576, 1.047410" \
+            "1.145000, 1.244650, 1.366490" \
+            "1.676430, 1.776060, 1.897900" \
+            "2.561870, 2.661510, 2.783350" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.023875, 0.023450, 0.023913" \
+            "0.234918, 0.234895, 0.234970" \
+            "0.384811, 0.384955, 0.384902" \
+            "0.633445, 0.633534, 0.633512" \
+            "1.050120, 1.050060, 1.050090" \
+            "1.744570, 1.744580, 1.744580" \
+            "2.902080, 2.902100, 2.902070" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.336130, 0.439008, 0.571290" \
+            "0.447372, 0.550497, 0.682875" \
+            "0.519693, 0.622915, 0.755270" \
+            "0.639051, 0.742373, 0.874761" \
+            "0.838876, 0.942170, 1.074560" \
+            "1.171810, 1.275070, 1.407470" \
+            "1.726580, 1.829830, 1.962250" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.027095, 0.026829, 0.028027" \
+            "0.163338, 0.164013, 0.164078" \
+            "0.265415, 0.265365, 0.265215" \
+            "0.434068, 0.434221, 0.434227" \
+            "0.716988, 0.717027, 0.716950" \
+            "1.188620, 1.188650, 1.188600" \
+            "1.974760, 1.974790, 1.974780" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008061 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.002538 ;
+      fall_capacitance : 0.002622 ;
+      capacitance : 0.002622 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.294900, 0.246100, 0.177700" \
+            "0.451200, 0.402300, 0.353500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.275400, 0.187500, 0.070300" \
+            "0.470700, 0.392600, 0.275400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.203100, -0.115200, -0.017600" \
+            "-0.369100, -0.291000, -0.193400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.242200, -0.193400, -0.125000" \
+            "-0.388700, -0.339800, -0.291000" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dfrbpq_2) {
+    area : 164.51 ;
+    ff (IQ, IQinv) {
+      next_state : D ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.364675, 0.467872, 0.600224" \
+            "0.490701, 0.594323, 0.726807" \
+            "0.563077, 0.666625, 0.799179" \
+            "0.682508, 0.785989, 0.918571" \
+            "0.882278, 0.985751, 1.118320" \
+            "1.215140, 1.318640, 1.451170" \
+            "1.769920, 1.873400, 2.005940" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.029318, 0.029845, 0.030467" \
+            "0.166840, 0.167748, 0.167790" \
+            "0.267048, 0.267170, 0.267158" \
+            "0.435445, 0.435460, 0.435493" \
+            "0.718192, 0.718264, 0.718181" \
+            "1.189860, 1.189910, 1.189860" \
+            "1.976030, 1.976060, 1.976070" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.366474, 0.465900, 0.587683" \
+            "0.546682, 0.645758, 0.767458" \
+            "0.662359, 0.761474, 0.883192" \
+            "0.853186, 0.952290, 1.074000" \
+            "1.172250, 1.271380, 1.393040" \
+            "1.703660, 1.802790, 1.924450" \
+            "2.589100, 2.688230, 2.809890" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.023291, 0.022999, 0.023677" \
+            "0.234115, 0.234083, 0.233794" \
+            "0.383973, 0.383970, 0.383839" \
+            "0.632574, 0.632566, 0.632527" \
+            "1.049100, 1.049100, 1.049180" \
+            "1.743620, 1.743620, 1.743620" \
+            "2.901150, 2.901150, 2.901120" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.007910 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.002538 ;
+      fall_capacitance : 0.002622 ;
+      capacitance : 0.002622 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.294900, 0.246100, 0.177700" \
+            "0.451200, 0.402300, 0.353500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.275400, 0.187500, 0.070300" \
+            "0.470700, 0.392600, 0.275400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.203100, -0.125000, -0.017600" \
+            "-0.378900, -0.300800, -0.193400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.242200, -0.193400, -0.125000" \
+            "-0.388700, -0.349600, -0.291000" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dlhq_1) {
+    area : 102.82 ;
+    latch (IQ, IQinv) {
+      data_in : D ;
+      enable : GATE ;
+    } /* end latch */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.306075, 0.359201, 0.386637" \
+            "0.420801, 0.473998, 0.501527" \
+            "0.493239, 0.546448, 0.573744" \
+            "0.612671, 0.665887, 0.693065" \
+            "0.812444, 0.865660, 0.892838" \
+            "1.145310, 1.198550, 1.225730" \
+            "1.700000, 1.753270, 1.780470" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.029444, 0.029467, 0.032053" \
+            "0.164254, 0.164306, 0.164581" \
+            "0.265326, 0.265303, 0.265592" \
+            "0.434149, 0.434156, 0.433998" \
+            "0.716958, 0.717019, 0.717032" \
+            "1.188620, 1.188650, 1.188660" \
+            "1.974770, 1.974790, 1.974780" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.332394, 0.385545, 0.414092" \
+            "0.504997, 0.558344, 0.586858" \
+            "0.620782, 0.674105, 0.702628" \
+            "0.811685, 0.864985, 0.893493" \
+            "1.130760, 1.184050, 1.212550" \
+            "1.662190, 1.715480, 1.743970" \
+            "2.547640, 2.600940, 2.629420" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.025524, 0.025181, 0.024915" \
+            "0.234865, 0.234883, 0.234809" \
+            "0.384802, 0.384897, 0.384698" \
+            "0.633477, 0.633466, 0.633416" \
+            "1.050130, 1.050170, 1.050160" \
+            "1.744580, 1.744620, 1.744610" \
+            "2.902100, 2.902100, 2.902110" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.006089 ;
+      fall_capacitance : 0.005816 ;
+      capacitance : 0.006089 ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : setup_falling ;
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.109400, -0.027300, -0.222700" \
+            "0.197300, 0.050800, -0.154300" \
+          ) ;
+        } /* end fall_constraint */
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.246100, 0.187500, 0.080100" \
+            "0.353500, 0.294900, 0.187500" \
+          ) ;
+        } /* end rise_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : GATE ;
+        timing_type : hold_falling ;
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.232400, -0.173800, -0.066400" \
+            "-0.349600, -0.281200, -0.173800" \
+          ) ;
+        } /* end fall_constraint */
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.105500, 0.041000, 0.236300" \
+            "-0.183600, -0.037100, 0.168000" \
+          ) ;
+        } /* end rise_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (GATE) {
+      direction : input ;
+      rise_capacitance : 0.006567 ;
+      fall_capacitance : 0.006575 ;
+      capacitance : 0.006575 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dlhr_1) {
+    area : 106.24 ;
+    latch (IQ, IQinv) {
+      data_in : D ;
+      enable : GATE ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    latch (IQN, IQNinv) {
+      data_in : "!(D)" ;
+      enable : GATE ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.365977, 0.419330, 0.445853" \
+            "0.507758, 0.560779, 0.587528" \
+            "0.583811, 0.636869, 0.663569" \
+            "0.704465, 0.757497, 0.784258" \
+            "0.904472, 0.957481, 0.984260" \
+            "1.237340, 1.290370, 1.317130" \
+            "1.792090, 1.845130, 1.871890" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.043859, 0.045222, 0.045043" \
+            "0.182054, 0.182270, 0.182448" \
+            "0.277533, 0.277510, 0.277678" \
+            "0.440223, 0.440283, 0.440359" \
+            "0.719816, 0.719863, 0.719767" \
+            "1.190570, 1.190590, 1.190520" \
+            "1.976640, 1.976660, 1.976650" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.365595, 0.419330, 0.448506" \
+            "0.541579, 0.595424, 0.624332" \
+            "0.657320, 0.711166, 0.740036" \
+            "0.848121, 0.901963, 0.930834" \
+            "1.167190, 1.221030, 1.249890" \
+            "1.698610, 1.752430, 1.781300" \
+            "2.584060, 2.637890, 2.666760" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.029673, 0.031102, 0.031231" \
+            "0.235599, 0.235479, 0.235737" \
+            "0.385122, 0.385057, 0.385167" \
+            "0.633559, 0.633565, 0.633580" \
+            "1.050160, 1.050090, 1.050100" \
+            "1.744630, 1.744600, 1.744600" \
+            "2.902120, 2.902130, 2.902130" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(D)" ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.443283, 0.496244, 0.522997" \
+            "0.615018, 0.667958, 0.694674" \
+            "0.730902, 0.783808, 0.810524" \
+            "0.921811, 0.974695, 1.001410" \
+            "1.240970, 1.293840, 1.320550" \
+            "1.772440, 1.825300, 1.852020" \
+            "2.657940, 2.710790, 2.737510" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.027107, 0.027385, 0.027291" \
+            "0.235056, 0.235078, 0.235065" \
+            "0.385213, 0.385218, 0.385217" \
+            "0.633808, 0.633787, 0.633808" \
+            "1.050370, 1.050300, 1.050370" \
+            "1.744840, 1.744810, 1.744840" \
+            "2.902340, 2.902340, 2.902330" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.423609, 0.477702, 0.506234" \
+            "0.536764, 0.590516, 0.619361" \
+            "0.609103, 0.662913, 0.691671" \
+            "0.728481, 0.782344, 0.811058" \
+            "0.928323, 0.982158, 1.010890" \
+            "1.261280, 1.315060, 1.343840" \
+            "1.815970, 1.869810, 1.898610" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.025594, 0.026953, 0.025982" \
+            "0.164365, 0.164533, 0.164279" \
+            "0.265967, 0.265898, 0.265943" \
+            "0.434585, 0.434722, 0.434545" \
+            "0.717633, 0.717645, 0.717645" \
+            "1.189290, 1.189290, 1.189300" \
+            "1.975430, 1.975430, 1.975430" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.006092 ;
+      fall_capacitance : 0.005816 ;
+      capacitance : 0.006092 ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : setup_falling ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.265600, 0.207000, 0.109400" \
+            "0.373000, 0.070300, 0.207000" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.138700, -0.007800, -0.212900" \
+            "0.216800, 0.070300, -0.134800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : GATE ;
+        timing_type : hold_falling ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.125000, 0.021500, 0.216800" \
+            "-0.203100, -0.281200, 0.148400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.242200, -0.183600, -0.076200" \
+            "-0.349600, -0.281200, -0.173800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (GATE) {
+      direction : input ;
+      rise_capacitance : 0.006568 ;
+      fall_capacitance : 0.006575 ;
+      capacitance : 0.006575 ;
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.007366 ;
+      fall_capacitance : 0.007408 ;
+      capacitance : 0.007408 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dlhrq_1) {
+    area : 92.53 ;
+    latch (IQ, IQinv) {
+      data_in : D ;
+      enable : GATE ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.347969, 0.401881, 0.430629" \
+            "0.521489, 0.575269, 0.604211" \
+            "0.637224, 0.691014, 0.719999" \
+            "0.828120, 0.881872, 0.910863" \
+            "1.147190, 1.200940, 1.229920" \
+            "1.678610, 1.732360, 1.761350" \
+            "2.564050, 2.617810, 2.646810" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.028249, 0.027652, 0.026383" \
+            "0.235106, 0.235071, 0.234970" \
+            "0.384981, 0.385022, 0.384755" \
+            "0.633604, 0.633643, 0.633530" \
+            "1.050200, 1.050230, 1.050250" \
+            "1.744660, 1.744710, 1.744700" \
+            "2.902190, 2.902200, 2.902210" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.330233, 0.381968, 0.406748" \
+            "0.457406, 0.509659, 0.535039" \
+            "0.530697, 0.582938, 0.608392" \
+            "0.650261, 0.702551, 0.728026" \
+            "0.850124, 0.902411, 0.927908" \
+            "1.183070, 1.235320, 1.260850" \
+            "1.737850, 1.790110, 1.815630" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.037928, 0.036731, 0.036131" \
+            "0.171440, 0.171276, 0.171650" \
+            "0.270106, 0.270197, 0.270224" \
+            "0.436618, 0.436680, 0.436752" \
+            "0.718975, 0.718900, 0.719016" \
+            "1.190520, 1.190480, 1.190530" \
+            "1.976670, 1.976640, 1.976640" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.006092 ;
+      fall_capacitance : 0.005816 ;
+      capacitance : 0.006092 ;
+      timing () {
+        related_pin : GATE ;
+        timing_type : setup_falling ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.255900, 0.197300, 0.099600" \
+            "0.363300, 0.294900, 0.197300" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.128900, -0.017600, -0.212900" \
+            "0.207000, 0.060500, -0.144500" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : GATE ;
+        timing_type : hold_falling ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.115200, 0.021500, 0.226600" \
+            "-0.193400, -0.046900, 0.148400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.232400, -0.164100, -0.066400" \
+            "-0.339800, -0.271500, -0.164100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (GATE) {
+      direction : input ;
+      rise_capacitance : 0.006568 ;
+      fall_capacitance : 0.006576 ;
+      capacitance : 0.006576 ;
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.006776 ;
+      fall_capacitance : 0.006812 ;
+      capacitance : 0.006812 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dllr_1) {
+    area : 113.10 ;
+    latch (IQ, IQinv) {
+      data_in : D ;
+      enable : "GATE_N'" ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    latch (IQN, IQNinv) {
+      data_in : "!(D)" ;
+      enable : "GATE_N'" ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : falling_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.761700, 13.638300, 15.469500" \
+            "12.902700, 13.779300, 15.610800" \
+            "12.978700, 13.855300, 15.686800" \
+            "13.099300, 13.975900, 15.807400" \
+            "13.299300, 14.175900, 16.007400" \
+            "13.632200, 14.508800, 16.340300" \
+            "14.187000, 15.063600, 16.895100" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.041684, 0.043518, 0.044111" \
+            "0.182013, 0.182173, 0.182062" \
+            "0.277456, 0.277466, 0.277464" \
+            "0.440219, 0.440086, 0.440226" \
+            "0.719815, 0.719839, 0.719801" \
+            "1.190560, 1.190580, 1.190570" \
+            "1.976640, 1.976650, 1.976630" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.686200, 13.570900, 15.411800" \
+            "12.862200, 13.746700, 15.587300" \
+            "12.977900, 13.862400, 15.703000" \
+            "13.168800, 14.053300, 15.893800" \
+            "13.487800, 14.372300, 16.212900" \
+            "14.019200, 14.903800, 16.744300" \
+            "14.904700, 15.789200, 17.629800" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.029873, 0.030012, 0.032038" \
+            "0.235825, 0.235653, 0.235742" \
+            "0.385156, 0.385009, 0.385177" \
+            "0.633555, 0.633566, 0.633580" \
+            "1.050080, 1.050160, 1.050110" \
+            "1.744590, 1.744630, 1.744620" \
+            "2.902130, 2.902130, 2.902110" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(D)" ;
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : falling_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.744200, 13.628600, 15.469900" \
+            "12.857300, 13.741800, 15.583000" \
+            "12.929600, 13.814100, 15.655300" \
+            "13.049000, 13.933500, 15.774700" \
+            "13.248800, 14.133300, 15.974600" \
+            "13.581700, 14.466300, 16.307500" \
+            "14.136400, 15.021000, 16.862300" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.025210, 0.026537, 0.026701" \
+            "0.164508, 0.164010, 0.164066" \
+            "0.265972, 0.265874, 0.265887" \
+            "0.434643, 0.434603, 0.434597" \
+            "0.717669, 0.717660, 0.717628" \
+            "1.189320, 1.189310, 1.189280" \
+            "1.975450, 1.975450, 1.975440" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.838200, 13.714900, 15.546300" \
+            "13.010000, 13.886500, 15.717900" \
+            "13.125900, 14.002300, 15.833700" \
+            "13.316800, 14.193200, 16.024600" \
+            "13.636000, 14.512300, 16.343700" \
+            "14.167500, 15.043800, 16.875200" \
+            "15.052900, 15.929300, 17.760700" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.027230, 0.027702, 0.027572" \
+            "0.234996, 0.235320, 0.235136" \
+            "0.385163, 0.385103, 0.385232" \
+            "0.633773, 0.633773, 0.633800" \
+            "1.050380, 1.050320, 1.050370" \
+            "1.744840, 1.744800, 1.744810" \
+            "2.902330, 2.902330, 2.902320" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.006088 ;
+      fall_capacitance : 0.005589 ;
+      capacitance : 0.006088 ;
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.226600, 0.294900, 0.168000" \
+            "0.343800, 0.294900, 0.275400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.285200, 0.285200, 0.343800" \
+            "0.353500, 0.363300, 0.412100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.271500, -0.154300, -0.330100" \
+            "-0.349600, -0.349600, -0.398400" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.203100, -0.154300, -0.144500" \
+            "-0.310500, -0.261700, -0.252000" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (GATE_N) {
+      direction : input ;
+      rise_capacitance : 0.006570 ;
+      fall_capacitance : 0.006575 ;
+      capacitance : 0.006575 ;
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.007366 ;
+      fall_capacitance : 0.007408 ;
+      capacitance : 0.007408 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_dllrq_1) {
+    area : 99.39 ;
+    latch (IQ, IQinv) {
+      data_in : D ;
+      enable : "GATE_N'" ;
+      clear : "RESET_B'" ;
+    } /* end latch */
+    pin (Q) {
+      direction : output ;
+      function : "Q = D" ;
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : falling_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.725100, 13.602100, 15.433300" \
+            "12.852600, 13.729400, 15.560900" \
+            "12.925800, 13.802600, 15.634100" \
+            "13.045500, 13.922200, 15.753700" \
+            "13.245400, 14.122100, 15.953600" \
+            "13.578300, 14.455000, 16.286500" \
+            "14.133100, 15.009800, 16.841300" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.034576, 0.037230, 0.036404" \
+            "0.171121, 0.171570, 0.171129" \
+            "0.269670, 0.270099, 0.270038" \
+            "0.436754, 0.436614, 0.436578" \
+            "0.718884, 0.718885, 0.718974" \
+            "1.190470, 1.190470, 1.190530" \
+            "1.976640, 1.976630, 1.976630" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "12.668400, 13.552200, 15.392100" \
+            "12.842100, 13.725800, 15.565400" \
+            "12.957800, 13.841600, 15.681200" \
+            "13.148800, 14.032500, 15.872100" \
+            "13.467800, 14.351600, 16.191200" \
+            "13.999300, 14.883000, 16.722700" \
+            "14.884700, 15.768500, 17.608200" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.027705, 0.028047, 0.029334" \
+            "0.235079, 0.234875, 0.234817" \
+            "0.384939, 0.384968, 0.384943" \
+            "0.633583, 0.633583, 0.633606" \
+            "1.050210, 1.050250, 1.050240" \
+            "1.744660, 1.744710, 1.744680" \
+            "2.902190, 2.902190, 2.902170" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.006088 ;
+      fall_capacitance : 0.005589 ;
+      capacitance : 0.006088 ;
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.207000, 0.168000, 0.158200" \
+            "0.324200, 0.275400, 0.265600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.275400, 0.285200, 0.334000" \
+            "0.353500, 0.353500, 0.402300" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : GATE_N ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.261700, -0.271500, -0.320300" \
+            "-0.339800, -0.349600, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.183600, -0.144500, -0.134800" \
+            "-0.291000, -0.252000, -0.242200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (GATE_N) {
+      direction : input ;
+      rise_capacitance : 0.006570 ;
+      fall_capacitance : 0.006575 ;
+      capacitance : 0.006575 ;
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.006776 ;
+      fall_capacitance : 0.006812 ;
+      capacitance : 0.006812 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_sdfbbp_1) {
+    area : 212.49 ;
+    ff (IQ, IQinv) {
+      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+      preset : "SET_B'" ;
+    } /* end ff */
+    ff (IQN, IQNinv) {
+      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+      preset : "SET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.537054, 0.635023, 0.758848" \
+            "0.650986, 0.749354, 0.872661" \
+            "0.723269, 0.821684, 0.944996" \
+            "0.842635, 0.941044, 1.064500" \
+            "1.042440, 1.140870, 1.264280" \
+            "1.375360, 1.473800, 1.597170" \
+            "1.930050, 2.028540, 2.151950" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.030009, 0.029132, 0.030360" \
+            "0.164784, 0.164525, 0.164723" \
+            "0.266232, 0.266135, 0.265825" \
+            "0.434649, 0.434782, 0.434859" \
+            "0.717700, 0.717687, 0.717546" \
+            "1.189320, 1.189310, 1.189220" \
+            "1.975450, 1.975450, 1.975440" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.491133, 0.594913, 0.729430" \
+            "0.662848, 0.766607, 0.901119" \
+            "0.778698, 0.882479, 1.016950" \
+            "0.969658, 1.073380, 1.207830" \
+            "1.288800, 1.392510, 1.526980" \
+            "1.820280, 1.923970, 2.058440" \
+            "2.705770, 2.809460, 2.943940" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.027523, 0.027495, 0.027732" \
+            "0.235299, 0.234946, 0.235194" \
+            "0.385126, 0.385152, 0.385258" \
+            "0.633704, 0.633775, 0.633822" \
+            "1.050360, 1.050320, 1.050360" \
+            "1.744810, 1.744800, 1.744830" \
+            "2.902320, 2.902330, 2.902340" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.467499, 0.565667, 0.689662" \
+            "0.660145, 0.758604, 0.882102" \
+            "0.776387, 0.874843, 0.998347" \
+            "0.966867, 1.065320, 1.188850" \
+            "1.285570, 1.384010, 1.507510" \
+            "1.816730, 1.915180, 2.038680" \
+            "2.702030, 2.800480, 2.923990" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.043595, 0.044918, 0.043307" \
+            "0.245330, 0.245339, 0.245367" \
+            "0.390387, 0.390399, 0.390213" \
+            "0.635791, 0.635675, 0.635674" \
+            "1.051210, 1.051270, 1.051270" \
+            "1.745560, 1.745570, 1.745580" \
+            "2.903090, 2.903070, 2.903090" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.413629, 0.517325, 0.651586" \
+            "0.555735, 0.659955, 0.794337" \
+            "0.631885, 0.736146, 0.870573" \
+            "0.752583, 0.856837, 0.991297" \
+            "0.952594, 1.056820, 1.191300" \
+            "1.285510, 1.389720, 1.524200" \
+            "1.840260, 1.944460, 2.078950" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.041037, 0.042015, 0.045558" \
+            "0.182467, 0.182695, 0.182974" \
+            "0.277967, 0.278072, 0.277968" \
+            "0.440476, 0.440563, 0.440595" \
+            "0.719931, 0.719960, 0.719952" \
+            "1.190590, 1.190600, 1.190610" \
+            "1.976650, 1.976660, 1.976670" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008056 ;
+      fall_capacitance : 0.007817 ;
+      capacitance : 0.008056 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.004630 ;
+      fall_capacitance : 0.004636 ;
+      capacitance : 0.004636 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.334000, 0.275400, 0.119100" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.314500, 0.226600, 0.119100" \
+            "0.509800, 0.431600, 0.324200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.281200, -0.183600, -0.193400" \
+            "-0.486300, -0.388700, -0.271500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.320300, -0.261700, -0.193400" \
+            "-0.486300, -0.437500, -0.378900" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.004641 ;
+      fall_capacitance : 0.004658 ;
+      capacitance : 0.004658 ;
+    } /* end pin */
+    pin (SCD) {
+      direction : input ;
+      rise_capacitance : 0.004243 ;
+      fall_capacitance : 0.004273 ;
+      capacitance : 0.004273 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.334000, 0.275400, 0.119100" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.314500, 0.226600, 0.119100" \
+            "0.509800, 0.431600, 0.324200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.281200, -0.183600, -0.193400" \
+            "-0.486300, -0.388700, -0.271500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.320300, -0.261700, -0.193400" \
+            "-0.486300, -0.437500, -0.378900" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SCE) {
+      direction : input ;
+      rise_capacitance : 0.008313 ;
+      fall_capacitance : 0.008459 ;
+      capacitance : 0.008459 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.334000, 0.275400, 0.119100" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.314500, 0.226600, 0.119100" \
+            "0.509800, 0.431600, 0.324200" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.281200, -0.183600, -0.193400" \
+            "-0.486300, -0.388700, -0.271500" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.320300, -0.261700, -0.193400" \
+            "-0.486300, -0.437500, -0.378900" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SET_B) {
+      direction : input ;
+      rise_capacitance : 0.013373 ;
+      fall_capacitance : 0.013386 ;
+      capacitance : 0.013386 ;
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_sdfrbp_1) {
+    area : 219.34 ;
+    ff (IQ, IQinv) {
+      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    ff (IQN, IQNinv) {
+      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.384896, 0.486062, 0.610114" \
+            "0.556623, 0.657682, 0.781742" \
+            "0.672543, 0.773594, 0.897631" \
+            "0.863484, 0.964509, 1.088540" \
+            "1.182610, 1.283620, 1.407690" \
+            "1.714080, 1.815090, 1.939150" \
+            "2.599560, 2.700560, 2.824650" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.026474, 0.027138, 0.026331" \
+            "0.235119, 0.235019, 0.235234" \
+            "0.384993, 0.385036, 0.385217" \
+            "0.633590, 0.633617, 0.633709" \
+            "1.050240, 1.050240, 1.050210" \
+            "1.744680, 1.744690, 1.744690" \
+            "2.902160, 2.902170, 2.902190" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.378457, 0.483794, 0.620154" \
+            "0.491633, 0.596698, 0.733287" \
+            "0.563972, 0.669202, 0.805570" \
+            "0.683368, 0.788629, 0.924937" \
+            "0.883157, 0.988418, 1.124740" \
+            "1.216050, 1.321310, 1.457650" \
+            "1.770810, 1.876080, 2.012410" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.028045, 0.029212, 0.031077" \
+            "0.164548, 0.164518, 0.164610" \
+            "0.265930, 0.265839, 0.265948" \
+            "0.434454, 0.434559, 0.434371" \
+            "0.717358, 0.717368, 0.717366" \
+            "1.188960, 1.188960, 1.188960" \
+            "1.975080, 1.975090, 1.975080" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.313263, 0.414960, 0.540279" \
+            "0.460837, 0.561469, 0.684950" \
+            "0.538050, 0.638643, 0.762049" \
+            "0.659283, 0.759892, 0.883252" \
+            "0.859502, 0.960114, 1.083450" \
+            "1.192500, 1.293110, 1.416400" \
+            "1.747210, 1.847900, 1.971190" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.044435, 0.041897, 0.043135" \
+            "0.186925, 0.186893, 0.186675" \
+            "0.281070, 0.280804, 0.280826" \
+            "0.442013, 0.442072, 0.441910" \
+            "0.720613, 0.720562, 0.720419" \
+            "1.190820, 1.190810, 1.190660" \
+            "1.976750, 1.976750, 1.976640" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.314472, 0.418773, 0.551448" \
+            "0.511518, 0.615686, 0.751499" \
+            "0.628015, 0.732025, 0.867623" \
+            "0.818568, 0.922416, 1.057710" \
+            "1.137260, 1.240990, 1.376150" \
+            "1.668400, 1.772080, 1.907150" \
+            "2.553690, 2.657320, 2.792300" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.044905, 0.045382, 0.052069" \
+            "0.247357, 0.248471, 0.251374" \
+            "0.391285, 0.391966, 0.393676" \
+            "0.636023, 0.636257, 0.637209" \
+            "1.051250, 1.051360, 1.051900" \
+            "1.745570, 1.745570, 1.745910" \
+            "2.903110, 2.903100, 2.903230" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008061 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.007380 ;
+      fall_capacitance : 0.007415 ;
+      capacitance : 0.007415 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.363300, 0.304700" \
+            "0.500000, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.324200, 0.207000" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.349600, -0.261700, -0.154300" \
+            "-0.564500, -0.486300, -0.378900" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.320300, -0.242200" \
+            "-0.457000, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pin (SCD) {
+      direction : input ;
+      rise_capacitance : 0.005572 ;
+      fall_capacitance : 0.005656 ;
+      capacitance : 0.005656 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.363300, 0.304700" \
+            "0.500000, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.324200, 0.207000" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.349600, -0.261700, -0.154300" \
+            "-0.564500, -0.486300, -0.378900" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.320300, -0.242200" \
+            "-0.457000, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SCE) {
+      direction : input ;
+      rise_capacitance : 0.012876 ;
+      fall_capacitance : 0.012792 ;
+      capacitance : 0.012876 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.363300, 0.304700" \
+            "0.500000, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.324200, 0.207000" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.349600, -0.261700, -0.154300" \
+            "-0.564500, -0.486300, -0.378900" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.320300, -0.242200" \
+            "-0.457000, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_sdfrbp_2) {
+    area : 239.90 ;
+    ff (IQ, IQinv) {
+      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    ff (IQN, IQNinv) {
+      next_state : "!(((SCE & SCD) | (!(SCE) & D)))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.448889, 0.554436, 0.693344" \
+            "0.577314, 0.682631, 0.821224" \
+            "0.649619, 0.754941, 0.893508" \
+            "0.768834, 0.874237, 1.012840" \
+            "0.968535, 1.073920, 1.212530" \
+            "1.301420, 1.406730, 1.545400" \
+            "1.856140, 1.961480, 2.100120" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.032052, 0.032003, 0.033459" \
+            "0.168554, 0.168696, 0.168337" \
+            "0.267743, 0.267646, 0.267460" \
+            "0.435535, 0.435443, 0.435571" \
+            "0.718301, 0.718195, 0.718275" \
+            "1.189930, 1.189860, 1.189910" \
+            "1.976060, 1.976020, 1.976050" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.451202, 0.553620, 0.679106" \
+            "0.630537, 0.732700, 0.858791" \
+            "0.745940, 0.848166, 0.974262" \
+            "0.936662, 1.038860, 1.164950" \
+            "1.255670, 1.357860, 1.483950" \
+            "1.787080, 1.889290, 2.015360" \
+            "2.672520, 2.774730, 2.900810" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.026307, 0.025961, 0.026835" \
+            "0.234768, 0.234505, 0.234473" \
+            "0.384173, 0.384127, 0.384138" \
+            "0.632596, 0.632667, 0.632604" \
+            "1.049210, 1.049220, 1.049210" \
+            "1.743640, 1.743650, 1.743650" \
+            "2.901120, 2.901130, 2.901150" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (Q_N) {
+      direction : output ;
+      function : "Q_N = !(((SCE & SCD) | (!(SCE) & D)))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.329576, 0.431732, 0.559941" \
+            "0.494581, 0.596386, 0.721978" \
+            "0.575680, 0.677364, 0.802901" \
+            "0.699339, 0.801017, 0.926488" \
+            "0.900374, 1.002060, 1.127490" \
+            "1.233480, 1.335170, 1.460560" \
+            "1.788220, 1.889990, 2.015400" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.045235, 0.044563, 0.042571" \
+            "0.196862, 0.196983, 0.196036" \
+            "0.291493, 0.291422, 0.291219" \
+            "0.450701, 0.450581, 0.450507" \
+            "0.725531, 0.725534, 0.725404" \
+            "1.193740, 1.193750, 1.193610" \
+            "1.979180, 1.979190, 1.979110" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.334277, 0.439745, 0.574165" \
+            "0.547742, 0.652077, 0.789296" \
+            "0.665349, 0.769516, 0.906480" \
+            "0.855895, 0.959859, 1.096510" \
+            "1.174230, 1.278040, 1.414460" \
+            "1.705060, 1.808790, 1.945050" \
+            "2.590110, 2.693790, 2.829890" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.042763, 0.041263, 0.048523" \
+            "0.253575, 0.254521, 0.257198" \
+            "0.395301, 0.396060, 0.397604" \
+            "0.637771, 0.638019, 0.639021" \
+            "1.051380, 1.051530, 1.052110" \
+            "1.745300, 1.745350, 1.745650" \
+            "2.902810, 2.902810, 2.902910" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.007909 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.007380 ;
+      fall_capacitance : 0.007415 ;
+      capacitance : 0.007415 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.373000, 0.304700" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.334000, 0.304700" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.339800, -0.261700, -0.154300" \
+            "-0.554700, -0.476600, -0.369100" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.310500, -0.154300" \
+            "-0.447300, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pin (SCD) {
+      direction : input ;
+      rise_capacitance : 0.005572 ;
+      fall_capacitance : 0.005656 ;
+      capacitance : 0.005656 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.373000, 0.304700" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.334000, 0.304700" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.339800, -0.261700, -0.154300" \
+            "-0.554700, -0.476600, -0.369100" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.310500, -0.154300" \
+            "-0.447300, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SCE) {
+      direction : input ;
+      rise_capacitance : 0.012876 ;
+      fall_capacitance : 0.012792 ;
+      capacitance : 0.012876 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.373000, 0.304700" \
+            "0.509800, 0.451200, 0.392600" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.421900, 0.334000, 0.304700" \
+            "0.646500, 0.558600, 0.441400" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.339800, -0.261700, -0.154300" \
+            "-0.554700, -0.476600, -0.369100" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.369100, -0.310500, -0.154300" \
+            "-0.447300, -0.398400, -0.330100" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_sdfrbpq_1) {
+    area : 202.20 ;
+    ff (IQ, IQinv) {
+      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.374469, 0.470941, 0.590837" \
+            "0.553597, 0.650590, 0.769912" \
+            "0.669123, 0.766081, 0.885413" \
+            "0.859804, 0.956768, 1.076110" \
+            "1.178810, 1.275760, 1.395080" \
+            "1.710190, 1.807140, 1.926460" \
+            "2.595630, 2.692580, 2.811890" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.036555, 0.036551, 0.036239" \
+            "0.237354, 0.237344, 0.237348" \
+            "0.386298, 0.386308, 0.386145" \
+            "0.634697, 0.634693, 0.634575" \
+            "1.051290, 1.051280, 1.051270" \
+            "1.745770, 1.745770, 1.745720" \
+            "2.903270, 2.903270, 2.903270" \
+          ) ;
+        } /* end fall_transition */
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.371580, 0.465968, 0.582755" \
+            "0.510815, 0.605076, 0.723031" \
+            "0.586093, 0.680319, 0.798313" \
+            "0.706539, 0.800790, 0.918827" \
+            "0.906562, 1.000830, 1.118840" \
+            "1.239500, 1.333790, 1.451770" \
+            "1.794200, 1.888550, 2.006560" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.051480, 0.085800, 0.142560, 0.237600, 0.396000, 0.660000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.044960, 0.046510, 0.046216" \
+            "0.182017, 0.182262, 0.182590" \
+            "0.278056, 0.277738, 0.278108" \
+            "0.442056, 0.441955, 0.442202" \
+            "0.722432, 0.722373, 0.722405" \
+            "1.193380, 1.193330, 1.193340" \
+            "1.979480, 1.979450, 1.979500" \
+          ) ;
+        } /* end rise_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008060 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.007380 ;
+      fall_capacitance : 0.007415 ;
+      capacitance : 0.007415 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pin (SCD) {
+      direction : input ;
+      rise_capacitance : 0.005572 ;
+      fall_capacitance : 0.005656 ;
+      capacitance : 0.005656 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SCE) {
+      direction : input ;
+      rise_capacitance : 0.012876 ;
+      fall_capacitance : 0.012527 ;
+      capacitance : 0.012876 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+  cell (sg13g2_hv_sdfrbpq_2) {
+    area : 209.06 ;
+    ff (IQ, IQinv) {
+      next_state : "((SCE & SCD) | (!(SCE) & D))" ;
+      clocked_on : CLK ;
+      clear : "RESET_B'" ;
+    } /* end ff */
+    pin (Q) {
+      direction : output ;
+      function : "Q = ((SCE & SCD) | (!(SCE) & D))" ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : rising_edge ;
+        cell_rise (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.424848, 0.519333, 0.636612" \
+            "0.590117, 0.684420, 0.802502" \
+            "0.669853, 0.764200, 0.882240" \
+            "0.793381, 0.887729, 1.005750" \
+            "0.994607, 1.088940, 1.206980" \
+            "1.327840, 1.422130, 1.540160" \
+            "1.882600, 1.976910, 2.094970" \
+          ) ;
+        } /* end cell_rise */
+        rise_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.049957, 0.052768, 0.052944" \
+            "0.199932, 0.199820, 0.200673" \
+            "0.294539, 0.294685, 0.294915" \
+            "0.454480, 0.454614, 0.454668" \
+            "0.730863, 0.730872, 0.730943" \
+            "1.199210, 1.199200, 1.199220" \
+            "1.984580, 1.984570, 1.984570" \
+          ) ;
+        } /* end rise_transition */
+        cell_fall (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.416705, 0.513158, 0.631838" \
+            "0.611290, 0.707987, 0.827247" \
+            "0.726203, 0.822961, 0.942157" \
+            "0.916218, 1.012940, 1.132210" \
+            "1.234690, 1.331440, 1.450700" \
+            "1.765720, 1.862490, 1.981730" \
+            "2.650920, 2.747700, 2.866940" \
+          ) ;
+        } /* end cell_fall */
+        fall_transition (delay_template_7x3) {
+          index_1 ("0.002200, 0.102960, 0.171600, 0.285120, 0.475200, 0.792000, 1.320000") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.035913, 0.037857, 0.039547" \
+            "0.242036, 0.241889, 0.242154" \
+            "0.388001, 0.387975, 0.387980" \
+            "0.634910, 0.634858, 0.634872" \
+            "1.051100, 1.051190, 1.051140" \
+            "1.745610, 1.745640, 1.745620" \
+            "2.903160, 2.903150, 2.903160" \
+          ) ;
+        } /* end fall_transition */
+      } /* end timing */
+    } /* end pin */
+    pin (CLK) {
+      direction : input ;
+      clock : true ;
+      rise_capacitance : 0.008064 ;
+      fall_capacitance : 0.008060 ;
+      capacitance : 0.008064 ;
+    } /* end pin */
+    pin (D) {
+      direction : input ;
+      rise_capacitance : 0.007380 ;
+      fall_capacitance : 0.007415 ;
+      capacitance : 0.007415 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (RESET_B) {
+      direction : input ;
+      rise_capacitance : 0.009573 ;
+      fall_capacitance : 0.009610 ;
+      capacitance : 0.009610 ;
+    } /* end pin */
+    pin (SCD) {
+      direction : input ;
+      rise_capacitance : 0.005572 ;
+      fall_capacitance : 0.005656 ;
+      capacitance : 0.005656 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pin (SCE) {
+      direction : input ;
+      rise_capacitance : 0.012876 ;
+      fall_capacitance : 0.012527 ;
+      capacitance : 0.012876 ;
+      timing () {
+        related_pin : CLK ;
+        timing_type : setup_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.363300, 0.294900" \
+            "0.500000, 0.441400, 0.382800" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "0.412100, 0.314500, 0.207000" \
+            "0.636700, 0.548800, 0.431600" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+      timing () {
+        related_pin : CLK ;
+        timing_type : hold_rising ;
+        rise_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.359400, -0.271500, -0.164100" \
+            "-0.574200, -0.496100, -0.388700" \
+          ) ;
+        } /* end rise_constraint */
+        fall_constraint (constraint_template_2x3) {
+          index_1 ("1.373520, 3.359580") ;
+          index_2 ("0.462840, 1.373520, 3.359580") ;
+          values ( \
+            "-0.378900, -0.320300, -0.252000" \
+            "-0.466800, -0.408200, -0.339800" \
+          ) ;
+        } /* end fall_constraint */
+      } /* end timing */
+    } /* end pin */
+    pg_pin (VDD) {
+      voltage_name : VDD ;
+      pg_type : primary_power ;
+    } /* end pg_pin */
+    pg_pin (VSS) {
+      voltage_name : VSS ;
+      pg_type : primary_ground ;
+    } /* end pg_pin */
+  } /* end cell */
+} /* end library */

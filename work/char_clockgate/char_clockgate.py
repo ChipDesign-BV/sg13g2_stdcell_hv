@@ -541,20 +541,44 @@ def suh_point(cell, pin, dslew, cslew):
 
 
 def task_suh():
+    """Setup/hold of the enable pins against the rising clock edge.
+
+    The largest task in the flow: 18 grid points, each of which is four
+    bisections (setup/hold x rise/fall). Resumable and incrementally
+    persisted for the same reason task_delay and task_mpw are -- on a
+    contended machine this runs for hours, and it used to hold everything
+    in memory and write once at the end, so an interruption near the end
+    cost the whole run.
+    """
     res = {}
+    path = RAW / f"suh_{CORNER.name}.json"
+    if path.exists():
+        res = {k: v for k, v in json.loads(path.read_text()).items()
+               if isinstance(v, dict)
+               and all(v.get(f) is not None for f in
+                       ("setup_rise", "setup_fall", "hold_rise", "hold_fall"))}
     jobs = [(c, p, d, k) for c, s in CELLS.items() for p in s["enables"]
-            for d in CON_DATA for k in CON_CLK]
-    with cf.ThreadPoolExecutor(JOBS) as ex:
-        futs = {ex.submit(suh_point, c, p, d, k): (c, p, d, k)
-                for c, p, d, k in jobs}
-        for f in cf.as_completed(futs):
-            c, p, d, k = futs[f]
-            res[f"{c}|{p}|{d}|{k}"] = f.result()
-            v = res[f"{c}|{p}|{d}|{k}"]
-            print(f"  {c:20s} {p:4s} d{d:8.4f} c{k:8.4f}  "
-                  f"su_r {v['setup_rise']:+7.3f} su_f {v['setup_fall']:+7.3f} "
-                  f"ho_r {v['hold_rise']:+7.3f} ho_f {v['hold_fall']:+7.3f}")
-    (RAW / f"suh_{CORNER.name}.json").write_text(json.dumps(res, indent=1, sort_keys=True))
+            for d in CON_DATA for k in CON_CLK
+            if f"{c}|{p}|{d}|{k}" not in res]
+    if not jobs:
+        print(f"suh: {len(res)} points, all cached", flush=True)
+    else:
+        print(f"suh: {len(res)} cached, {len(jobs)} to measure "
+              f"({JOBS} jobs, {TIMEOUT} s deck timeout)", flush=True)
+        with cf.ThreadPoolExecutor(JOBS) as ex:
+            futs = {ex.submit(suh_point, c, p, d, k): (c, p, d, k)
+                    for c, p, d, k in jobs}
+            for f in cf.as_completed(futs):
+                c, p, d, k = futs[f]
+                res[f"{c}|{p}|{d}|{k}"] = f.result()
+                v = res[f"{c}|{p}|{d}|{k}"]
+                path.write_text(json.dumps(res, indent=1, sort_keys=True))
+                print(f"  {c:20s} {p:4s} d{d:8.4f} c{k:8.4f}  "
+                      f"su_r {v['setup_rise']:+7.3f} "
+                      f"su_f {v['setup_fall']:+7.3f} "
+                      f"ho_r {v['hold_rise']:+7.3f} "
+                      f"ho_f {v['hold_fall']:+7.3f}", flush=True)
+    path.write_text(json.dumps(res, indent=1, sort_keys=True))
 
 
 # ---------------------------------------------------------------------------
@@ -630,13 +654,37 @@ def mpw_point(cell, slew, high):
 
 
 def task_mpw():
+    """Bisect the minimum CLK high/low pulse width.
+
+    Resumable, and incrementally persisted, for the same reason task_delay
+    is: this is the slowest task in the flow -- hours on a loaded machine --
+    and it used to build its results in memory and write once at the end, so
+    an interruption at 95 % threw away everything.
+
+    Only *bracketed* points count as cached. An unbracketed result is not a
+    measurement -- emit() refuses to ship it, because the returned number is
+    a search bound -- and the remedy is to re-bisect it with a longer deck
+    timeout. Treating it as done would make the re-run a no-op.
+    """
     res = {}
-    jobs = [(c, s, h) for c in CELLS for s in MPW_SLEWS for h in (True, False)]
-    with cf.ThreadPoolExecutor(JOBS) as ex:
-        futs = {ex.submit(mpw_point, c, s, h): (c, s, h) for c, s, h in jobs}
-        for f in cf.as_completed(futs):
-            c, s, h = futs[f]
-            res[f"{c}|{s}|{'high' if h else 'low'}"] = f.result()
+    path = RAW / f"mpw_{CORNER.name}.json"
+    if path.exists():
+        res = {k: v for k, v in json.loads(path.read_text()).items()
+               if isinstance(v, dict) and v.get("bracketed")}
+    jobs = [(c, s, h) for c in CELLS for s in MPW_SLEWS for h in (True, False)
+            if f"{c}|{s}|{'high' if h else 'low'}" not in res]
+    if not jobs:
+        print(f"mpw: {len(res)} points, all bracketed and cached", flush=True)
+    else:
+        print(f"mpw: {len(res)} cached, {len(jobs)} to bisect "
+              f"({JOBS} jobs, {TIMEOUT} s deck timeout)", flush=True)
+        with cf.ThreadPoolExecutor(JOBS) as ex:
+            futs = {ex.submit(mpw_point, c, s, h): (c, s, h)
+                    for c, s, h in jobs}
+            for f in cf.as_completed(futs):
+                c, s, h = futs[f]
+                res[f"{c}|{s}|{'high' if h else 'low'}"] = f.result()
+                path.write_text(json.dumps(res, indent=1, sort_keys=True))
     for k in sorted(res):
         print(f"  {k:45s} {res[k]['width']:8.4f} ns "
               f"{'' if res[k]['bracketed'] else '  *** PINNED ***'}")
@@ -671,6 +719,22 @@ def table(name, tmpl, indent, index1, index2, rows):
 
 def emit():
     delay = json.loads((RAW / f"delay_{CORNER.name}.json").read_text())
+    # A grid point that failed to measure is stored as all-None so the delay
+    # task can resume it. It must never reach a table: fmt(None) would either
+    # raise here or, worse, write the literal "None" into a Liberty the STA
+    # tool would then read. The mpw bisection already refuses to ship an
+    # unbracketed search; this is the same rule for the delay grid.
+    holes = sorted(k for k, v in delay.items()
+                   if any(x is None for x in v.values()))
+    assert not holes, (
+        f"delay_{CORNER.name}.json has {len(holes)} unmeasured grid "
+        f"point(s); re-run the delay task before emitting:\n  "
+        + "\n  ".join(holes)
+        + "\n\nThese are usually deck timeouts on a loaded machine, not "
+          "physics: re-run with a longer timeout and fewer parallel jobs, "
+          "e.g. CG_TIMEOUT=2400 CG_JOBS=6 ./char_clockgate.py "
+          f"--corner {CORNER.name} delay -- only the incomplete points are "
+          "re-simulated.")
     leak = json.loads((RAW / f"leakage_{CORNER.name}.json").read_text())
     cap = json.loads((RAW / f"cap_{CORNER.name}.json").read_text())
     suh = json.loads((RAW / f"suh_{CORNER.name}.json").read_text())
