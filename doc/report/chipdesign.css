@@ -122,6 +122,33 @@ pre {
   pre { overflow-x: auto; }
 }
 
+/* On paper there is no scrollbar: overflow-x simply CLIPS, so a code line
+   wider than the text column is lost silently -- the reader cannot tell a
+   truncated command from a complete one. Wrap instead, with the
+   continuation indented so a wrapped line still reads as one line. Source
+   lines are kept under the column width anyway (build.sh enforces it);
+   this is the backstop for the ones that slip through. */
+@media print {
+  pre {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    padding-left: 2.2em;
+    text-indent: -1.4em;
+  }
+  /* Long unbreakable tokens -- paths, library names -- must not push a
+     table or a paragraph past the margin either. */
+  td, th { overflow-wrap: break-word; }
+  code { overflow-wrap: break-word; }
+  table { width: 100%; table-layout: auto; }
+  /* Keep a listing on one page where it fits: a shell recipe split across a
+     page break is much harder to follow, and the longest block here is well
+     under a page. WeasyPrint still splits a block that cannot fit at all,
+     so this cannot deadlock the pagination. */
+  pre { break-inside: avoid; }
+  tr  { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}
+
 /* ── Print / PDF (weasyprint) ────────────────────────────────────────────── */
 @page {
   size: A4;

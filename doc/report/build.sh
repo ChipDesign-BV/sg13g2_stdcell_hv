@@ -32,6 +32,18 @@ for d in $DOCS; do
         --toc --toc-depth=2 \
         -o "$d.html"
 
+    # Warn on source lines that will have to wrap. The column fits ~77
+    # monospace characters; wrapping is handled (see chipdesign.css) but a
+    # line short enough not to need it reads better.
+    awk '/^```/{b=!b;next} b&&length($0)>77{printf "    long line %d (%d chars): %s\n", NR, length($0), substr($0,1,60)}' "$d.md"
+
+    # Nothing may cross the text column: on paper overflow is clipping, and
+    # a truncated command is indistinguishable from a complete one.
+    ./fitcheck.py "$d.html" || {
+        echo "    ABORT: $d would ship clipped content" >&2
+        exit 1
+    }
+
     # -u . resolves the CSS, the logo and the _mathcache SVGs relative to here
     python3 -m weasyprint "$d.html" "$d.pdf" -u .
 
