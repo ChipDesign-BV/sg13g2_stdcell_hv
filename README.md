@@ -848,22 +848,29 @@ python3 gen_hv_lib.py           # regenerate the library
 python3 verify_logic.py         # combinational equivalence
 python3 verify_seq.py           # sequential equivalence
 python3 verify_sch.py           # schematics and CDL vs SPICE netlist
-python3 gen_charlib_config.py   # build the CharLib configuration
-./run_charlib.sh ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib
-# sequential cells (flops + latches) use the custom procedures in
-# seq_delay_procedure.py, registered by charlib_patched.py at startup:
-env -u PYTHONPATH sh -c "PATH=$PWD/ngspice-osdi-shim:\$PATH \
-  /foss/tools/charlib/bin/python charlib_patched.py run \
-  charlib_sg13g2_stdcell_hv.yml -f 'sg13g2_hv_(sdf|dfr|dlh|dll)' \
-  -o seq.lib -j 6"
-python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib seq.lib
-python3 seq_leakage.py          # single-state leakage for the 14 cells
-python3 tie_leakage.py          # measured tie-cell leakage into the Liberty
-python3 update_lib_area.py      # Liberty area from the LEF (reports drift)
-python3 finalize_lib.py         # drive limits from the table axes, physical-
-                                # cell stubs (measured leakage/cap), corner
-                                # suffix on the library name
-python3 verify_lib.py           # gates the shipped Liberty as data
+# Characterization is per PVT corner. One command runs a whole corner --
+# CharLib for what it can express, then the project's own procedures for
+# the sequential cells, then direct ngspice measurement for the cells no
+# characterizer models (tri-states, clock gates, bus holder, tie cells),
+# then drive limits, areas and the data gate. corners.py defines the
+# corners; work/run_corner.sh documents why the order is what it is.
+./run_corner.sh typ             # or: fast | slow
+./run_corner.sh fast direct     # resume a failed run from a given stage
+
+# The individual steps, if you need them one at a time:
+python3 gen_charlib_config.py --corner typ   # CharLib configuration
+./run_charlib.sh typ                          # corner picks config + output
+python3 merge_lib.py <lib> seq_typ.lib        # sequential run merged in
+python3 seq_leakage.py  --corner typ          # single-state sequential leakage
+python3 tie_leakage.py  --corner typ          # measured tie-cell leakage
+python3 char_sighold.py --corner typ          # bus holder: no timing arcs
+python3 char_tristate/char_tristate.py --corner typ   # + enable/disable arcs
+python3 char_clockgate/char_clockgate.py --corner typ all
+python3 finalize_lib.py --corner typ  # drive limits from the table axes,
+                                      # physical-cell stubs (measured
+                                      # leakage/cap), corner-suffixed name
+python3 update_lib_area.py      # Liberty area from the LEF, every corner
+python3 verify_lib.py --corner typ    # gates the shipped Liberty as data
 python3 lctime_compare.py       # independent characterizer cross-check
 python3 view_matrix.py          # per-cell view coverage matrix
 

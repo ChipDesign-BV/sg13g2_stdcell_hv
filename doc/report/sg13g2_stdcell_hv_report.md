@@ -620,15 +620,14 @@ python3 verify_logic.py; python3 verify_seq.py; python3 verify_sch.py
 # DRC: PDK run_drc.py on drc/drc_top.gds and drc/shared_rail.gds
 #      plus magic drc(full) on drc_top.gds for the strict N-well rules
 
-./run_charlib.sh ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib
-# sequential cells via charlib_patched.py, then:
-python3 merge_lib.py ../lib/sg13g2_stdcell_hv_typ_3p30V_25C.lib <seq.lib>
-python3 seq_leakage.py; python3 tie_leakage.py
-python3 char_sighold.py          # bus holder: leakage + small-signal Cin
-python3 char_tristate/char_tristate.py    # tri-states: data + enable/disable
-python3 finalize_lib.py          # drive limits, physical stubs, corner name
-python3 update_lib_area.py       # areas from the LEF
-python3 verify_lib.py            # gates the shipped Liberty as data
+# Characterization is per PVT corner (corners.py); one command per corner:
+./run_corner.sh typ              # or fast | slow
+#   CharLib for what it can express, the project's own procedures for the
+#   sequential cells, direct ngspice measurement for the cells no
+#   characteriser models (tri-states, clock gates, bus holder, tie cells),
+#   then drive limits, areas and the data gate -- in that order, because
+#   the drive limits are derived from the table axes of whatever is
+#   already merged.
 python3 lctime_compare.py        # independent characteriser cross-check
 
 python3 make_pdk_pr.py --pdk <IHP-Open-PDK checkout>   # assemble the PR
