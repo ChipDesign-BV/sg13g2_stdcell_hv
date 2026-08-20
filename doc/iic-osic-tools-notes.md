@@ -114,24 +114,44 @@ $ ls -l /foss/pdks/ihp-sg13g2/libs.tech/qucs-s/
 symbols_stdcell -> /home/rahman/temp/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_stdcell/sym/qucs-s
 ```
 
-That target does not exist in the image — it is a build-machine path baked in
-at image build time. It is the **only** dangling symlink under `libs.tech`.
+That target does not exist in the image. It is an absolute path on the
+machine of whoever built it, captured at image build time.
 
-The consequence is that the thin-oxide standard cells are not available as
-Qucs-S schematic components out of the box, even though the PDK ships all 84
-component definitions and 45 gate-shape files. `libs.ref/sg13g2_stdcell/sym/
-README.md` documents the symlink as the supported mechanism, so this is a
-packaging slip rather than a design decision.
+**This is not upstream content that got mangled.** Checked against
+`IHP-GmbH/IHP-Open-PDK` main: `libs.tech/qucs-s/` upstream contains only
+`symbols/` — there is no `symbols_stdcell` entry at all. The link exists only
+in the container image.
 
-Fix, either directly:
+How it gets created: `libs.tech/qucs-s/install.py` reads `PDK_ROOT` and `HOME`
+from the environment and builds absolute paths from them. Run with
+`PDK_ROOT=/home/rahman/temp/IHP-Open-PDK`, it produces exactly this link. The
+image evidently captured the state of a machine where that had been run, and
+`/home/rahman` does not exist in the container.
+
+It is the only dangling symlink under `libs.tech`. The one other symlink the
+PDK tracks, `libs.tech/ngspice/install.py -> ../xschem/install.py`, is
+relative and survives intact — so this is not a systematic relative-to-
+absolute rewrite during image build, it is one link that was materialised
+from someone's working directory.
+
+The consequence is that none of the 84 thin-oxide standard cells are
+available as Qucs-S schematic components out of the box, even though the PDK
+ships all their component definitions and gate shapes.
+
+The supported fix is to run the installer with the environment set for this
+machine:
 
 ```sh
-ln -sfn "$PDK_ROOT/$PDK/libs.ref/sg13g2_stdcell/sym/qucs-s" \
-        "$PDK_ROOT/$PDK/libs.tech/qucs-s/symbols_stdcell"
+PDK_ROOT=/foss/pdks python3 /foss/pdks/ihp-sg13g2/libs.tech/qucs-s/install.py
 ```
 
-or by running `libs.tech/qucs-s/install.py`, which exists for exactly this and
-appears to have been run on the build machine with absolute paths.
+which populates the user's Qucs workspace (`$HOME/.qucs/user_lib`). To repair
+the in-tree link directly, make it relative so it survives relocation:
+
+```sh
+ln -sfn ../../libs.ref/sg13g2_stdcell/sym/qucs-s \
+        /foss/pdks/ihp-sg13g2/libs.tech/qucs-s/symbols_stdcell
+```
 
 ### Thick-oxide needs the same link
 
@@ -163,3 +183,19 @@ gated against the shipped SPICE netlist (`work/verify_qucs.py`: geometry
 untouched relative to the thin-oxide originals, all 920 device sizes matching
 the netlist, and the two hand-composed tie cells matching terminal by
 terminal), but that is a different claim from "opens in the tool".
+
+### Side effect on this PR
+
+Because the container's PDK tree is what a working copy gets seeded from, the
+`symbols_stdcell` entry can travel into a fork. Our PR branch currently
+carries `ihp-sg13g2/libs.tech/qucs-s/symbols_stdcell` (in relative form),
+which upstream main does not have:
+
+```
+ours:     1 entry
+upstream: 0 entry
+```
+
+It is unrelated to the thick-oxide library and points into the thin-oxide
+one, so it should come out of the PR, or be raised deliberately as a separate
+fix if IHP wants the link shipped.
