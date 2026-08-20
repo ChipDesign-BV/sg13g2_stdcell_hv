@@ -937,7 +937,13 @@ def lv_tables(body, pin, tnames, sub=None):
         if not mm:
             continue
         tb = _block(pb, mm.start())
-        vals = re.search(r"values \((.*?)\) ;?", tb, re.S).group(1)
+        # The thin-oxide library closes a table with ");" and this project's
+        # own emitter writes ") ;" -- the original pattern required the space
+        # and so never matched a single LV table, which is why this
+        # cross-check has never once produced a report.
+        mv = re.search(r"values \((.*?)\)\s*;", tb, re.S)
+        assert mv, f"{t}: no values block in the LV table"
+        vals = mv.group(1)
         out[t] = [[float(x) for x in row.split(",")]
                   for row in re.findall(r'"([^"]+)"', vals)]
     return out

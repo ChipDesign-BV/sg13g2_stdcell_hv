@@ -212,15 +212,27 @@ def ngspice(deck_text, name, meas):
 
 def measure_leakage(cell, ports):
     conns = {"VDD": "vdd", "VSS": "0"}
+    # Every signal pin needs a DC path or the operating point is
+    # under-determined. antennanp's A pin was left dangling: at typ and fast
+    # ngspice happened to converge on *some* solution, and at slow (125 C)
+    # gmin stepping, source stepping and the transient op all failed. Worse
+    # than the failure was the success -- the floating answer at typ was
+    # 6.5x the well-defined one, so the number was never a measurement of
+    # anything. A 1 Gohm tie to ground defines the node without loading it
+    # (3 V / 1 Gohm = 3 nA, three orders below the currents of interest);
+    # it is the same technique work/char_tristate and work/verify_logic use
+    # to make a floating tri-state node well defined.
+    floats = [f"o{p}" for p in ports if p.upper() not in ("VDD", "VSS")]
     lines = [f"* leakage {cell}",
              f".lib {MODELS}/cornerMOShv.lib {CORNER.models}",
              f".option temp={CORNER.temperature:g}",
              f".include {MODELS}/diodes.lib",
              f".include {SPICE}",
-             f"Vdd vdd 0 {VDD}",
-             "Xdut " + " ".join(conns.get(p.upper(), f"o{p}")
-                                for p in ports) + f" {cell}",
-             ".tran 0.5n 60n",
+             f"Vdd vdd 0 {VDD}"]
+    lines += [f"Rdef{i} {n} 0 1G" for i, n in enumerate(floats)]
+    lines += ["Xdut " + " ".join(conns.get(p.upper(), f"o{p}")
+                                 for p in ports) + f" {cell}",
+              ".tran 0.5n 60n",
              ".meas tran ivdd AVG i(Vdd) from=40n to=60n",
              ".control", "run", ".endc", ".end"]
     i_a = abs(ngspice("\n".join(lines) + "\n", f"leak_{cell}", "ivdd"))

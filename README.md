@@ -199,11 +199,11 @@ than borrowed from the thin-oxide library:
   the charge-integration method is unusable here because the antenna
   diodes' breakdown model forces picosecond transient steps.
 * **Corner-suffixed library name**, matching the upstream per-corner
-  naming. Two corners ship, each covering all 84 cells on identical slew
-  and load grids so STA can interpolate across them:
-  `sg13g2_stdcell_hv_typ_3p30V_25C` (mos_tt) and
-  `sg13g2_stdcell_hv_fast_3p60V_m40C` (mos_ff). Slow (3.00 V, 125 °C) is
-  not yet characterized.
+  naming. Three corners ship, each covering all 84 cells on identical
+  slew and load grids so STA can interpolate across them:
+  `sg13g2_stdcell_hv_typ_3p30V_25C` (mos_tt),
+  `sg13g2_stdcell_hv_fast_3p60V_m40C` (mos_ff) and
+  `sg13g2_stdcell_hv_slow_3p00V_125C` (mos_ss).
 
 Historically, **20 cells were configured but produced nothing** — all 14
 flip-flops and latches (`dfrbp_*`, `dfrbpq_*`, `dlh*`, `dll*`, `sdf*`) and all 6
