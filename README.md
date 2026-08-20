@@ -171,10 +171,13 @@ arcs (area-only stubs, measured leakage, measured diode pin capacitance);
 (measured leakage); `sighold` is a bus holder whose only signal pin is an
 `inout` (measured `bus_hold` capacitance and leakage — see
 `work/char_sighold/`). `lgcp_1` and `slgcp_1` are statetable-based integrated
-clock gates and CharLib has no input form for a statetable; their direct
-characterization is still in progress, so they ship with layout but no
-Liberty, and the SCL excludes them exactly as the thin-oxide SCL excludes its
-own clock gates.
+clock gates and CharLib has no input form for a statetable, so they are
+measured directly by `work/char_clockgate/` and ship the full ICG model:
+statetable, internal state pin, `state_function` on GCLK, the
+`clock_gate_*` pin attributes, CLK→GCLK propagation, enable setup/hold, CLK
+`min_pulse_width` and per-state leakage. The SCL still excludes them, exactly
+as the thin-oxide SCL excludes its own clock gates — an ICG is instantiated
+deliberately, not inferred.
 
 `work/finalize_lib.py` post-processes the characterized file into the
 shipped one, all three steps idempotent and derived or measured rather
@@ -871,8 +874,13 @@ of its clocked mappings are proven against the Yosys cell semantics with
 `equiv_induct`. Tri-states map through `SYNTH_TRISTATE_MAP`
 (`tribuff_map.v`, Yosys' `$_TBUF_` onto `sg13g2_hv_ebufn_2`) with
 `TRISTATE_CELLS` listing both footprints, mirroring the thin-oxide SCL.
-The 2 clock gates have no mapping — they are drawn but not yet
-characterized, and the thin-oxide SCL excludes its own clock gates too.
+The 2 clock gates are drawn and fully characterized but deliberately have
+no mapping: an ICG is instantiated by the designer, not inferred by
+synthesis, so they stay on the exclude list as the thin-oxide SCL keeps its
+own. To enable clock gating, drop `lgcp_1` from `synth_exclude.cells` and set
+`SYNTH_CLOCKGATE_MIN_WIDTH` plus
+`SYNTH_CLOCKGATE_POSEDGE_ICG "sg13g2_hv_lgcp_1/GATE/CLK/GCLK"` — Yosys takes
+the ICG from that variable, not from the Liberty.
 
 At install time `finalize_lib.strip_layoutless` still guards the
 liberty ⊆ LEF invariant; with all 84 cells drawn it strips nothing.
