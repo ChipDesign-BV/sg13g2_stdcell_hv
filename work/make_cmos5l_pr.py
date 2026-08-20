@@ -18,7 +18,8 @@ library needs no re-characterization to cross over.
 Installed (17 symlinks, 3 real files, 1 two-line patch):
 
   libs.ref/sg13cmos5l_stdcell_hv/
-      {gds,lef,lib,spice,cdl,verilog}/sg13cmos5l_stdcell_hv.*  -> G2 views
+      {gds,lef,spice,cdl,verilog}/sg13cmos5l_stdcell_hv.*     -> G2 views
+      lib/sg13cmos5l_stdcell_hv_<corner>.lib  -> one per corner #1103 ships
       {sym,sch,doc}                                            -> G2 dirs
       lef/sg13cmos5l_tech.lef -> ../../sg13cmos5l_stdcell/lef/...
   libs.tech/librelane/sg13cmos5l_stdcell_hv/
@@ -57,6 +58,7 @@ Usage: python3 make_cmos5l_pr.py --pdk <IHP-Open-PDK checkout root>
 import argparse
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -64,13 +66,15 @@ import sys
 HV = pathlib.Path(__file__).resolve().parent.parent
 G2 = "sg13g2_stdcell_hv"
 C5 = "sg13cmos5l_stdcell_hv"
-LIB_CORNER = "typ_3p30V_25C"
+# Liberty corners are discovered, not listed: #1103 grew from one corner to
+# three (typ 3.30 V, fast 3.60 V/-40 C, slow 3.00 V/125 C) after this port
+# was first written, and a hard-coded name silently ships a subset.
+CORNER_RE = re.compile(rf"^{G2}_(.*)\.lib$")
 
 # (path inside ihp-sg13cmos5l, symlink target relative to that path's dir)
 VIEW_FILES = [
     (f"libs.ref/{C5}/gds/{C5}.gds", f"gds/{G2}.gds"),
     (f"libs.ref/{C5}/lef/{C5}.lef", f"lef/{G2}.lef"),
-    (f"libs.ref/{C5}/lib/{C5}_{LIB_CORNER}.lib", f"lib/{G2}_{LIB_CORNER}.lib"),
     (f"libs.ref/{C5}/spice/{C5}.spice", f"spice/{G2}.spice"),
     (f"libs.ref/{C5}/cdl/{C5}.cdl", f"cdl/{G2}.cdl"),
     (f"libs.ref/{C5}/verilog/{C5}.v", f"verilog/{G2}.v"),
@@ -101,9 +105,21 @@ def link(path, target):
     os.symlink(target, path)
 
 
-def install_libs_ref(c5):
+def corners(pdk):
+    """Every Liberty corner #1103 ships, newest set at install time."""
+    lib = pdk / "ihp-sg13g2" / "libs.ref" / G2 / "lib"
+    out = sorted(m.group(1) for m in
+                 (CORNER_RE.match(p.name) for p in lib.glob("*.lib")) if m)
+    assert out, f"no {G2}_*.lib found in {lib}"
+    return out
+
+
+def install_libs_ref(pdk, c5):
     """Per-file links for the collective views, directory links for the
     per-cell ones, plus the CMOS5L tech LEF the PDK config expects."""
+    for corner in corners(pdk):
+        link(c5 / "libs.ref" / C5 / "lib" / f"{C5}_{corner}.lib",
+             f"../../../../ihp-sg13g2/libs.ref/{G2}/lib/{G2}_{corner}.lib")
     for rel, tail in VIEW_FILES:
         link(c5 / rel, f"../../../../ihp-sg13g2/libs.ref/{G2}/{tail}")
     for d in VIEW_DIRS:
@@ -112,6 +128,8 @@ def install_libs_ref(c5):
     link(c5 / "libs.ref" / C5 / "lef" / "sg13cmos5l_tech.lef",
          "../../sg13cmos5l_stdcell/lef/sg13cmos5l_tech.lef")
     print(f"libs.ref/{C5}: {len(VIEW_FILES)} view links, "
+          f"{len(corners(pdk))} Liberty links "
+          f"({', '.join(corners(pdk))}), "
           f"{len(VIEW_DIRS)} directory links, 1 tech LEF link")
 
 
@@ -190,19 +208,21 @@ def verify_links(pdk, c5):
     return bad == 0
 
 
-def verify_paths(c5):
+def verify_paths(pdk, c5):
     """Every path the LibreLane configs name must exist on disk."""
     scl = c5 / "libs.tech" / "librelane" / C5
     wanted = [
         c5 / "libs.ref" / C5 / "gds" / f"{C5}.gds",
         c5 / "libs.ref" / C5 / "lef" / f"{C5}.lef",
         c5 / "libs.ref" / C5 / "lef" / "sg13cmos5l_tech.lef",
-        c5 / "libs.ref" / C5 / "lib" / f"{C5}_{LIB_CORNER}.lib",
+        *[c5 / "libs.ref" / C5 / "lib" / f"{C5}_{c}.lib"
+          for c in corners(pdk)],
         c5 / "libs.ref" / C5 / "spice" / f"{C5}.spice",
         c5 / "libs.ref" / C5 / "cdl" / f"{C5}.cdl",
         c5 / "libs.ref" / C5 / "verilog" / f"{C5}.v",
-        c5 / "libs.ref" / "sg13cmos5l_io" / "lib" /
-        "sg13cmos5l_io_typ_1p5V_3p3V_25C.lib",
+        *[c5 / "libs.ref" / "sg13cmos5l_io" / "lib" / f"sg13cmos5l_io_{c}.lib"
+          for c in ("typ_1p5V_3p3V_25C", "fast_1p65V_3p6V_m40C",
+                    "slow_1p35V_3p0V_125C")],
         scl / "config.tcl", scl / "tracks.info",
         scl / "latch_map.v", scl / "mux2_map.v", scl / "mux4_map.v",
         scl / "tribuff_map.v", scl / "sdfbbp_map.v",
@@ -263,12 +283,12 @@ def main():
         (f"{pdk}/ihp-sg13g2/libs.ref/{G2} is missing -- apply "
          f"make_pdk_pr.py (IHP-Open-PDK#1103) first")
 
-    install_libs_ref(c5)
+    install_libs_ref(pdk, c5)
     install_librelane(c5)
     install_klayout(c5)
     patch_xschemrc(c5)
     ok = verify_links(pdk, c5)
-    ok = verify_paths(c5) and ok
+    ok = verify_paths(pdk, c5) and ok
     ok = verify_tracked(c5) and ok
 
     print("""

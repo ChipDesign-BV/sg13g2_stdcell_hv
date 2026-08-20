@@ -41,6 +41,9 @@ Exit code 0 and RESULT: PASS only if every check holds.
 """
 import re
 import argparse
+import shutil
+import subprocess
+import tempfile
 import sys
 import pathlib
 import klayout.db as db
@@ -84,6 +87,36 @@ def err(msg, waive_key=None):
     errors.append(msg)
     print(f"  FAIL  {msg}")
 
+
+# --- 0. does a timer actually accept the file? -------------------------------
+# Everything below reads the Liberty as *text*, which is the point (data, not
+# a parser's opinion of it) -- but it also means a file no STA tool can read
+# still passes every check. The fast and slow corners shipped with CharLib's
+# `function : "Q = D"` on 14 sequential cells (fix_lib_seq.py had not been run
+# over them); OpenSTA rejects the whole file at the first one, and nothing here
+# noticed. So ask a timer first.
+def sta_reads(lib):
+    sta = shutil.which("sta") or "/foss/tools/openroad-librelane/bin/sta"
+    if not pathlib.Path(sta).exists():
+        print("OpenSTA not found -- read check skipped")
+        return None
+    with tempfile.NamedTemporaryFile("w", suffix=".tcl", delete=False) as f:
+        f.write(f"read_liberty {lib}\nexit\n")
+        script = f.name
+    r = subprocess.run([sta, "-no_init", "-exit", script],
+                       capture_output=True, text=True, timeout=600)
+    pathlib.Path(script).unlink(missing_ok=True)
+    bad = [l for l in (r.stdout + r.stderr).splitlines()
+           if l.startswith("Error") or " Error:" in l]
+    return bad
+
+
+_bad = sta_reads(LIB)
+if _bad:
+    for line in _bad[:5]:
+        err(f"OpenSTA cannot read the Liberty: {line.strip()}")
+elif _bad is not None:
+    print("OpenSTA read: clean")
 
 txt = LIB.read_text(errors="surrogateescape")
 
