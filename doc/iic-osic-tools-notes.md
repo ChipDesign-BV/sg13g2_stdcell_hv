@@ -117,28 +117,34 @@ symbols_stdcell -> /home/rahman/temp/IHP-Open-PDK/ihp-sg13g2/libs.ref/sg13g2_std
 That target does not exist in the image. It is an absolute path on the
 machine of whoever built it, captured at image build time.
 
-**This is not upstream content that got mangled.** Checked against
-`IHP-GmbH/IHP-Open-PDK` main: `libs.tech/qucs-s/` upstream contains only
-`symbols/` — there is no `symbols_stdcell` entry at all. The link exists only
-in the container image.
+**This was upstream content, and upstream has already fixed it.** The
+absolute link was committed to `IHP-GmbH/IHP-Open-PDK` and corrected by
+PR #1097, "HOTFIX: absolute symbolic link for qucs-s stdcell symbols: make it
+relative", merged to the `dev` branch on 2026-08-11. `dev` now carries
 
-How it gets created: `libs.tech/qucs-s/install.py` reads `PDK_ROOT` and `HOME`
-from the environment and builds absolute paths from them. Run with
-`PDK_ROOT=/home/rahman/temp/IHP-Open-PDK`, it produces exactly this link. The
-image evidently captured the state of a machine where that had been run, and
-`/home/rahman` does not exist in the container.
+```
+symbols_stdcell -> ../../libs.ref/sg13g2_stdcell/sym/qucs-s
+```
 
-It is the only dangling symlink under `libs.tech`. The one other symlink the
-PDK tracks, `libs.tech/ngspice/install.py -> ../xschem/install.py`, is
-relative and survives intact — so this is not a systematic relative-to-
-absolute rewrite during image build, it is one link that was materialised
-from someone's working directory.
+which is relative and survives relocation. (`main` has no Qucs-S standard-cell
+views at all; that work lives on `dev`.)
+
+The `rahman` in the path is the upstream author of the original commit, not an
+image builder: `install.py` composes absolute paths from `$PDK_ROOT` and
+`$HOME`, so a link created on a developer's machine records that machine's
+layout.
+
+**So this is a stale-snapshot problem, not a defect to report.** The PDK tree
+in this image is dated 27 Jul 2026, roughly two weeks before the fix landed,
+so it still carries the pre-#1097 absolute link. Any image built from a PDK
+checkout after 11 Aug 2026 will not have it.
 
 The consequence is that none of the 84 thin-oxide standard cells are
 available as Qucs-S schematic components out of the box, even though the PDK
 ships all their component definitions and gate shapes.
 
-The supported fix is to run the installer with the environment set for this
+The real fix is to refresh the bundled PDK. Failing that, repair the link in
+place (below), or run the installer with the environment set for this
 machine:
 
 ```sh
@@ -184,18 +190,10 @@ untouched relative to the thin-oxide originals, all 920 device sizes matching
 the netlist, and the two hand-composed tie cells matching terminal by
 terminal), but that is a different claim from "opens in the tool".
 
-### Side effect on this PR
+### Not a problem for PR #1103
 
-Because the container's PDK tree is what a working copy gets seeded from, the
-`symbols_stdcell` entry can travel into a fork. Our PR branch currently
-carries `ihp-sg13g2/libs.tech/qucs-s/symbols_stdcell` (in relative form),
-which upstream main does not have:
-
-```
-ours:     1 entry
-upstream: 0 entry
-```
-
-It is unrelated to the thick-oxide library and points into the thin-oxide
-one, so it should come out of the PR, or be raised deliberately as a separate
-fix if IHP wants the link shipped.
+An earlier version of this note claimed our PR branch carried a stray
+`symbols_stdcell`. That was an artifact of comparing against `main`. PR #1103
+targets `dev`, `dev` already contains the symlink from #1097, and our branch
+carries the identical relative target — so it does not appear in the PR diff
+and there is nothing to remove.
