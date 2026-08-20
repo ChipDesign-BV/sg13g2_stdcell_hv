@@ -133,8 +133,10 @@ python3 verify_sch.py       # schematics and CDL vs SPICE netlist
 
 ## Liberty
 
-`lib/` holds an NLDM characterization produced with CharLib at the 3.3 V
-typical corner. Cell functions, pin directions and state elements are lifted
+`lib/` holds NLDM characterizations produced with CharLib at three PVT
+corners — typ 3.30 V/25 °C, fast 3.60 V/−40 °C and slow 3.00 V/125 °C — on
+identical slew and load axes so STA can interpolate across them. Cell
+functions, pin directions and state elements are lifted
 from the thin-oxide Liberty file, since the transform did not change any
 cell's logic. The slew and load index grids are the thin-oxide grids rescaled
 by the measured 2.66× delay and 2.20× capacitance ratios, so the tables cover
@@ -737,9 +739,11 @@ sg13g2_stdcell_hv/
 ├── verilog/sg13g2_stdcell_hv.v       behavioural models, modules renamed
 ├── sch/xschem/*.sch                  84 schematics
 │   └── sg13g2_hv_stdcells.sch        all 84 cells on one sheet (the gallery)
+├── sch/qucs-s/*.sch                  84 Qucs-S schematics
 ├── sym/xschem/*.sym                  84 symbols (copies of the thin-oxide ones)
+├── sym/qucs-s/*.xml, *.sym           84 Qucs-S components + 45 gate shapes
 ├── lef/sg13g2_stdcell_hv.lef         84 macros + CoreSiteHV (0.48 x 7.14)
-├── lib/                              Liberty, 3.3 V typical
+├── lib/                              Liberty, 3 PVT corners
 ├── gds/sg13g2_stdcell_hv.gds         84 cells: 66 retargeted + 18 generated
 ├── doc/sg13g2_stdcell_hv.celllist
 ├── klayout/pymacros/*.lym            KLayout cell-library registration
@@ -755,6 +759,31 @@ This tree follows the PDK's `libs.ref` layout but lives outside `$PDK_ROOT`,
 so the shared PDK install is left untouched.
 
 ## Using it
+
+### Qucs-S
+
+`sch/qucs-s` and `sym/qucs-s` mirror the thin-oxide library's Qucs-S views: one
+schematic and one component definition per cell, plus the 45 gate-shape `.sym`
+files the components reference. They are a device-level retarget of the
+thin-oxide schematics — identical topology and wiring, devices switched to
+`sg13_hv_*` and resized from the shipped SPICE netlist — except `tiehi` and
+`tielo`, which are composed from this library's own `inv_1` because their
+thick-oxide topology differs.
+
+To make the cells available as Qucs-S components, link the symbol directory
+into the Qucs-S component library path, the same way the thin-oxide library is
+exposed:
+
+```sh
+ln -sfn ../../libs.ref/sg13g2_stdcell_hv/sym/qucs-s \
+        "$PDK_ROOT/$PDK/libs.tech/qucs-s/symbols_stdcell_hv"
+```
+
+Regenerate with `work/gen_qucs.py`; `work/verify_qucs.py` gates the result
+against the shipped SPICE netlist. Note that in iic-osic-tools images built
+before 11 Aug 2026 the *thin-oxide* equivalent of this link is broken, so no
+standard cells resolve in Qucs-S until the bundled PDK is refreshed — see
+`doc/iic-osic-tools-notes.md`.
 
 ### xschem
 
