@@ -53,7 +53,9 @@ as a maintainer question in the PR.
 
 Usage: python3 make_cmos5l_pr.py --pdk <IHP-Open-PDK checkout root>
        (the root that contains BOTH ihp-sg13g2 -- with #1103 applied --
-        and ihp-sg13cmos5l)
+        and ihp-sg13cmos5l; since the CMOS5L migration into IHP-Open-PDK
+        that is a single checkout of its dev branch, and the relative
+        links this writes resolve inside it unchanged)
 """
 import argparse
 import os
@@ -292,8 +294,11 @@ def main():
     ok = verify_tracked(c5) and ok
 
     print("""
-Next steps in the checkout (PRs target ihp-sg13cmos5l's *main* branch;
-commits need a Developer Certificate of Origin sign-off, git commit -s):
+Next steps in the checkout (PRs now target IHP-Open-PDK's *dev* branch:
+IHP-GmbH/ihp-sg13cmos5l is being archived and its content is migrated
+into IHP-Open-PDK under ihp-sg13cmos5l/, so this port belongs in the
+same repository and branch as #1103; commits need a Developer
+Certificate of Origin sign-off, git commit -s):
   re-run signoff with the CMOS5L decks: run_drc.py (modular + maximal +
     the CMOS5L forbidden-layer table) on the two work/drc arrays,
     per-cell LVS with libs.tech/klayout/tech/lvs/run_lvs.py, OpenSTA read
@@ -302,8 +307,8 @@ commits need a Developer Certificate of Origin sign-off, git commit -s):
     STD_CELL_LIBRARY sg13cmos5l_stdcell_hv, and confirm the SCL config
     wins over the PDK-level VDD_PIN_VOLTAGE of 1.20 V;
   keep the PR a draft until IHP-Open-PDK#1103 merges into dev -- every
-    link dangles until then, including in this repo's CI, which clones
-    IHP-Open-PDK dev and overlays this checkout onto it.
+    link into ihp-sg13g2/libs.ref/sg13g2_stdcell_hv dangles until then,
+    because that library is what #1103 adds.
 """)
     return 0 if ok else 1
 
