@@ -112,19 +112,33 @@ if {{ $::env(STD_CELL_LIBRARY) eq "sg13g2_stdcell_hv" }} {{
         }}
     }}
     set ::env(STA_CORNERS) [join $_hv_corners " "]
-    set ::env(DEFAULT_CORNER) "nom_typ_3p30V_25C"
+    # Default to typical, but only if it is actually one of the corners
+    # that exist -- the loop above deliberately tolerates a partial
+    # install, and naming a DEFAULT_CORNER outside STA_CORNERS would break
+    # any step that assumes the default is usable.
+    if {{ [lsearch -exact $_hv_corners "nom_typ_3p30V_25C"] >= 0 }} {{
+        set ::env(DEFAULT_CORNER) "nom_typ_3p30V_25C"
+    }} elseif {{ [llength $_hv_corners] > 0 }} {{
+        set ::env(DEFAULT_CORNER) [lindex $_hv_corners 0]
+    }}
     unset _hv_corners _pat _hv _io _hvlib _iolib
 }}
 {END_LL}'''
 
 ANCHOR = ("append XSCHEM_LIBRARY_PATH "
           ":${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell/sym/xschem")
+# Guarded with file isdir, matching how this xschemrc already treats
+# PDK_ROOT itself: the library is optional, and an XSCHEM_LIBRARY_PATH
+# entry that does not exist makes xschem complain on every start.
 PATCH = (
-    "append XSCHEM_LIBRARY_PATH "
+    "if { [file isdir "
+    "${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sym/xschem] } {\n"
+    "  append XSCHEM_LIBRARY_PATH "
     ":${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sym/xschem\n"
-    "# thick-oxide stdcell symbols resolve their schematics through this\n"
-    "set ::SG13G2_HV_SCH "
-    "${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sch/xschem\n")
+    "  # thick-oxide stdcell symbols resolve their schematics through this\n"
+    "  set ::SG13G2_HV_SCH "
+    "${PDK_ROOT}/${PDK}/libs.ref/sg13g2_stdcell_hv/sch/xschem\n"
+    "}\n")
 
 
 def copy_libs_ref(pdk):
@@ -203,7 +217,7 @@ def patch_xschemrc(pdk):
     assert ANCHOR in text, "thin-oxide sym append not found in xschemrc"
     text = text.replace(ANCHOR, ANCHOR + "\n" + PATCH.rstrip(), 1)
     rc.write_text(text)
-    print("xschemrc: 3 lines added after the thin-oxide sym append")
+    print("xschemrc: guarded HV block added after the thin-oxide sym append")
     return rc
 
 

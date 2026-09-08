@@ -87,13 +87,21 @@ SCL_SHARED = ["latch_map.v", "mux2_map.v", "mux4_map.v", "tribuff_map.v",
 
 XSCHEM_ANCHOR = ("append XSCHEM_LIBRARY_PATH "
                  ":${PDK_ROOT}/${PDK}/libs.tech/xschem/sg13cmos5l_pr")
+# Guarded with file isdir. These paths are symlinks into the SG13G2 tree,
+# so before IHP-Open-PDK#1103 lands they do not resolve at all; without the
+# guard xschem would start with a dead XSCHEM_LIBRARY_PATH entry and a
+# ::SG13G2_HV_SCH pointing nowhere. Matches how this xschemrc already
+# treats PDK_ROOT.
 XSCHEM_PATCH = (
     "\n# thick-oxide (3.3 V) standard cells, symlinked from the G2 PDK;\n"
     "# their symbols resolve the schematics through ::SG13G2_HV_SCH\n"
-    "append XSCHEM_LIBRARY_PATH "
+    "if { [file isdir "
+    "${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sym/xschem] } {\n"
+    "  append XSCHEM_LIBRARY_PATH "
     ":${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sym/xschem\n"
-    "set ::SG13G2_HV_SCH "
-    "${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sch/xschem")
+    "  set ::SG13G2_HV_SCH "
+    "${PDK_ROOT}/${PDK}/libs.ref/sg13cmos5l_stdcell_hv/sch/xschem\n"
+    "}")
 
 
 def link(path, target):
