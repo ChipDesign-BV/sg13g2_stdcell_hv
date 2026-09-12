@@ -709,12 +709,12 @@ for each delayed wire, and initialises the notifiers.
 
 ```sh
 python3 work/make_functional_models.py verilog/sg13g2_stdcell_hv.v hv_func.v
-iverilog -g2012 $PDK/libs.ref/sg13g2_stdcell/verilog/sg13g2_udp.v \
+iverilog -g2012 verilog/sg13g2_udp.v \
     hv_func.v <netlist>.v <testbench>.v
 ```
 
-The UDP primitives are not shipped here (see the note under
-[Directory layout](#directory-layout)); use the PDK's `sg13g2_udp.v`.
+The UDP primitives reach the cellset through the `sg13g2_udp.v` symlink
+installed alongside the models (see [Directory layout](#directory-layout)).
 
 ## What this library is not
 
@@ -740,6 +740,7 @@ sg13g2_stdcell_hv/
 ├── spice/sg13g2_stdcell_hv.spice     84 subcircuits, thick-oxide devices
 ├── cdl/sg13g2_stdcell_hv.cdl         LVS netlist
 ├── verilog/sg13g2_stdcell_hv.v       behavioural models, modules renamed
+│   └── sg13g2_udp.v                  symlink to the shared ihp_* primitives
 ├── sch/xschem/*.sch                  84 schematics
 │   └── sg13g2_hv_stdcells.sch        all 84 cells on one sheet (the gallery)
 ├── sch/qucs-s/*.sch                  84 Qucs-S schematics
@@ -754,9 +755,12 @@ sg13g2_stdcell_hv/
 └── work/                             generator, verification and provenance
 ```
 
-The Verilog deliberately does **not** ship a copy of `sg13g2_udp.v`: the UDP
-primitives are named `ihp_*` and are shared, so a second copy would collide if
-both libraries were loaded. Include the PDK's original alongside this file.
+`verilog/sg13g2_udp.v` is installed as a **symlink** to the thin-oxide
+library's copy. The behavioural models instantiate six `ihp_*` primitives and
+define none, so without it nothing with a flop or a latch elaborates; a
+symlink makes the cellset self-contained without creating a second copy that
+could drift. The primitives keep the same `ihp_*` names in both libraries, so
+include exactly one of the two.
 
 This tree follows the PDK's `libs.ref` layout but lives outside `$PDK_ROOT`,
 so the shared PDK install is left untouched.

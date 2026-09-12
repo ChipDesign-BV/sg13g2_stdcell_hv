@@ -57,6 +57,7 @@ the same gate verify_sch.py runs against this repository.
 Usage: python3 make_pdk_pr.py --pdk <IHP-Open-PDK checkout root>
 """
 import argparse
+import os
 import pathlib
 import re
 import shutil
@@ -166,6 +167,31 @@ def copy_libs_ref(pdk):
     return ref
 
 
+def link_udp(ref):
+    """Make the verilog view self-contained.
+
+    sg13g2_stdcell_hv.v instantiates six ihp_* user-defined primitives
+    (ihp_dff_r, ihp_dff_sr_1, ihp_latch, ihp_latch_r, ihp_mux2, ihp_mux4)
+    and defines none of them, so on its own nothing with a flop or a latch
+    elaborates. Reported by @b10346 on #1207.
+
+    A *copy* of sg13g2_udp.v is what the release notes rightly warned
+    against -- two copies of the same ihp_* primitives collide if both
+    libraries are loaded, and a copy can drift. A symlink gives the
+    cellset the file the thin-oxide libraries ship (sg13cmos5l_stdcell
+    carries its own sg13cmos5l_udp.v) without either problem: it is the
+    same file, so it cannot diverge, and a flow still includes exactly one
+    of them.
+    """
+    link = ref / "verilog" / "sg13g2_udp.v"
+    target = "../../sg13g2_stdcell/verilog/sg13g2_udp.v"
+    if link.is_symlink() or link.exists():
+        link.unlink()
+    os.symlink(target, link)
+    assert link.resolve().is_file(), f"{link} does not resolve"
+    print(f"verilog/sg13g2_udp.v -> {target}")
+
+
 def copy_tech_lef(pdk, ref):
     """The PDK-level librelane config globs
     libs.ref/$STD_CELL_LIBRARY/lef/sg13g2_tech.lef; Tcl glob errors on no
@@ -236,6 +262,41 @@ def copy_klayout(pdk):
     assert old in text, "GDS candidate block not found in the .lym"
     dst.write_text(text.replace(old, new))
     print(f"klayout: {dst.name} (PDK-relative GDS path prepended)")
+
+
+GITIGNORE = """# Make sure we don't ignore sub-directories in the root .gitignore
+!cdl/
+!doc/
+!gds/
+!lib/
+!spice/
+!verilog/
+
+# ...and the views inside them. `!spice/` above only re-includes the
+# directory; the root .gitignore's `*.spice` rule still excludes the file
+# within it, so a newly added spice view is silently dropped by
+# `git add`. sg13g2_stdcell's own spice view predates that rule and is
+# already tracked, which is why this went unnoticed until
+# sg13g2_stdcell_hv added one.
+!*.spice
+"""
+
+
+def write_gitignore(pdk):
+    """Re-include the views the root .gitignore would swallow.
+
+    Written by the generator rather than left as a hand-edit, so that
+    installing into a plain dev checkout produces a *trackable* tree --
+    otherwise verify_tracked below fails on a fresh clone and the fix has
+    to be remembered. Idempotent: the file the branch already carries is
+    byte-identical to this one.
+    """
+    f = pdk / "ihp-sg13g2" / "libs.ref" / ".gitignore"
+    if f.exists() and f.read_text() == GITIGNORE:
+        return
+    f.write_text(GITIGNORE)
+    print("libs.ref/.gitignore: re-includes the views the root "
+          "*.spice rule would drop")
 
 
 def verify_tracked(pdk):
@@ -322,7 +383,9 @@ def main():
     assert (pdk / "ihp-sg13g2" / "libs.ref").is_dir(), \
         f"{pdk} is not an IHP-Open-PDK checkout"
 
+    write_gitignore(pdk)
     ref = copy_libs_ref(pdk)
+    link_udp(ref)
     copy_tech_lef(pdk, ref)
     finalize_lib.strip_layoutless(ref / "lib" / LIB_NAME,
                                   ref / "lef" / "sg13g2_stdcell_hv.lef")

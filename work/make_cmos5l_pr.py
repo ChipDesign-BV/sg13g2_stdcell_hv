@@ -24,7 +24,7 @@ Installed (17 symlinks, 3 real files, 1 two-line patch):
       lef/sg13cmos5l_tech.lef -> ../../sg13cmos5l_stdcell/lef/...
   libs.tech/librelane/sg13cmos5l_stdcell_hv/
       {latch,mux2,mux4,tribuff,sdfbbp}_map.v, *_exclude.cells  -> G2 SCL
-      tracks.info                (real: copied from sg13cmos5l_stdcell)
+      tracks.info                (real: built by write_tracks())
       config.tcl                 (real: ../librelane_cmos5l/config.tcl)
   libs.tech/klayout/tech/pymacros/sg13cmos5l_stdcell_hv.lym    (real)
   libs.tech/xschem/xschemrc                                    (patch)
@@ -41,8 +41,10 @@ Three things must NOT come from G2:
     Via4, TopMetal2, TopVia2), and its PDK config globs the CMOS5L file
     name; it is linked from the thin-oxide library so the two SCLs can
     never diverge in layer definitions;
-  * tracks.info -- the CMOS5L routing grid differs (M1 X 0.42 vs 0.48,
-    M3 X 0.42, TM1 2.28 vs 3.28);
+  * tracks.info -- built here, not copied: the G2 pitches (these are the
+    G2 cells on the 0.48 um G2 site) restricted to the layers the CMOS5L
+    tech LEF declares. Copying sg13cmos5l_stdcell's file shipped a wrong
+    grid once already -- see write_tracks();
   * config.tcl -- see librelane_cmos5l/config.tcl.
 
 Cell names keep the sg13g2_hv_ prefix. sg13cmos5l_stdcell renames its
@@ -137,10 +139,18 @@ def install_libs_ref(pdk, c5):
              f"../../../ihp-sg13g2/libs.ref/{G2}/{d}")
     link(c5 / "libs.ref" / C5 / "lef" / "sg13cmos5l_tech.lef",
          "../../sg13cmos5l_stdcell/lef/sg13cmos5l_tech.lef")
+    # The verilog view instantiates six ihp_* user-defined primitives and
+    # defines none, so without this the cellset cannot elaborate anything
+    # with a flop or a latch (reported by @b10346 on #1207). Linked to the
+    # CMOS5L sibling rather than the G2 one: it is byte-identical, and it
+    # keeps the reference inside this PDK, the way the tech LEF above does.
+    link(c5 / "libs.ref" / C5 / "verilog" / "sg13cmos5l_udp.v",
+         "../../sg13cmos5l_stdcell/verilog/sg13cmos5l_udp.v")
     print(f"libs.ref/{C5}: {len(VIEW_FILES)} view links, "
           f"{len(corners(pdk))} Liberty links "
           f"({', '.join(corners(pdk))}), "
-          f"{len(VIEW_DIRS)} directory links, 1 tech LEF link")
+          f"{len(VIEW_DIRS)} directory links, 1 tech LEF link, "
+          "1 UDP link")
 
 
 def install_librelane(c5):
@@ -148,14 +158,47 @@ def install_librelane(c5):
     for name in SCL_SHARED:
         link(scl / name,
              f"../../../../ihp-sg13g2/libs.tech/librelane/{G2}/{name}")
-    # The CMOS5L grid, not the G2 one: M1 X 0.42, M3 X 0.42, TM1 2.28,
-    # and no Metal5/TopMetal2 rows at all.
-    src = (c5 / "libs.tech" / "librelane" / "sg13cmos5l_stdcell" /
-           "tracks.info")
-    shutil.copy2(src, scl / "tracks.info")
+    n_tracks = write_tracks(c5, scl)
     shutil.copy2(HV / "librelane_cmos5l" / "config.tcl", scl / "config.tcl")
     print(f"libs.tech/librelane/{C5}: {len(SCL_SHARED)} links + "
-          f"tracks.info (from sg13cmos5l_stdcell) + config.tcl")
+          f"tracks.info ({n_tracks} rows, G2 pitches on the CMOS5L stack) "
+          f"+ config.tcl")
+
+
+def write_tracks(c5, scl):
+    """tracks.info: the G2 pitches, restricted to the CMOS5L metal stack.
+
+    Neither neighbour is usable as-is, and taking the wrong one shipped a
+    wrong grid in the first revision of this port (reported by @b10346 on
+    #1207):
+
+      * sg13cmos5l_stdcell's file is not the CMOS5L *process* grid, it is
+        that library's own routing grid, and it declares `Metal1 X 0.42`
+        against a CoreSite that is 0.48 um wide -- a track pitch that does
+        not divide the site it has to align to. Its TopMetal1 is 2.28
+        where the G2 stack has 3.28.
+      * The G2 file has the right pitches, because these cells *are* the
+        G2 cells on the 0.48 um G2 site, but it also declares Metal5 and
+        TopMetal2, which CMOS5L does not have (M1-M4 + TopMetal1).
+
+    So take the pitches from the library the cells come from and the layer
+    set from the PDK they are being installed into, and assert the result
+    is neither empty nor larger than its source.
+    """
+    g2 = (HV / "librelane" / "tracks.info").read_text().splitlines()
+    tech = (c5 / "libs.ref" / "sg13cmos5l_stdcell" / "lef" /
+            "sg13cmos5l_tech.lef").read_text()
+    have = {m.split()[1] for m in tech.splitlines()
+            if m.startswith("LAYER ")}
+    rows = [l for l in g2 if l.strip() and l.split()[0] in have]
+    dropped = {l.split()[0] for l in g2 if l.strip()} - have
+    assert rows, "no G2 track rows survive the CMOS5L layer filter"
+    assert len(rows) < len([l for l in g2 if l.strip()]), \
+        "the CMOS5L stack should be a strict subset of the G2 one"
+    (scl / "tracks.info").write_text("\n".join(rows) + "\n")
+    print(f"  tracks.info: dropped {sorted(dropped)} "
+          "(absent from the CMOS5L tech LEF)")
+    return len(rows)
 
 
 def install_klayout(c5):
@@ -245,15 +288,17 @@ def verify_paths(pdk, c5):
     return not missing
 
 
-def verify_tracked(c5):
+def verify_tracked(pdk, c5):
     """Fail if anything just installed would be invisible to git.
 
     Same guard as make_pdk_pr.py -- see its docstring for the *.spice
-    incident. This repository's .gitignore carries no such rule, but the
-    check is free and the failure mode (a view that every local tool
-    reads and no clone receives) is expensive.
+    incident. The root .gitignore that matters is the one at the *checkout
+    root*, not at ihp-sg13cmos5l/: re-homing this port into IHP-Open-PDK
+    moved the repository one level up, and testing `c5/.git` here made the
+    check skip itself silently on every run -- a guard that reports
+    nothing is indistinguishable from a guard that passes.
     """
-    if not (c5 / ".git").exists():
+    if not (pdk / ".git").exists():
         print("git visibility: not a checkout, skipped")
         return True
     roots = [c5 / "libs.ref" / C5,
@@ -263,8 +308,8 @@ def verify_tracked(c5):
     for r in roots:
         files += [r] if r.is_file() else [p for p in r.rglob("*")
                                           if p.is_file() or p.is_symlink()]
-    rel = [str(p.relative_to(c5)) for p in files]
-    r = subprocess.run(["git", "-C", str(c5), "check-ignore", "--stdin",
+    rel = [str(p.relative_to(pdk)) for p in files]
+    r = subprocess.run(["git", "-C", str(pdk), "check-ignore", "--stdin",
                         "--no-index"],
                        input="\n".join(rel), capture_output=True, text=True)
     ignored = [ln for ln in r.stdout.splitlines() if ln.strip()]
@@ -299,7 +344,7 @@ def main():
     patch_xschemrc(c5)
     ok = verify_links(pdk, c5)
     ok = verify_paths(pdk, c5) and ok
-    ok = verify_tracked(c5) and ok
+    ok = verify_tracked(pdk, c5) and ok
 
     print("""
 Next steps in the checkout (PRs now target IHP-Open-PDK's *dev* branch:
