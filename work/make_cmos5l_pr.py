@@ -41,10 +41,10 @@ Three things must NOT come from G2:
     Via4, TopMetal2, TopVia2), and its PDK config globs the CMOS5L file
     name; it is linked from the thin-oxide library so the two SCLs can
     never diverge in layer definitions;
-  * tracks.info -- built here, not copied: the G2 pitches (these are the
-    G2 cells on the 0.48 um G2 site) restricted to the layers the CMOS5L
-    tech LEF declares. Copying sg13cmos5l_stdcell's file shipped a wrong
-    grid once already -- see write_tracks();
+  * tracks.info -- derived here from sg13cmos5l_tech.lef, not copied
+    from either neighbour. Copying sg13cmos5l_stdcell's file shipped a
+    grid that contradicts that very LEF; copying G2's would have carried
+    Metal5 and TopMetal2 rows. See write_tracks();
   * config.tcl -- see librelane_cmos5l/config.tcl.
 
 Cell names keep the sg13g2_hv_ prefix. sg13cmos5l_stdcell renames its
@@ -161,43 +161,93 @@ def install_librelane(c5):
     n_tracks = write_tracks(c5, scl)
     shutil.copy2(HV / "librelane_cmos5l" / "config.tcl", scl / "config.tcl")
     print(f"libs.tech/librelane/{C5}: {len(SCL_SHARED)} links + "
-          f"tracks.info ({n_tracks} rows, G2 pitches on the CMOS5L stack) "
+          f"tracks.info ({n_tracks} rows, derived from the CMOS5L tech LEF) "
           f"+ config.tcl")
 
 
-def write_tracks(c5, scl):
-    """tracks.info: the G2 pitches, restricted to the CMOS5L metal stack.
+def lef_tracks(tech_lef):
+    """The routing grid a tech LEF declares, in tracks.info form.
 
-    Neither neighbour is usable as-is, and taking the wrong one shipped a
-    wrong grid in the first revision of this port (reported by @b10346 on
-    #1207):
-
-      * sg13cmos5l_stdcell's file is not the CMOS5L *process* grid, it is
-        that library's own routing grid, and it declares `Metal1 X 0.42`
-        against a CoreSite that is 0.48 um wide -- a track pitch that does
-        not divide the site it has to align to. Its TopMetal1 is 2.28
-        where the G2 stack has 3.28.
-      * The G2 file has the right pitches, because these cells *are* the
-        G2 cells on the 0.48 um G2 site, but it also declares Metal5 and
-        TopMetal2, which CMOS5L does not have (M1-M4 + TopMetal1).
-
-    So take the pitches from the library the cells come from and the layer
-    set from the PDK they are being installed into, and assert the result
-    is neither empty nor larger than its source.
+    LEF gives, per routing layer, `DIRECTION`, `PITCH x y` and
+    `OFFSET x y`; LibreLane's tracks.info wants one `<layer> X <off>
+    <pitch>` and one `<layer> Y <off> <pitch>` row per layer. The LEF is
+    the authority here -- it is the file the router and every LEF-reading
+    tool actually obey -- so the grid is derived from it rather than
+    copied from a neighbouring library and hoped to match.
     """
-    g2 = (HV / "librelane" / "tracks.info").read_text().splitlines()
+    rows, layer, body = [], None, []
+    for line in tech_lef.splitlines():
+        s = line.strip()
+        if s.startswith("LAYER "):
+            layer, body = s.split()[1], []
+        elif s.startswith("END ") and layer and s.split()[1] == layer:
+            if any(w.startswith("TYPE") and "ROUTING" in w for w in body):
+                pitch = next((w.split()[1:3] for w in body
+                              if w.startswith("PITCH")), None)
+                off = next((w.split()[1:3] for w in body
+                            if w.startswith("OFFSET")), None)
+                assert pitch and off, f"{layer}: routing layer without "\
+                                      f"PITCH/OFFSET"
+                px, py = (pitch * 2)[:2]
+                ox, oy = (off * 2)[:2]
+                # keep the LEF's own literals -- reformatting them would
+                # turn `0.0` into `0` and gratuitously differ from every
+                # other tracks.info in the tree
+                rows.append(f"{layer} X {ox} {px}")
+                rows.append(f"{layer} Y {oy} {py}")
+            layer = None
+        elif layer is not None:
+            body.append(s.rstrip(";").strip())
+    return rows
+
+
+def write_tracks(c5, scl):
+    """tracks.info, derived from the CMOS5L tech LEF.
+
+    The first revision of this port shipped sg13cmos5l_stdcell's
+    tracks.info verbatim, on the reasoning that the CMOS5L grid should
+    come from the CMOS5L library. It is wrong, and @b10346 caught it on
+    #1207: that file says `Metal1 X 0.42` and `TopMetal1 1.64 2.28`,
+    while sg13cmos5l_tech.lef -- shipped in the same library -- declares
+    `Metal1 PITCH 0.48 0.42` and `TopMetal1 PITCH 3.28 3.28`. A 0.42 um
+    Metal1 X pitch also does not divide the 0.48 um CoreSite these cells
+    sit on. (That mismatch is upstream's, in the thin-oxide library; it is
+    reported separately and is not this PR's to fix.)
+
+    Copying from *either* neighbour is the actual defect -- the G2 file
+    would have been right by luck, since these are the G2 cells and the
+    two LEFs declare identical pitches, but it also declares Metal5 and
+    TopMetal2, which the CMOS5L M1-M4-TM1 stack does not have. Deriving
+    from the LEF needs no luck and stays correct if a pitch ever changes.
+
+    Cross-checked against the G2 grid on the layers both stacks share, so
+    a LEF parsed wrongly cannot pass silently.
+    """
     tech = (c5 / "libs.ref" / "sg13cmos5l_stdcell" / "lef" /
-            "sg13cmos5l_tech.lef").read_text()
-    have = {m.split()[1] for m in tech.splitlines()
-            if m.startswith("LAYER ")}
-    rows = [l for l in g2 if l.strip() and l.split()[0] in have]
-    dropped = {l.split()[0] for l in g2 if l.strip()} - have
-    assert rows, "no G2 track rows survive the CMOS5L layer filter"
-    assert len(rows) < len([l for l in g2 if l.strip()]), \
-        "the CMOS5L stack should be a strict subset of the G2 one"
+            "sg13cmos5l_tech.lef")
+    rows = lef_tracks(tech.read_text())
+    assert rows, f"no routing layers found in {tech}"
+
+    g2 = [l for l in (HV / "librelane" / "tracks.info").read_text().splitlines()
+          if l.strip()]
+    shared = {l.split()[0] for l in rows} & {l.split()[0] for l in g2}
+    def grid(ls):
+        # numeric, so `0` and `0.0` are the same grid -- the check is
+        # about pitches, not about how a file spells them
+        return [(w[0], w[1], float(w[2]), float(w[3]))
+                for w in (l.split() for l in ls) if w[0] in shared]
+
+    mine, theirs = grid(rows), grid(g2)
+    assert mine == theirs, (
+        "the CMOS5L LEF grid disagrees with the G2 grid on the layers both "
+        f"stacks share:\n  CMOS5L: {mine}\n  G2:     {theirs}")
+    dropped = sorted({l.split()[0] for l in g2} - {l.split()[0] for l in rows})
+    assert dropped, "the CMOS5L stack should be a strict subset of the G2 one"
+
     (scl / "tracks.info").write_text("\n".join(rows) + "\n")
-    print(f"  tracks.info: dropped {sorted(dropped)} "
-          "(absent from the CMOS5L tech LEF)")
+    print(f"  tracks.info: {len(rows)} rows from {tech.name}; "
+          f"agrees with the G2 grid on {len(shared)} shared layers, "
+          f"dropped {dropped}")
     return len(rows)
 
 
