@@ -264,14 +264,7 @@ def copy_klayout(pdk):
     print(f"klayout: {dst.name} (PDK-relative GDS path prepended)")
 
 
-GITIGNORE = """# Make sure we don't ignore sub-directories in the root .gitignore
-!cdl/
-!doc/
-!gds/
-!lib/
-!spice/
-!verilog/
-
+SPICE_RULE = """
 # ...and the views inside them. `!spice/` above only re-includes the
 # directory; the root .gitignore's `*.spice` rule still excludes the file
 # within it, so a newly added spice view is silently dropped by
@@ -282,21 +275,28 @@ GITIGNORE = """# Make sure we don't ignore sub-directories in the root .gitignor
 """
 
 
-def write_gitignore(pdk):
-    """Re-include the views the root .gitignore would swallow.
+def patch_gitignore(pdk):
+    """Re-include the spice view the root .gitignore would swallow.
 
-    Written by the generator rather than left as a hand-edit, so that
-    installing into a plain dev checkout produces a *trackable* tree --
-    otherwise verify_tracked below fails on a fresh clone and the fix has
-    to be remembered. Idempotent: the file the branch already carries is
-    byte-identical to this one.
+    Done by the generator rather than left as a hand-edit, so installing
+    into a plain dev checkout produces a *trackable* tree -- otherwise
+    verify_tracked below fails on a fresh clone and the repair has to be
+    remembered.
+
+    APPENDS; never rewrites. libs.ref/.gitignore is upstream's file, and a
+    generator that replaces a file it does not own will happily revert an
+    upstream change while every local check still passes (CLAUDE.md,
+    "generators that edit their own reference"). The `!*.spice` line is
+    the only thing this library needs, so that is the only thing added.
     """
     f = pdk / "ihp-sg13g2" / "libs.ref" / ".gitignore"
-    if f.exists() and f.read_text() == GITIGNORE:
+    assert f.is_file(), f"{f} is missing -- not an IHP-Open-PDK checkout?"
+    text = f.read_text()
+    if re.search(r"^!\*\.spice$", text, re.M):
         return
-    f.write_text(GITIGNORE)
-    print("libs.ref/.gitignore: re-includes the views the root "
-          "*.spice rule would drop")
+    f.write_text(text.rstrip("\n") + "\n" + SPICE_RULE)
+    print("libs.ref/.gitignore: appended !*.spice (the root rule would "
+          "otherwise drop the spice view)")
 
 
 def verify_tracked(pdk):
@@ -383,7 +383,7 @@ def main():
     assert (pdk / "ihp-sg13g2" / "libs.ref").is_dir(), \
         f"{pdk} is not an IHP-Open-PDK checkout"
 
-    write_gitignore(pdk)
+    patch_gitignore(pdk)
     ref = copy_libs_ref(pdk)
     link_udp(ref)
     copy_tech_lef(pdk, ref)
